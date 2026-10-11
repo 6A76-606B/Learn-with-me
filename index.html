@@ -1795,7 +1795,7 @@
        content = أدمن المحتوى: المحتوى بس (يضيفه المدير من اللوحة)
        ========================================================== */
     const OWNER_EMAIL = 'markogoerge123321@gmail.com';
-    const ROLE_LABELS = { owner: 'المالك', content: 'أدمن المحتوى', guest: 'ضيف أدمن' };
+    const ROLE_LABELS = { owner: 'المالك', content: 'أدمن المحتوى', guest: 'ضيف أدمن', community: 'مشرف مجتمع' };
 
     let currentRole = null;   // دور المستخدم الحالي (أو null لو مش أدمن)
 
@@ -1807,6 +1807,7 @@
       return m ? GRADES.map((_, i) => 'content:' + i + '_' + m[1]) : [g];
     });
     let myGrants = new Set();
+    let myCommMod = false;   // مشرف مجتمع: طالب عادي + صلاحيات الإشراف على مجموعات صفه بس (من غير لوحة تحكم ولا محتوى ولا بيانات طلاب)
     /* المدير الرئيسي الوحيد: الإيميل ده بس هو اللي يضيف ويشيل الأدمن والضيوف */
     const isOwner    = () => currentRole === 'owner' && (auth.currentUser?.email || '').toLowerCase() === OWNER_EMAIL;
     const hasGrant   = (kind, grade, subj) => currentRole === 'guest' && myGrants.has(kind + ':' + grade + '_' + subj);
@@ -1815,12 +1816,13 @@
 
     async function getRole(user) {
       const email = (user.email || '').toLowerCase();
-      myGrants = new Set();
+      myGrants = new Set(); myCommMod = false;
       if (email === OWNER_EMAIL) return 'owner';
       try {
         const snap = await getDoc(doc(db, 'admins', email));
         if (!snap.exists()) return null;
         const d = snap.data();
+        if (d.role === 'community') { myCommMod = true; return null; }   // بيفضل طالب في كل حاجة غير الإشراف
         /* مفيش دور 'owner' إلا للإيميل الرئيسي؛ أي مستند تاني بيتحول لأدمن عادي */
         const role = d.role === 'guest' ? 'guest' : 'content';
         if (role === 'guest') myGrants = new Set(expandGrants(d.grants));
@@ -2442,7 +2444,7 @@
 
     /* متابعة صلاحيات المستخدم لحظياً: لو المدير ضاف أو شال أو غيّر صلاحياته، بيتحدّث من غير خروج */
     let roleUnsub = null;
-    const grantsKey = () => JSON.stringify([currentRole, [...myGrants].sort()]);
+    const grantsKey = () => JSON.stringify([currentRole, myCommMod, [...myGrants].sort()]);
 
     onAuthStateChanged(auth, async user => {
       if (roleUnsub) { roleUnsub(); roleUnsub = null; }
@@ -2729,7 +2731,7 @@
       adminList.innerHTML = rows.map((a, i) => `
         <div class="row" data-id="${esc(a.id)}" style="--i:${Math.min(i, 8)}">
           <div class="row__info"><b>${ROLE_LABELS[a.role] || 'أدمن'}</b><span>${esc(a.id)}</span></div>
-          <span class="chip chip--role">${a.role === 'owner' ? 'كامل الصلاحيات' : 'المحتوى بس'}</span>
+          <span class="chip chip--role">${a.role === 'owner' ? 'كامل الصلاحيات' : a.role === 'community' ? 'المجتمع بس' : 'المحتوى بس'}</span>
           <div class="row__acts">
             <button data-act="reset">إعادة تعيين كلمة السر</button>
             ${a.role === 'owner' ? '' : '<button data-act="remove" class="danger">إزالة</button>'}
@@ -3068,7 +3070,7 @@
     function renderLogAdmins() {
       const rows = admins.filter(a => a.id !== OWNER_EMAIL);
       logBox().innerHTML = rows.length ? rows.map(a => {
-        const sub = a.role === 'guest' ? expandGrants(a.grants).map(g => grantLabel(g)).join(' • ') : 'كل المواد والصفوف';
+        const sub = a.role === 'guest' ? expandGrants(a.grants).map(g => grantLabel(g)).join(' • ') : a.role === 'community' ? 'مجموعات صفه بس' : 'كل المواد والصفوف';
         return `<div class="row" data-email="${esc(a.id)}" style="cursor:pointer">
           <div class="row__info"><b>${esc(studentByEmail(a.id)?.name || a.id)}</b>
             <small>${esc(ROLE_LABELS[a.role] || '')} · ${esc(a.id)}</small><small>${esc(sub)}</small></div>
@@ -4109,11 +4111,12 @@
       { k: 'extras',  name: 'إضافات للمنصة',       ic: '✨' }
     ];
     let cGrade = 0, cTm = null;                           // الأدمن بيختار الصف، والطالب صفه بس
-    const gradeNow = () => isStaff() ? cGrade : myGrade;
+    const gradeNow = () => isAdminStaff() ? cGrade : myGrade;
     const roomName = (r, g) => r.k === 'science' && g === 3 ? 'علوم متكاملة' : r.name;
-    const isStaff = () => currentRole === 'owner' || currentRole === 'content';
+    const isAdminStaff = () => currentRole === 'owner' || currentRole === 'content';   // أدمن كامل
+    const isStaff = () => isAdminStaff() || myCommMod;                                  // + مشرف المجتمع
     const myUid  = () => auth.currentUser?.uid;
-    const myDisp = () => currentRole === 'owner' ? 'المالك' : isStaff() ? (auth.currentUser.displayName || 'الإدارة') : (myName || 'طالب');
+    const myDisp = () => currentRole === 'owner' ? 'المالك' : isAdminStaff() ? (auth.currentUser.displayName || 'الإدارة') : (myName || 'طالب');
     const cBody = document.getElementById('cBody'), cTitle = document.getElementById('cTitle');
     const cBack = document.getElementById('cBack'), bnav = document.getElementById('bnav');
     let cUn = [], cLast = 'home', cRoom = null;
@@ -4193,9 +4196,9 @@
       const em = ((await getDoc(doc(db, 'users', uidX))).data()?.email || '').toLowerCase();
       if (!em) return toast('مش لاقي إيميل الطالب.');
       const ref = doc(db, 'admins', em), has = (await getDoc(ref)).exists();
-      if (!confirm((has ? 'إزالة صلاحية الأدمن من ' : 'تعيين أدمن محتوى ومجتمع: ') + n + '؟')) return;
-      if (has) await deleteDoc(ref); else await setDoc(ref, { role: 'content', uid: uidX, createdAt: serverTimestamp() });
-      logStu(uidX, has ? 'إزالة أدمن (من المجتمع)' : 'تعيين أدمن (من المجتمع)');
+      if (!confirm((has ? 'إزالة صلاحية الإشراف من ' : 'تعيين مشرف مجتمع (مجموعات صفه بس، من غير محتوى أو بيانات طلاب): ') + n + '؟')) return;
+      if (has) await deleteDoc(ref); else await setDoc(ref, { role: 'community', uid: uidX, createdAt: serverTimestamp() });
+      logStu(uidX, has ? 'إزالة مشرف (من المجتمع)' : 'تعيين مشرف مجتمع');
       toast(has ? 'اتشالت الصلاحية' : 'اتعيّن أدمن ✓');
     }
     async function delMsg(roomId, mid) {
@@ -4213,20 +4216,20 @@
       if (!Number.isInteger(g)) { cTitle.textContent = 'المجتمع'; cBody.innerHTML = '<p class="empty">حسابك مش متسجّل على صف. كلّم الإدارة.</p>'; return; }
       cTitle.textContent = 'المجتمع · ' + GRADES[g].name;
       cBody.innerHTML = `
-        ${isStaff() ? '<div class="chips">' + GRADES.map((x, i) => `<button type="button" class="cb" data-a="grade" data-id="${i}" aria-pressed="${i === g}">${x.name}</button>`).join('') + '</div>' : ''}
+        ${isAdminStaff() ? '<div class="chips">' + GRADES.map((x, i) => `<button type="button" class="cb" data-a="grade" data-id="${i}" aria-pressed="${i === g}">${x.name}</button>`).join('') + '</div>' : ''}
         <h3 class="wa-sec">المجموعات</h3>
         <div class="wa-list">${ROOMS.map(r => crow(r.ic, roomName(r, g), 'مجموعة ' + GRADES[g].name, 'room', 'g' + g + '_' + r.k, `data-t="${esc(roomName(r, g))}"`)).join('')}</div>
         ${isOwner() ? `<h3 class="wa-sec">الإدارة</h3><div class="wa-list">${crow('👥', 'كل الناس وأكوادهم', 'كل الطلاب بأسمائهم وأكوادهم (للمالك بس)', 'people')}</div>` : ''}
-        <h3 class="wa-sec">${isStaff() ? 'رسايل الطلاب' : 'كلم الإدارة'}</h3>
-        <div class="wa-list" ${isStaff() ? 'id="cThreads"' : ''}>${isStaff() ? '<p class="empty">مفيش رسايل.</p>'
+        <h3 class="wa-sec">${isAdminStaff() ? 'رسايل الطلاب' : 'كلم الإدارة'}</h3>
+        <div class="wa-list" ${isAdminStaff() ? 'id="cThreads"' : ''}>${isAdminStaff() ? '<p class="empty">مفيش رسايل.</p>'
           : crow('💻', 'كلم داما', 'المبرمج اللي عامل المنصة', 'thread', 'dev') + crow('👨‍🏫', 'كلم المستر', 'اسأله أي سؤال', 'thread', 'teacher')}</div>
         <h3 class="wa-sec">لوحة الشرف</h3>
         <div class="wa-list">${crow('🏆', 'لوحة الشرف', 'أعلى درجات الأسبوع', 'board')}</div>
         <h3 class="wa-sec">تقييم المنصة</h3>
-        <div class="wa-list">${crow('⭐', 'قيّم المنصة', isStaff() ? 'شوف تقييمات الطلاب' : 'النجوم ورأيك', 'rate')}</div>`;
+        <div class="wa-list">${crow('⭐', 'قيّم المنصة', isAdminStaff() ? 'شوف تقييمات الطلاب' : 'النجوم ورأيك', 'rate')}</div>`;
       const fill = (id, docs, mk) => { const el = document.getElementById(id); if (el && docs.length) el.innerHTML = docs.map(mk).join(''); };
       const byAt = (a, b) => (b.at?.seconds || 0) - (a.at?.seconds || 0);
-      if (isStaff()) cUn.push(onSnapshot(query(collection(db, 'rooms'), where('kind', 'in', ['dev', 'teacher'])), snap => {
+      if (isAdminStaff()) cUn.push(onSnapshot(query(collection(db, 'rooms'), where('kind', 'in', ['dev', 'teacher'])), snap => {
         const ds = snap.docs.map(d => ({ id: d.id, ...d.data() })).sort(byAt);
         fill('cThreads', ds.filter(d => d.grade === undefined || d.grade === g), d => crow(d.kind === 'dev' ? '💻' : '👨‍🏫', d.name || 'طالب', d.last || '', 'sthread', d.id, `data-t="${esc((d.kind === 'dev' ? 'داما' : 'المستر') + ' · ' + (d.name || ''))}"`, fShort(msOf(d.at))));
       }, dbError));
@@ -4469,8 +4472,8 @@
           <button type="button" data-x="copy">📋 نسخ الرسالة</button>
           ${canInfo(m) ? `<button type="button" data-x="info">👁 ${mine ? 'من قرى رسالتي' : 'من قرا الرسالة'}</button>` : ''}
           ${mine && !form.hidden && !m._p && Date.now() - m._t < 9e5 ? '<button type="button" data-x="edit">✏️ تعديل الرسالة</button>' : ''}
-          ${(isStaff() && !isDm) || mine ? '<button type="button" class="d" data-x="del">🗑 حذف الرسالة</button>' : ''}
-          ${isOwner() && !mine ? '<button type="button" data-x="mkadmin">👤 تعيين / إزالة أدمن</button>' : ''}`, async (x, el) => {
+          ${(isAdminStaff() && !isDm) || (myCommMod && o.group) || mine ? '<button type="button" class="d" data-x="del">🗑 حذف الرسالة</button>' : ''}
+          ${isOwner() && !mine ? '<button type="button" data-x="mkadmin">👤 تعيين / إزالة مشرف</button>' : ''}`, async (x, el) => {
           try {
             if (x === 'rx') { waCloseSheet(); setRx(mid, el.dataset.e); }
             else if (x === 'edit') { waCloseSheet(); setEdit(m); }
@@ -4534,7 +4537,8 @@
           const last = text.slice(0, 60);
           if (o.thread) await setDoc(doc(db, 'rooms', id), { kind: o.thread, uid, name: myDisp(), grade: myGrade, last, at: serverTimestamp() }, { merge: true });
           else if (o.thread === undefined && !o.group) await updateDoc(doc(db, 'rooms', id), { last, at: serverTimestamp() });
-          const data = { uid, name: myDisp(), text, admin: isStaff(), badge: isStaff() ? '' : myBadge, at: serverTimestamp(), ...(reply ? { reply } : {}) };
+          const asStaff = isAdminStaff() || (myCommMod && !!o.group);   // المشرف صلاحياته في المجموعات بس، مش في محادثات داما/المستر
+          const data = { uid, name: myDisp(), text, admin: asStaff, badge: asStaff ? '' : myBadge, at: serverTimestamp(), ...(reply ? { reply } : {}) };
           if (o.group && !isStaff() && R.slow) {
             const bt = writeBatch(db);
             bt.set(doc(db, 'rooms', id, 'last', uid), { at: serverTimestamp() });
@@ -4598,7 +4602,7 @@
               ${st ? `<button type="button" data-x="free" data-u="${u}" data-n="${n}">✅ فك</button>`
                    : `<button type="button" data-x="mute" data-u="${u}" data-n="${n}">🔇 قراءة بس</button><button type="button" class="d" data-x="ban" data-u="${u}" data-n="${n}">⛔ حظر</button>`}
               <button type="button" data-x="clr" data-u="${u}" data-n="${n}">🧹 رسايله</button>
-              ${isOwner() ? `<button type="button" data-x="adm" data-u="${u}" data-n="${n}">👤 أدمن</button>` : ''}
+              ${isOwner() ? `<button type="button" data-x="adm" data-u="${u}" data-n="${n}">👤 مشرف</button>` : ''}
             </div></div>`;
         }).join('') : '<p class="note-s">مفيش نتايج.</p>';
       };
@@ -4763,7 +4767,7 @@
 
     async function commRate() {
       cStop(); cTitle.textContent = 'تقييم المنصة'; cBack.hidden = false;
-      if (isStaff()) {
+      if (isAdminStaff()) {
         cUn.push(onSnapshot(collection(db, 'ratings'), snap => {
           const r = snap.docs.map(d => d.data()).sort((a, b) => (b.at?.seconds || 0) - (a.at?.seconds || 0));
           const avg = r.length ? (r.reduce((s, x) => s + x.stars, 0) / r.length).toFixed(1) : '—';
