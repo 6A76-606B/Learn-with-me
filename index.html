@@ -1340,6 +1340,19 @@
     .wa-pc{display:flex;align-items:center;gap:6px;direction:ltr}
     .wa-pc code{font:700 14px ui-monospace,Menlo,Consolas,monospace;letter-spacing:1.5px;padding:3px 9px;border-radius:8px;background:rgba(0,168,132,.17);color:#3ddbb3;user-select:all}
     @media (prefers-reduced-motion:reduce){.wa-sheet,.wa-sheet-bg,.wa-flash{animation:none!important}}
+
+    /* ---- الاشتراك المدفوع ---- */
+    .pay-h { margin: 14px 0 8px; font-size: 15px; }
+    .pay-msg { white-space: pre-wrap; }
+    .pay-pick { width: 100%; min-height: 110px; border: 2px dashed var(--mut); border-radius: 18px; background: transparent; color: var(--txt); font: 500 15px 'IBM Plex Sans Arabic', sans-serif; cursor: pointer; display: grid; place-items: center; overflow: hidden; padding: 0; }
+    .pay-pick img { width: 100%; max-height: 260px; object-fit: contain; display: block; }
+    .pay-state { min-height: 20px; margin: 10px 0 0; font-weight: 600; font-size: 14px; }
+    .gate__card textarea { width: 100%; box-sizing: border-box; margin-top: 10px; padding: 12px; border-radius: 14px; border: 2px solid transparent; background: var(--bg); color: var(--txt); font: 500 15px 'IBM Plex Sans Arabic', sans-serif; resize: vertical; }
+    .paycard { padding: 14px; margin-bottom: 12px; border-radius: 18px; background: var(--card); box-shadow: var(--sh); }
+    .paycard p { margin: 6px 0; white-space: pre-wrap; color: var(--mut); }
+    .paycard .payimg { width: 100%; max-height: 220px; object-fit: contain; border-radius: 12px; background: rgba(127,127,127,.12); cursor: zoom-in; display: block; margin-top: 8px; }
+    .imgbox { position: fixed; inset: 0; z-index: 10000; background: rgba(0,0,0,.88); display: grid; place-items: center; padding: 12px; cursor: zoom-out; }
+    .imgbox img { max-width: 100%; max-height: 100%; object-fit: contain; }
   </style>
 </head>
 
@@ -1490,7 +1503,17 @@
         <div class="pane" id="paneStudent">
           <p class="note" style="margin:0 0 8px;font-weight:600">١) اختار صفك الأول:</p>
           <div class="chips" id="loginGrades"></div>
-          <p class="note" style="margin:0 0 8px;font-weight:600">٢) بعدين سجّل بجوجل:</p>
+          <div id="refBox" hidden>
+            <p class="note" style="margin:0 0 8px;font-weight:600">٢) انت جاي من واحد صاحبك ولا من نفسك؟</p>
+            <div class="chips" id="refChoice">
+              <button type="button" class="cb" data-r="friend" aria-pressed="false">جاي من صاحبي 👫</button>
+              <button type="button" class="cb" data-r="self" aria-pressed="false">جاي من نفسي 🙋</button>
+            </div>
+            <label class="field" id="refField" hidden><span>اكتب كود صاحبك</span>
+              <input class="rtl" id="refCode" maxlength="14" autocomplete="off" autocapitalize="characters" placeholder="مثال: K7M2QX" style="direction:ltr;text-align:center;letter-spacing:2px">
+            </label>
+          </div>
+          <p class="note" style="margin:0 0 8px;font-weight:600">٣) بعدين سجّل بجوجل:</p>
           <button class="google" id="googleBtn" type="button">
             <svg viewBox="0 0 48 48" aria-hidden="true">
               <path fill="#EA4335" d="M24 9.5c3.5 0 6.6 1.2 9.1 3.6l6.8-6.8C35.8 2.4 30.3 0 24 0 14.6 0 6.5 5.4 2.6 13.2l7.9 6.1C12.4 13.6 17.7 9.5 24 9.5z"/>
@@ -1644,6 +1667,20 @@
         </div>
       </section>
 
+      <!-- الاشتراكات (للمالك) -->
+      <section id="tabBilling" hidden>
+        <div class="addbox">
+          <h3>الاشتراك الشهري</h3>
+          <p class="note-s">لو شغّلته: الطالب مبيشوفش حاجة غير لما تفعّله، والتفعيل بيخلص بعد شهر لوحده ولازم يدفع من جديد.</p>
+          <label class="field"><textarea class="rtl" id="payMsgInput" rows="3" maxlength="400" placeholder="الكلام اللي هيظهر للطالب قبل التفعيل (طريقة الدفع، الرقم، السعر...)"></textarea></label>
+          <div class="ctl"><span id="payStateTxt"></span><button class="tool" id="payToggle" type="button"></button></div>
+          <button class="tool" id="payMsgSave" type="button" style="width:100%;margin-top:8px">حفظ الكلام</button>
+          <button class="tool" id="payActAll" type="button" style="width:100%;margin-top:8px">فعّل كل الطلاب الحاليين شهر</button>
+        </div>
+        <h3 style="margin:14px 0 10px">طلبات التفعيل <span class="pill" id="billCount"></span></h3>
+        <div id="billList"></div>
+      </section>
+
       <section id="tabStats" hidden>
         <div class="addbox" id="exportBox" hidden>
           <h3>تصدير ونسخة احتياطية</h3>
@@ -1677,6 +1714,12 @@
       <div class="addbox">
         <h3>سجل الطالب</h3>
         <div id="stuLog"></div>
+      </div>
+
+      <div class="addbox" id="stuPayBox">
+        <h3>الاشتراك</h3>
+        <p class="note-s" id="stuPayInfo"></p>
+        <div class="ctl"><button class="tool" id="stuPayOn" type="button">فعّل شهر</button><button class="tool danger" id="stuPayOff" type="button">إلغاء التفعيل</button></div>
       </div>
 
       <div class="addbox">
@@ -1751,6 +1794,23 @@
     </div>
   </div>
 
+  <!-- ========== بوابة الاشتراك: الطالب مبيشوفش حاجة غير لما الأدمن يفعّله ========== -->
+  <div class="gate" id="payGate" role="dialog" aria-modal="true" aria-labelledby="payTitle" hidden>
+    <div class="gate__card">
+      <div class="gate__ic">🔒</div>
+      <h2 id="payTitle">اشتراكك مش مفعّل</h2>
+      <p class="pay-msg" id="payMsg"></p>
+      <div class="codebox" id="payCodeBox" hidden><span>كودك:</span><code id="payCode"></code></div>
+      <h3 class="pay-h">ضيف صورة التحويل</h3>
+      <button type="button" class="pay-pick" id="payPick"><img id="payPrev" alt="" hidden><span id="payPickHint">📷 اضغط واختار صورة التحويل</span></button>
+      <input type="file" id="payFile" accept="image/*" hidden>
+      <textarea class="rtl" id="payNote" rows="3" maxlength="400" placeholder="اكتب رسالة للمستر (اختياري)"></textarea>
+      <div class="pay-state" id="payState" role="status"></div>
+      <button class="btn" id="paySend" type="button">كلم المستر</button>
+      <button class="gate__admin" id="payOut" type="button">تسجيل خروج</button>
+    </div>
+  </div>
+
   <script type="module">
     /* ==========================================================
        Firebase
@@ -1765,17 +1825,17 @@
     import {
       getFirestore, initializeFirestore, persistentLocalCache, persistentMultipleTabManager, CACHE_SIZE_UNLIMITED, doc, getDoc, setDoc, updateDoc, deleteDoc,
       collection, addDoc, query, where, orderBy, limit, onSnapshot, serverTimestamp,
-      writeBatch, getDocs, getCountFromServer, deleteField, increment, Bytes
+      writeBatch, getDocs, getCountFromServer, deleteField, increment, Bytes, arrayUnion
     } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js";
 
     const firebaseConfig = {
-      apiKey: "AIzaSyDR-H_U6eqXym92T6I7rYnOzMrhShII9vw",
-      authDomain: "learn-with-me-b1d62.firebaseapp.com",
-      projectId: "learn-with-me-b1d62",
-      storageBucket: "learn-with-me-b1d62.firebasestorage.app",
-      messagingSenderId: "658177441369",
-      appId: "1:658177441369:web:41176f37ab1fc1cc797b48",
-      measurementId: "G-RX9YE98D27"
+      apiKey: "AIzaSyDeoTMvn3dR9DS3xU9m6hYmwThXwlGvCMc",
+      authDomain: "learn-with-me-b8b81.firebaseapp.com",
+      projectId: "learn-with-me-b8b81",
+      storageBucket: "learn-with-me-b8b81.firebasestorage.app",
+      messagingSenderId: "890332463932",
+      appId: "1:890332463932:web:77f6a138965e6b31379439",
+      measurementId: "G-YNYLK6KR4N"
     };
 
     const app  = initializeApp(firebaseConfig);
@@ -1794,7 +1854,7 @@
        owner   = المدير: يتحكم في كل حاجة (الطلاب + الأدمن + المحتوى)
        content = أدمن المحتوى: المحتوى بس (يضيفه المدير من اللوحة)
        ========================================================== */
-    const OWNER_EMAIL = 'markogoerge123321@gmail.com';
+    const OWNER_EMAIL = 'dama@gmail.com';
     const ROLE_LABELS = { owner: 'المالك', content: 'أدمن المحتوى', guest: 'ضيف أدمن', community: 'مشرف مجتمع' };
 
     let currentRole = null;   // دور المستخدم الحالي (أو null لو مش أدمن)
@@ -1876,6 +1936,7 @@
     /* ---- فتح وقفل النافذة ---- */
     function openLogin(role = 'student') {
       loginGrade = (typeof wantedGrade === 'number') ? wantedGrade : null;
+      loginRef = null; document.getElementById('refCode').value = '';
       renderLoginGrades();
       showView('login');
       setRole(role);
@@ -1895,11 +1956,13 @@
     }
 
     /* ---- وضع الصيانة (settings/site) ---- */
-    let siteCfg = {}, maintBypass = false;
+    let siteCfg = {}, maintBypass = false, stuListReady = false;
     const siteRef = doc(db, 'settings', 'site');
     function renderSite() {
-      updateMaint(); updateAnnc();
+      updateMaint(); updateAnnc(); updatePay();
       if (curTab === 'announce') fillSiteTab();
+      if (curTab === 'billing') renderBilling();
+      if (typeof renderStudents === 'function' && stuListReady) renderStudents();
     }
     function updateAnnc() {
       const a = siteCfg.annc || {}, text = (a.text || '').trim();
@@ -1924,6 +1987,89 @@
     document.getElementById('maintAdmin').addEventListener('click', () => { maintBypass = true; updateMaint(); openLogin('admin'); });
     onSnapshot(siteRef, snap => { siteCfg = snap.data() || {}; renderSite(); }, () => {});
 
+    /* ---- الاشتراك المدفوع: الطالب بيشوف بوابة لحد ما الأدمن يفعّله، والتفعيل شهر ---- */
+    let myPaidUntil = 0, myLoaded = false, myPay = null, payUnsub = null, payUid = null, payImg = '';
+    const payOn = () => !!(siteCfg.pay && siteCfg.pay.on);
+    const payActive = s => (Number(s && s.paidUntil) || 0) > Date.now();
+    const addMonth = ms => { const d = new Date(ms); d.setMonth(d.getMonth() + 1); return d.getTime(); };
+    const fmtDate = ms => new Date(ms).toLocaleDateString('ar-EG', { day: 'numeric', month: 'long', year: 'numeric' });
+    const payGate = document.getElementById('payGate');
+    const goodImg = v => typeof v === 'string' && /^data:image\/(jpeg|png|webp);base64,/.test(v);
+
+    function renderPayState() {
+      const st = document.getElementById('payState');
+      if (myPay && myPay.status === 'pending') st.textContent = '✓ اتبعتت للمستر. استنى التفعيل.';
+      else if (myPay && myPay.status === 'rejected') st.textContent = 'المستر مقبلش الصورة. ابعت صورة أوضح أو كلّمه.';
+      else st.textContent = '';
+    }
+    function watchMyPay(uid) {
+      if (payUid === uid) return;
+      stopMyPay(); payUid = uid;
+      payUnsub = onSnapshot(doc(db, 'payments', uid), snap => { myPay = snap.exists() ? snap.data() : null; renderPayState(); }, () => {});
+    }
+    function stopMyPay() { if (payUnsub) payUnsub(); payUnsub = null; payUid = null; myPay = null; }
+
+    function updatePay() {
+      if (payOn() && waiting) { waiting = false; closeLogin(); }   // كان واقف على شاشة الموافقة القديمة
+      const locked = payOn() && !currentRole && !!auth.currentUser && myLoaded && !(myPaidUntil > Date.now());
+      payGate.hidden = !locked;
+      if (!locked) { stopMyPay(); if (document.body.style.overflow === 'hidden' && !document.querySelector('.panel.is-open') && !modal.classList.contains('is-open') && joinGate.hidden) document.body.style.overflow = ''; return; }
+      document.body.style.overflow = 'hidden';
+      watchMyPay(auth.currentUser.uid);
+      document.getElementById('payTitle').textContent = myPaidUntil > 0 ? 'خلص اشتراك الشهر' : 'اشتراكك مش مفعّل';
+      document.getElementById('payMsg').textContent = (siteCfg.pay && siteCfg.pay.msg) || 'ادفع وابعت صورة التحويل للمستر وهيفعّل حسابك.';
+      document.getElementById('payCodeBox').hidden = !myCode;
+      document.getElementById('payCode').textContent = myCode || '';
+      renderPayState();
+    }
+    setInterval(updatePay, 60000);
+
+    function fileToProof(file, max = 1100) {
+      return new Promise((res, rej) => {
+        if (!file || !/^image\//.test(file.type)) return rej(new Error('bad'));
+        const url = URL.createObjectURL(file), img = new Image();
+        img.onload = () => {
+          URL.revokeObjectURL(url);
+          const k = Math.min(1, max / Math.max(img.width, img.height)), c = document.createElement('canvas');
+          c.width = Math.round(img.width * k); c.height = Math.round(img.height * k);
+          c.getContext('2d').drawImage(img, 0, 0, c.width, c.height);
+          let q = .72, out = c.toDataURL('image/jpeg', q);
+          while (out.length > 450000 && q > .3) { q -= .1; out = c.toDataURL('image/jpeg', q); }
+          res(out);
+        };
+        img.onerror = () => { URL.revokeObjectURL(url); rej(new Error('bad')); };
+        img.src = url;
+      });
+    }
+    document.getElementById('payPick').addEventListener('click', () => document.getElementById('payFile').click());
+    document.getElementById('payFile').addEventListener('change', async e => {
+      const f = e.target.files[0]; e.target.value = '';
+      if (!f) return;
+      try {
+        payImg = await fileToProof(f);
+        const pv = document.getElementById('payPrev'); pv.src = payImg; pv.hidden = false;
+        document.getElementById('payPickHint').hidden = true;
+      } catch (err) { toast('اختار صورة صحيحة (JPG أو PNG).'); }
+    });
+    document.getElementById('paySend').addEventListener('click', async () => {
+      const u = auth.currentUser; if (!u) return;
+      if (!payImg) return toast('ضيف صورة التحويل الأول.');
+      const btn = document.getElementById('paySend'); btn.disabled = true;
+      try {
+        await setDoc(doc(db, 'payments', u.uid), {
+          uid: u.uid, name: myName || u.displayName || '', email: u.email || '',
+          grade: Number.isInteger(myGrade) ? myGrade : null, code: myCode || '',
+          img: payImg, msg: document.getElementById('payNote').value.trim().slice(0, 400),
+          status: 'pending', at: serverTimestamp()
+        });
+        toast('اتبعتت للمستر ✓');
+        payImg = ''; document.getElementById('payPrev').hidden = true; document.getElementById('payPickHint').hidden = false;
+        document.getElementById('payNote').value = '';
+      } catch (err) { toast(err.code === 'permission-denied' ? 'مش قادر يبعت دلوقتي. كلّم المستر.' : authMessage(err)); }
+      finally { btn.disabled = false; }
+    });
+    document.getElementById('payOut').addEventListener('click', () => signOut(auth));
+
     /* آخر تحديث لكل مادة (عشان علامة "جديد") */
     let upd = {};
     onSnapshot(doc(db, 'settings', 'updates'), s => { upd = s.data() || {}; if (view.screen === 'subjects') renderSubjects(); }, () => {});
@@ -1943,11 +2089,30 @@
     }
 
     /* ---- اختيار الصف قبل جوجل ---- */
+    let loginRef = null;      // 'friend' (جاي من صاحبه) | 'self' (من نفسه)
+    const normCode = v => String(v || '').toUpperCase().replace(/[\s-]/g, '');
+    const codeOk   = v => /^[A-Z0-9]{4,12}$/.test(normCode(v));
+    const refReady = () => loginRef === 'self' || (loginRef === 'friend' && codeOk(document.getElementById('refCode').value));
     function renderLoginGrades() {
       document.getElementById('loginGrades').innerHTML = GRADES.map((g, i) =>
         `<button type="button" class="cb" data-i="${i}" aria-pressed="${loginGrade === i}">${g.name}</button>`).join('');
-      document.getElementById('googleBtn').disabled = loginGrade === null;
+      /* السؤال بيظهر أول ما الصف يتختار */
+      document.getElementById('refBox').hidden = loginGrade === null;
+      document.querySelectorAll('#refChoice .cb').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.r === loginRef)));
+      document.getElementById('refField').hidden = loginRef !== 'friend';
+      document.getElementById('googleBtn').disabled = loginGrade === null || !refReady();
     }
+    document.getElementById('refChoice').addEventListener('click', e => {
+      const b = e.target.closest('.cb');
+      if (!b) return;
+      loginRef = b.dataset.r;
+      renderLoginGrades();
+      if (loginRef === 'friend') document.getElementById('refCode').focus();
+    });
+    document.getElementById('refCode').addEventListener('input', e => {
+      e.target.value = e.target.value.toUpperCase();
+      document.getElementById('googleBtn').disabled = loginGrade === null || !refReady();
+    });
     document.getElementById('loginGrades').addEventListener('click', e => {
       const b = e.target.closest('.cb');
       if (!b) return;
@@ -2010,6 +2175,7 @@
     const nameError = document.getElementById('nameError');
     let loginGrade = null;    // الصف اللي الطالب اختاره في نافذة الدخول
     let signupGrade = null;   // الصف اللي هيتسجل بيه (حساب جديد)
+    let signupRef = '';       // كود الصاحب اللي جابه (لو جاي من صاحبه)
     let waiting = false;      // الطالب مستني موافقة الأدمن
     let pendingUser = null;   // طالب دخل بجوجل ولسه ما كمّل بياناته
     let pendingExisting = false;   // حساب قديم ناقصه الصورة بس
@@ -2126,6 +2292,7 @@
 
         if (!snap.exists()) {                       // أول مرة: اطلب الصورة والاسم
           signupGrade = loginGrade;
+          signupRef = loginRef === 'friend' ? normCode(document.getElementById('refCode').value) : '';
           showProfileStep(user, null);
           return;
         }
@@ -2136,7 +2303,7 @@
           studentNote.textContent = 'الحساب ده متوقف. كلّم الإدارة.';
           return;
         }
-        if (data.approved === false) {              // لسه الأدمن ما وافقش
+        if (data.approved === false && !payOn()) {  // لسه الأدمن ما وافقش
           showWaiting();
           return;
         }
@@ -2169,6 +2336,7 @@
           await setDoc(doc(db, 'users', pendingUser.uid), {
             name, email: pendingUser.email, role: 'student', blocked: false, approved: false, photo: pendingPhoto || '', createdAt: serverTimestamp(),
             grade: signupGrade,
+            ...(signupRef ? { refCode: signupRef } : {}),
             // الطالب يشوف الصف اللي اختاره بس. باقي الصفوف مقفولة عليه (الأدمن يقدر يفتحها)
             ...(signupGrade === null ? {} : { access: { grades: [signupGrade], subjects: SUBJECTS.map(x => x.key) } })
           });
@@ -2178,7 +2346,8 @@
           myName = name;
           showDone('أهلاً بيك يا ' + name.split(' ')[0], 'اتحفظ حسابك.');
         } else {
-          showWaiting();                       // حساب جديد: استنى موافقة الأدمن
+          if (payOn()) { closeLogin(); toast('اتعمل حسابك ✓ فعّل اشتراكك عشان تفتح المحتوى'); }
+          else showWaiting();                  // حساب جديد: استنى موافقة الأدمن
         }
       } catch (err) {
         nameError.textContent = authMessage(err);
@@ -2354,7 +2523,7 @@
         const d = snap.data();
         if (d.blocked) { waiting = false; toast('حسابك اتوقف. كلّم الإدارة.'); signOut(auth); return; }
 
-        if (d.approved === false) {            // لسه مستني (أو الأدمن رفض): نفس الشاشة
+        if (d.approved === false && !payOn()) {   // لسه مستني (أو الأدمن رفض): نفس الشاشة
           myName = null;
           if (!waiting) showWaiting();
           return;
@@ -2378,6 +2547,7 @@
         if (JSON.stringify(myAccess) !== before) refreshAccess();
         myNeedGroup = !!d.needGroup;
         myMuted = !!d.muted;
+        myPaidUntil = Number(d.paidUntil) || 0; myLoaded = true; updatePay();
         updateAnnc();
         try {   // آخر ظهور: مرة واحدة في الجلسة
           if (sessionStorage.getItem('seen') !== '1') {
@@ -2423,9 +2593,9 @@
       stopStudentWatch();
       myName = null; myAccess = null; myMuted = false; prog = { done: {}, favs: {} };
       meAvatar.hidden = true; meLetter.hidden = true; meCrown.hidden = true; myBadge = ''; myGrade = null; myCode = ''; closeAvMenu();
-      myNeedGroup = false;
+      myNeedGroup = false; myPaidUntil = 0; myLoaded = false; payImg = '';
       if (currentRole) maintBypass = false;
-      updateAnnc();
+      updatePay(); updateAnnc();
       updateGate(); updateMaint();
 
       const isStudent = !!user && !currentRole;
@@ -2487,6 +2657,7 @@
 
     const TABS = {
       students: ['الطلاب', 'tabStudents'],
+      billing:  ['الاشتراكات', 'tabBilling'],
       members:  ['كل الأعضاء', 'tabMembers'],
       insights: ['إحصائيات', 'tabInsights'],
       admins:   ['الأدمن', 'tabAdmins'],
@@ -2497,7 +2668,7 @@
       content:  ['المحتوى', 'tabContent']
     };
 
-    let students = [], admins = [], unsubs = [];
+    let students = [], admins = [], unsubs = [], payments = [], payPendingCount = 0;
 
     /* حماية من الأكواد الضارة في الأسماء */
     const esc = t => String(t ?? '').replace(/[&<>"']/g, c =>
@@ -2528,17 +2699,23 @@
       if (currentRole === 'guest') {
         panelTabs = anyGrant('content') ? ['content'] : [];
         if (!panelTabs.length) return toast('مفيش صلاحيات متاحة لحسابك.');
-      } else panelTabs = currentRole === 'owner' ? ['students', 'members', 'insights', 'announce', 'stats', 'admins', 'guests', 'log', 'content'] : ['content'];
+      } else panelTabs = currentRole === 'owner' ? ['students', 'billing', 'members', 'insights', 'announce', 'stats', 'admins', 'guests', 'log', 'content'] : ['content'];
       const allowed = panelTabs;
 
       if (currentRole === 'owner') {
         unsubs.push(onSnapshot(collection(db, 'users'), snap => {
           students = snap.docs.map(d => ({ id: d.id, ...d.data() }));
-          renderStudents();
+          stuListReady = true;
+          renderStudents(); renderBilling();
           ensureCodes();
           renderGuests();
           renderMembers();
         }, panelError));
+        unsubs.push(onSnapshot(query(collection(db, 'payments'), where('status', '==', 'pending')), snap => {
+          payments = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+          payPendingCount = payments.length;
+          renderBilling(); renderTabs();
+        }, () => {}));
         unsubs.push(onSnapshot(collection(db, 'admins'), snap => {
           admins = snap.docs.map(d => ({ id: d.id, ...d.data() }));
           renderAdmins();
@@ -2569,7 +2746,7 @@
     let panelTabs = [], curTab = null, tabsOpen = false;
 
     function renderTabs() {
-      const count = k => k === 'students' ? pendingCount : 0;
+      const count = k => k === 'students' ? pendingCount : k === 'billing' ? payPendingCount : 0;
       const total = panelTabs.reduce((a, k) => a + count(k), 0);
       pTabs.innerHTML = `
         <button class="tabmenu" type="button" id="tabMenuBtn" aria-expanded="${tabsOpen}" aria-controls="tabList">
@@ -2592,6 +2769,7 @@
         document.getElementById(id).hidden = k !== key);
       renderTabs();
       if (key === 'announce') fillSiteTab();
+      if (key === 'billing') renderBilling();
       if (key === 'insights') loadInsights();
       if (key === 'stats') showBackupInfo();
       document.getElementById('exportBox').hidden = !isOwner();
@@ -2599,6 +2777,7 @@
 
     /* ---- الطلاب ---- */
     const gradeTag = s => Number.isInteger(s.grade) && GRADES[s.grade] ? ' • ' + GRADES[s.grade].name : '';
+    const refTag = s => { if (!s.refCode) return ''; const by = students.find(x => x.code === s.refCode); return ' • 🤝 جاي من ' + (by ? (by.name || 'طالب') : 'كود غير معروف ' + s.refCode); };
 
     /* ---- كود البحث لكل طالب: 6 حروف وأرقام (من غير الحروف المتشابهة) ---- */
     const CODE_CHARS = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
@@ -2629,7 +2808,7 @@
     let stuFilter = 'all', shownStudents = [];
     function renderStudents() {
       const q = document.getElementById('search').value.trim().toLowerCase();
-      const match = s => !q || (s.name || '').toLowerCase().includes(q) || (s.email || '').toLowerCase().includes(q) || (s.code || '').toLowerCase().includes(q.replace(/[\s-]/g, ''));
+      const match = s => !q || (s.name || '').toLowerCase().includes(q) || (s.email || '').toLowerCase().includes(q) || (s.code || '').toLowerCase().includes(q.replace(/[\s-]/g, '')) || (q.length >= 4 && (s.refCode || '').toLowerCase() === q.replace(/[\s-]/g, ''));
       const byNew = (a, b) => (b.createdAt?.seconds || 0) - (a.createdAt?.seconds || 0);
       const waitingList = students.filter(s => s.approved === false && match(s)).sort(byNew);
       const fOk = s => stuFilter === 'all' ? true : stuFilter === 'blocked' ? !!s.blocked : stuFilter === 'group' ? !!s.needGroup : s.grade === Number(stuFilter.slice(1));
@@ -2645,13 +2824,13 @@
 
       document.getElementById('pendingBox').innerHTML = waitingList.length ? `
         <h3 style="margin:6px 0 10px">طلبات التسجيل <span class="pill">${waitingList.length}</span></h3>
-        <button class="tool" data-act="approveAll" type="button" style="width:100%;margin-bottom:10px">✓ قبول كل الطلبات (${waitingList.filter(s => !s.rejected).length})</button>
+        ${payOn() ? '' : `<button class="tool" data-act="approveAll" type="button" style="width:100%;margin-bottom:10px">✓ قبول كل الطلبات (${waitingList.filter(s => !s.rejected).length})</button>`}
         ${waitingList.map(s => `
           <div class="row" data-id="${esc(s.id)}">
-            <div class="row__info"><b>${avatarImg(s.photo, 'avatar--sm', s.name, s.badge)}${esc(s.name)}${nameBadge(s.badge)}</b><span>${esc(s.email)}${esc(gradeTag(s))}</span>${s.code ? `<small class="stucode">كود: ${esc(s.code)}</small>` : ''}</div>
+            <div class="row__info"><b>${avatarImg(s.photo, 'avatar--sm', s.name, s.badge)}${esc(s.name)}${nameBadge(s.badge)}</b><span>${esc(s.email)}${esc(gradeTag(s) + refTag(s))}</span>${s.code ? `<small class="stucode">كود: ${esc(s.code)}</small>` : ''}</div>
             <span class="chip ${s.rejected ? 'chip--off' : ''}">${s.rejected ? 'مرفوض' : 'مستني'}</span>
             <div class="row__acts">
-              <button data-act="approve">قبول</button>
+              <button data-act="approve">${payOn() ? 'فعّل شهر' : 'قبول'}</button>
               ${s.rejected ? '' : '<button data-act="reject" class="danger">رفض</button>'}
             </div>
           </div>`).join('')}
@@ -2659,8 +2838,8 @@
 
       studentList.innerHTML = list.length ? list.map((s, i) => `
         <div class="row" data-id="${esc(s.id)}" style="--i:${Math.min(i, 8)}">
-          <div class="row__info"><b>${avatarImg(s.photo, 'avatar--sm', s.name, s.badge)}${esc(s.name)}${nameBadge(s.badge)}</b><span>${esc(s.email)}${esc(gradeTag(s))}</span>${s.code ? `<small class="stucode">كود: ${esc(s.code)}</small>` : ''}</div>
-          <span class="chip ${s.blocked ? 'chip--off' : ''}">${s.blocked ? 'متوقف' : 'نشط'}</span>
+          <div class="row__info"><b>${avatarImg(s.photo, 'avatar--sm', s.name, s.badge)}${esc(s.name)}${nameBadge(s.badge)}</b><span>${esc(s.email)}${esc(gradeTag(s) + refTag(s))}</span>${s.code ? `<small class="stucode">كود: ${esc(s.code)}</small>` : ''}</div>
+          ${stuChip(s)}
           <div class="row__acts"><button data-act="open">تحكم كامل</button></div>
         </div>`).join('') : '<p class="empty">مفيش طلاب لسه.</p>';
 
@@ -2713,7 +2892,9 @@
       const id = btn.closest('.row').dataset.id;
       btn.disabled = true;
       try {
-        if (btn.dataset.act === 'approve') {
+        if (btn.dataset.act === 'approve' && payOn()) {
+          await activateStudent(id);
+        } else if (btn.dataset.act === 'approve') {
           await updateDoc(doc(db, 'users', id), { approved: true, rejected: deleteField() });
           logStu(id, 'قبول الطالب'); toast('اتقبل الطالب ✓');
         } else {
@@ -2724,6 +2905,133 @@
     });
 
     document.getElementById('search').addEventListener('input', renderStudents);
+
+    /* ==========================================================
+       الاشتراكات (للمالك): تفعيل شهر، رفض، ومكافأة الصاحب (كل 10 = شهر ببلاش)
+       ========================================================== */
+    const stuChip = s => s.blocked ? '<span class="chip chip--off">متوقف</span>'
+      : !payOn() ? '<span class="chip">نشط</span>'
+      : payActive(s) ? `<span class="chip">مفعّل لحد ${esc(new Date(s.paidUntil).toLocaleDateString('ar-EG', { day: 'numeric', month: 'numeric' }))}</span>`
+      : '<span class="chip chip--off">مش مفعّل</span>';
+
+    async function activateStudent(id) {
+      if (!isOwner()) return toast('للمالك بس.');
+      const s = students.find(x => x.id === id); if (!s) return;
+      const until = addMonth(Math.max(Date.now(), Number(s.paidUntil) || 0));
+      try {
+        await updateDoc(doc(db, 'users', id), { approved: true, rejected: deleteField(), paidUntil: until });
+        updateDoc(doc(db, 'payments', id), { status: 'done' }).catch(() => {});
+        logStu(id, 'تفعيل اشتراك شهر', 'لحد ' + fmtDate(until));
+        toast('اتفعّل لحد ' + fmtDate(until) + ' ✓');
+        await rewardReferrer(s);
+      } catch (err) { dbError(err); }
+    }
+
+    /* كل 10 اشتراكوا بكود نفس الصاحب واتفعّلوا ← الصاحب ياخد شهر ببلاش (كل طالب بيتحسب مرة واحدة) */
+    async function rewardReferrer(s) {
+      if (!s.refCode) return;
+      const r = students.find(x => x.code === s.refCode && x.id !== s.id);
+      if (!r) return;
+      const now = Date.now();
+      const [kids, rs] = await Promise.all([
+        getDocs(query(collection(db, 'users'), where('refCode', '==', r.code))),
+        getDoc(doc(db, 'users', r.id))
+      ]);
+      const rd = rs.data() || {}, used = new Set(rd.refUsed || []);
+      const ids = kids.docs.filter(d => d.id !== r.id && !used.has(d.id) && !d.data().blocked && Number(d.data().paidUntil) > now).map(d => d.id);
+      const months = Math.floor(ids.length / 10);
+      if (!months) return;
+      const take = ids.slice(0, months * 10);
+      let until = Math.max(now, Number(rd.paidUntil) || 0);
+      for (let i = 0; i < months; i++) until = addMonth(until);
+      await updateDoc(doc(db, 'users', r.id), { approved: true, paidUntil: until, refUsed: arrayUnion(...take) });
+      logStu(r.id, 'شهر هدية', take.length + ' صحاب اشتركوا بكوده');
+      toast('🎁 ' + (r.name || 'الصاحب') + ' خد شهر ببلاش');
+    }
+
+    async function activateAllExisting() {
+      const until = addMonth(Date.now());
+      const list = students.filter(x => x.approved !== false && !x.blocked && !payActive(x));
+      for (let i = 0; i < list.length; i += 150) {
+        const b = writeBatch(db);
+        list.slice(i, i + 150).forEach(st => { b.update(doc(db, 'users', st.id), { paidUntil: until }); bulkLog(b, st, 'تفعيل اشتراك شهر (جماعي)'); });
+        await b.commit();
+      }
+      return list.length;
+    }
+
+    function fillStuPay(s) {
+      const box = document.getElementById('stuPayBox'); if (!box) return;
+      const act = payActive(s);
+      const refd = students.filter(x => x.refCode && s.code && x.refCode === s.code && x.id !== s.id && payActive(x) && !(s.refUsed || []).includes(x.id)).length;
+      document.getElementById('stuPayInfo').textContent =
+        (act ? 'مفعّل لحد ' + fmtDate(s.paidUntil) : s.paidUntil ? 'الاشتراك خلص يوم ' + fmtDate(s.paidUntil) : 'مش مفعّل') +
+        (s.code ? ' • صحابه الفعّالين: ' + refd + ' من 10' : '') + (payOn() ? '' : ' • (نظام الاشتراك مقفول دلوقتي)');
+      document.getElementById('stuPayOff').hidden = !s.paidUntil;
+    }
+    document.getElementById('stuPayOn').addEventListener('click', () => { if (stuId) activateStudent(stuId); });
+    document.getElementById('stuPayOff').addEventListener('click', async () => {
+      const s = stu(); if (!s || !confirm('إلغاء تفعيل ' + (s.name || 'الطالب') + '؟')) return;
+      try { await updateDoc(doc(db, 'users', s.id), { paidUntil: 0 }); logStu(s.id, 'إلغاء التفعيل'); toast('اتلغى التفعيل'); } catch (err) { dbError(err); }
+    });
+
+    function showImg(src) {
+      const o = document.createElement('div'); o.className = 'imgbox';
+      const im = document.createElement('img'); im.src = src; o.appendChild(im);
+      o.addEventListener('click', () => o.remove()); document.body.appendChild(o);
+    }
+    function renderBilling() {
+      if (!isOwner()) return;
+      const on = payOn(), mi = document.getElementById('payMsgInput');
+      if (document.activeElement !== mi) mi.value = (siteCfg.pay && siteCfg.pay.msg) || '';
+      document.getElementById('payStateTxt').textContent = on ? 'الاشتراك شغّال' : 'الاشتراك مقفول (الكل بيدخل عادي)';
+      document.getElementById('payToggle').textContent = on ? 'إيقاف الاشتراك' : 'تشغيل الاشتراك';
+      document.getElementById('billCount').textContent = payPendingCount || '';
+      const list = document.getElementById('billList');
+      list.innerHTML = payments.length ? payments.map(p => {
+        const st = students.find(x => x.id === p.id) || {};
+        const g = Number.isInteger(st.grade) ? st.grade : p.grade;
+        return `<div class="paycard" data-id="${esc(p.id)}">
+          <b>${esc(st.name || p.name || 'طالب')}</b>
+          <p style="margin:2px 0">${esc(Number.isInteger(g) && GRADES[g] ? GRADES[g].name : 'بدون صف')} • كود: ${esc(st.code || p.code || 'لسه')}${esc(st.id ? refTag(st) : '')}</p>
+          ${goodImg(p.img) ? `<img class="payimg" src="${p.img}" alt="صورة التحويل" data-act="zoom">` : ''}
+          ${p.msg ? `<p>${esc(p.msg)}</p>` : ''}
+          <div class="row__acts"><button data-act="payOk">فعّل شهر</button><button data-act="payNo" class="danger">رفض</button></div>
+        </div>`;
+      }).join('') : '<p class="empty">مفيش طلبات تفعيل.</p>';
+    }
+    document.getElementById('billList').addEventListener('click', async e => {
+      const b = e.target.closest('[data-act]'); if (!b) return;
+      const id = b.closest('.paycard').dataset.id;
+      if (b.dataset.act === 'zoom') return showImg(b.src);
+      b.disabled = true;
+      try {
+        if (b.dataset.act === 'payOk') await activateStudent(id);
+        if (b.dataset.act === 'payNo') { await updateDoc(doc(db, 'payments', id), { status: 'rejected' }); logStu(id, 'رفض صورة التحويل'); toast('اترفضت'); }
+      } catch (err) { dbError(err); } finally { b.disabled = false; }
+    });
+    document.getElementById('payMsgSave').addEventListener('click', async () => {
+      if (!isOwner()) return toast('للمالك بس.');
+      try { await setDoc(siteRef, { pay: { msg: document.getElementById('payMsgInput').value.trim() } }, { merge: true }); toast('اتحفظ الكلام ✓'); } catch (err) { dbError(err); }
+    });
+    document.getElementById('payToggle').addEventListener('click', async () => {
+      if (!isOwner()) return toast('للمالك بس.');
+      const on = !payOn();
+      try {
+        if (on) {
+          if (!confirm('تشغيل الاشتراك؟ أي طالب مش مفعّل هيتقفل عليه المحتوى.')) return;
+          if (confirm('تفعّل كل الطلاب الحاليين شهر الأول بدل ما يتقفل عليهم؟\n(موافق = يتفعّلوا، إلغاء = هيتقفلوا لحد ما تفعّلهم واحد واحد)')) {
+            const n = await activateAllExisting(); toast('اتفعّل ' + n + ' طالب');
+          }
+        }
+        await setDoc(siteRef, { pay: { on, msg: document.getElementById('payMsgInput').value.trim() } }, { merge: true });
+        toast(on ? 'الاشتراك اشتغل' : 'الاشتراك وقف');
+      } catch (err) { dbError(err); }
+    });
+    document.getElementById('payActAll').addEventListener('click', async () => {
+      if (!isOwner() || !confirm('تفعّل كل الطلاب الحاليين غير المفعّلين شهر؟')) return;
+      try { const n = await activateAllExisting(); toast('اتفعّل ' + n + ' طالب'); } catch (err) { dbError(err); }
+    });
 
     /* ---- الأدمن ---- */
     function renderAdmins() {
@@ -2842,7 +3150,7 @@
       if (!box || !isOwner()) return;
       const q = document.getElementById('memSearch').value.trim().toLowerCase();
       const adminOf = email => admins.find(a => a.id === email);
-      const hit = s => !q || (s.name || '').toLowerCase().includes(q) || (s.email || '').toLowerCase().includes(q) || (s.code || '').toLowerCase().includes(q.replace(/[\s-]/g, ''));
+      const hit = s => !q || (s.name || '').toLowerCase().includes(q) || (s.email || '').toLowerCase().includes(q) || (s.code || '').toLowerCase().includes(q.replace(/[\s-]/g, '')) || (q.length >= 4 && (s.refCode || '').toLowerCase() === q.replace(/[\s-]/g, ''));
       const people = students.filter(s => s.approved !== false);
       const extra = admins.filter(a => a.id !== OWNER_EMAIL && !studentByEmail(a.id) && (!q || a.id.includes(q)));
       document.getElementById('memTotal').textContent = people.length + extra.length + 1;
@@ -2853,7 +3161,7 @@
         const em = (s.email || '').toLowerCase(), ad = adminOf(em);
         if (em === OWNER_EMAIL) return '';
         return `<div class="row" data-id="${esc(s.id)}" data-email="${esc(em)}">
-          <div class="row__info"><b>${avatarImg(s.photo, 'avatar--sm', s.name, s.badge)}${esc(s.name)}${nameBadge(s.badge)}</b><span>${esc(s.email)}${esc(gradeTag(s))}</span>${s.code ? `<small class="stucode">كود: ${esc(s.code)}</small>` : ''}</div>
+          <div class="row__info"><b>${avatarImg(s.photo, 'avatar--sm', s.name, s.badge)}${esc(s.name)}${nameBadge(s.badge)}</b><span>${esc(s.email)}${esc(gradeTag(s) + refTag(s))}</span>${s.code ? `<small class="stucode">كود: ${esc(s.code)}</small>` : ''}</div>
           <span class="chip ${ad ? 'chip--role' : (s.blocked ? 'chip--off' : '')}">${ad ? esc(ROLE_LABELS[ad.role] || 'أدمن') : (s.blocked ? 'متوقف' : 'طالب')}</span>
           <div class="row__acts">
             <button data-act="open">تحكم كامل</button>
@@ -3866,6 +4174,7 @@
       document.getElementById('blockBtn').textContent = s.blocked ? 'فك الحظر' : 'حظر الحساب';
       document.getElementById('groupBtn').textContent = s.needGroup ? 'إلغاء الإجبار' : 'تفعيل الإجبار';
       document.getElementById('muteBtn').textContent = s.muted ? 'فك الكتم' : 'كتم';
+      fillStuPay(s);
 
       document.getElementById('accGrades').innerHTML = GRADES.map((g, i) =>
         `<button type="button" class="cb" data-g="${i}" aria-pressed="${accSel.grades.has(i)}">${g.name}</button>`).join('');
@@ -4186,7 +4495,7 @@
     let pplCache = null;
     async function loadPeople() {
       if (pplCache && Date.now() - pplCache.t < 6e4) return pplCache.l;
-      const s = await getDocs(collection(db, 'users'));
+      const s = await getDocs(isAdminStaff() ? collection(db, 'users') : query(collection(db, 'users'), where('grade', '==', myGrade)));
       pplCache = { t: Date.now(), l: s.docs.map(d => ({ id: d.id, ...d.data() })) };
       return pplCache.l;
     }
@@ -4590,7 +4899,7 @@
       const drawMembers = () => {
         const el = document.getElementById('mList'); if (!el) return;
         const q = (R.mq || '').trim().toLowerCase(), rs = R.rs || {};
-        const ps = (R.people || []).filter(p => p.grade === gIdx && p.approved !== false && (!q || String(p.name || '').toLowerCase().includes(q)))
+        const ps = (R.people || []).filter(p => p.grade === gIdx && p.approved !== false && (!q || String(p.name || '').toLowerCase().includes(q) || String(p.code || '').toLowerCase().includes(q.replace(/[\s-]/g, ''))))
           .sort((a, b) => String(a.name || '').localeCompare(String(b.name || ''), 'ar'));
         const cnt = document.getElementById('mCnt'); if (cnt) cnt.textContent = ps.length + ' طالب';
         el.innerHTML = ps.length ? ps.map(p => {
@@ -4631,7 +4940,7 @@
         R.mq = '';
         waSheet(`<h3 class="wa-sh-t">أعضاء ${esc(title)}</h3>
           <div class="wa-irow">${avatarImg((R.teacher || {}).photo, '', 'المستر', '')}<b>${esc((R.teacher || {}).name || 'المستر')}</b><small>موجود في كل المجموعات</small></div>
-          <input id="mQ" type="search" class="wa-msearch" placeholder="🔍 ابحث بالاسم" autocomplete="off">
+          <input id="mQ" type="search" class="wa-msearch" placeholder="🔍 ابحث بالاسم أو الكود" autocomplete="off">
           <p class="note-s" id="mCnt"></p><div id="mList"><p class="note-s">بيحمّل...</p></div>
           <button type="button" class="big" data-x="close">إغلاق</button>`, onMember);
         document.getElementById('mQ').addEventListener('input', e => { R.mq = e.target.value; drawMembers(); });
