@@ -5543,7 +5543,7 @@
         console.warn('Learn Ai:', err);
         AI.msgs.pop(); AI.busy = false; AI.live = '';
         inp.value = text; AI.file = file;
-        AI.err = err.message === 'empty' ? 'الرد رجع فاضي، جرّب تاني.' : 'المساعد مش شغال دلوقتي. جرّب تاني بعد شوية.';
+        AI.err = err.message === 'empty' ? 'الرد رجع فاضي، جرّب تاني.' : 'المساعد مش شغال دلوقتي. جرّب تاني بعد شوية.' + ' [' + String(err.message || err).slice(0, 160) + ']';
         aiDraw(); return;
       }
       if (!$ai('aiMsgs')) return;
