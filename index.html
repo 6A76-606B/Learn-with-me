@@ -5213,7 +5213,7 @@
        ========================================================== */
     const AI_NAME = 'Learn Ai', AI_DEV = 'داما';
     /* تنبيه أمان: المفتاح ظاهر لأي حد يفتح كود الصفحة. الأفضل تنقل الاتصال لسيرفر/Cloud Function وتشيله من هنا. */
-    const AI_KEY = 'AQ.Ab8RN6J-ZcKKXcrfx16wsrw1uTlSRfLyizxPwlepthfCT2qJ7g';
+    const AI_KEY = 'AQ.Ab8RN6JCpPFxmdVbZ5vQob4Ftcl3248fXVOktdR9mpr6lJjQ_w';
     const AI_URL = 'https://generativelanguage.googleapis.com/v1beta/openai/chat/completions';   // Gemini (واجهة متوافقة مع OpenAI)
     const AI_MODELS = ['gemini-2.5-flash', 'gemini-2.5-flash-lite', 'gemini-2.0-flash'];
     const AI_MAX_CHARS = 30000;
@@ -5468,9 +5468,7 @@
       for (const model of list) {
         const reqBody = JSON.stringify({ model, max_tokens: 4096, temperature: (opts && opts.temp) ?? 0.6, stream: true, reasoning_effort: 'none', messages: [{ role: 'system', content: system }, ...hist] });
         const send = (auth) => fetch(AI_URL, { method: 'POST', signal: ctrl.signal, headers: Object.assign({ 'content-type': 'application/json' }, auth), body: reqBody });
-        /* أول محاولة بهيدر المفتاح، ولو اترفضت (401/403) نجرّب Bearer */
-        let r = await send({ 'x-goog-api-key': AI_KEY });
-        if (r.status === 401 || r.status === 403) r = await send({ 'Authorization': 'Bearer ' + AI_KEY });
+        const r = await send({ 'Authorization': 'Bearer ' + AI_KEY });
         if (r.ok) { res = r; try { localStorage.setItem('ai_model_g', model); } catch (e) {} break; }
         const j = await r.json().catch(() => ({})), je = (Array.isArray(j) ? j[0] : j)?.error || {};
         lastErr = je.message || String(r.status);
