@@ -5466,11 +5466,11 @@
       const list = saved ? [saved, ...AI_MODELS.filter(m => m !== saved)] : AI_MODELS;
       let res = null, lastErr = '';
       for (const model of list) {
-        const r = await fetch(AI_URL, {
-          method: 'POST', signal: ctrl.signal,
-          headers: { 'content-type': 'application/json', 'Authorization': 'Bearer ' + AI_KEY },
-          body: JSON.stringify({ model, max_tokens: 4096, temperature: (opts && opts.temp) ?? 0.6, stream: true, reasoning_effort: 'none', messages: [{ role: 'system', content: system }, ...hist] })
-        });
+        const reqBody = JSON.stringify({ model, max_tokens: 4096, temperature: (opts && opts.temp) ?? 0.6, stream: true, reasoning_effort: 'none', messages: [{ role: 'system', content: system }, ...hist] });
+        const send = (auth) => fetch(AI_URL, { method: 'POST', signal: ctrl.signal, headers: Object.assign({ 'content-type': 'application/json' }, auth), body: reqBody });
+        /* أول محاولة بهيدر المفتاح، ولو اترفضت (401/403) نجرّب Bearer */
+        let r = await send({ 'x-goog-api-key': AI_KEY });
+        if (r.status === 401 || r.status === 403) r = await send({ 'Authorization': 'Bearer ' + AI_KEY });
         if (r.ok) { res = r; try { localStorage.setItem('ai_model_g', model); } catch (e) {} break; }
         const j = await r.json().catch(() => ({})), je = (Array.isArray(j) ? j[0] : j)?.error || {};
         lastErr = je.message || String(r.status);
