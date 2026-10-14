@@ -1487,11 +1487,6 @@
        إضافات خفيفة جدًا: transform/opacity بس، من غير تمويه ولا حركات متكررة
        ========================================================== */
     html body :is(button, a, [role=button], .gcard, .subj, .lesson, .wa-row) { -webkit-tap-highlight-color: transparent; touch-action: manipulation; }
-    /* شريط تقدم التمرير بالـCSS فقط (من غير JavaScript) */
-    @supports (animation-timeline: scroll()) {
-      @keyframes prog { from { transform: scaleX(0); } to { transform: scaleX(1); } }
-      html::after { content: ""; position: fixed; top: 0; inset-inline: 0; height: 3px; z-index: 9999; pointer-events: none; transform-origin: right; transform: scaleX(0); background: linear-gradient(90deg, #5b6cff, #c6ff3d, #ff5c8a); animation: prog linear both; animation-timeline: scroll(root); }
-    }
     /* دخول بالتتابع لكروت الصفوف والمواد (مرة واحدة، أول 6 بس) */
     html body :is(#gradeGrid, #subjectList) > * { animation: rise .3s ease both; }
     html body :is(#gradeGrid, #subjectList) > :nth-child(2) { animation-delay: .04s; }
