@@ -1479,7 +1479,8 @@
       <div class="logo"><i>L</i><span dir="ltr">Learn With Me</span></div>
       <div class="nav__btns">
         <span class="pwrap" id="mePwrap"><img class="avatar" id="meAvatar" alt="" hidden><span class="avatar avatar--letter" id="meLetter" hidden></span><i class="crown" id="meCrown" hidden>👑</i></span>
-        <button class="btn btn--small bell" id="panelBtn" hidden>لوحة التحكم<span class="dot" id="panelDot" hidden>0</span></button>
+        <button class="btn btn--small" id="previewBtn" hidden>👁️ اعرض مثل الطالب</button>
+    <button class="btn btn--small bell" id="panelBtn" hidden>لوحة التحكم<span class="dot" id="panelDot" hidden>0</span></button>
         <button class="btn btn--small" id="loginBtn">دخول</button>
       </div>
     </nav>
@@ -1917,12 +1918,12 @@
       getAuth, GoogleAuthProvider, signInWithPopup,
       signInWithEmailAndPassword, createUserWithEmailAndPassword,
       sendPasswordResetEmail, updateProfile, signOut, onAuthStateChanged,
-      deleteUser, reauthenticateWithCredential, EmailAuthProvider
+      deleteUser as _deleteUser, reauthenticateWithCredential, EmailAuthProvider
     } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js";
     import {
-      getFirestore, initializeFirestore, persistentLocalCache, persistentMultipleTabManager, CACHE_SIZE_UNLIMITED, doc, getDoc, setDoc, updateDoc, deleteDoc,
-      collection, addDoc, query, where, orderBy, limit, onSnapshot, serverTimestamp,
-      writeBatch, getDocs, getCountFromServer, deleteField, increment, Bytes, arrayUnion
+      getFirestore, initializeFirestore, persistentLocalCache, persistentMultipleTabManager, CACHE_SIZE_UNLIMITED, doc, getDoc, setDoc as _setDoc, updateDoc as _updateDoc, deleteDoc as _deleteDoc,
+      collection, addDoc as _addDoc, query, where, orderBy, limit, onSnapshot, serverTimestamp,
+      writeBatch as _writeBatch, getDocs, getCountFromServer, deleteField, increment, Bytes, arrayUnion
     } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js";
 
     const firebaseConfig = {
@@ -1943,6 +1944,15 @@
       db = initializeFirestore(app, { localCache: persistentLocalCache({ tabManager: persistentMultipleTabManager(), cacheSizeBytes: CACHE_SIZE_UNLIMITED }) });
     } catch (e) { db = getFirestore(app); }
     auth.languageCode = 'ar';
+/* وضع "اعرض مثل الطالب": أي كتابة (حفظ / رسايل / نتايج / حذف حساب) بتتمنع وإنت بتعاين */
+let previewing = false, pvTs = 0;
+const pvBlock = () => { if (Date.now() - pvTs > 3000) { pvTs = Date.now(); try { toast('👁️ وضع المعاينة: مفيش حاجة بتتحفظ'); } catch (e) {} } };
+const setDoc    = (...a) => previewing ? (pvBlock(), Promise.resolve()) : _setDoc(...a);
+const updateDoc = (...a) => previewing ? (pvBlock(), Promise.resolve()) : _updateDoc(...a);
+const deleteDoc = (...a) => previewing ? (pvBlock(), Promise.resolve()) : _deleteDoc(...a);
+const addDoc    = (...a) => previewing ? (pvBlock(), Promise.resolve({ id: 'preview' })) : _addDoc(...a);
+const writeBatch = (...a) => { const b = _writeBatch(...a); const c = b.commit.bind(b); b.commit = () => previewing ? (pvBlock(), Promise.resolve()) : c(); return b; };
+const deleteUser = u => previewing ? (pvBlock(), Promise.reject(new Error('preview'))) : _deleteUser(u);
     /* التحليلات بتتحمّل بعد ما الصفحة تخلّص عشان متبطّئش البداية */
     setTimeout(() => { import('https://www.gstatic.com/firebasejs/10.14.1/firebase-analytics.js').then(m => m.getAnalytics(app)).catch(() => {}); }, 4000);
 
@@ -2468,6 +2478,7 @@
     /* ---- حالة المستخدم ---- */
     const loginBtn = document.getElementById('loginBtn');
     const panelBtn = document.getElementById('panelBtn');
+    const previewBtn = document.getElementById('previewBtn');
 
     let pendingCount = 0, pendingFirst = true, pendingUnsub = null;   // طلبات تسجيل مستنية (للمدير)
     let myName = null;     // اسم الطالب
@@ -2562,6 +2573,7 @@
     }
     /* حذف الحساب نهائياً: بياناتك + الحساب نفسه، وتقدر تسجّل من الأول */
     async function deleteMyAccount() {
+      if (previewing) return pvBlock();
       const user = auth.currentUser;
       if (!user || currentRole) return;
       if (!confirm('هتحذف حسابك وكل بياناتك نهائياً وترجع من الصفر. متأكد؟')) return;
@@ -2686,6 +2698,7 @@
     }
 
     async function applyUser(user) {
+      previewing = false; document.getElementById('previewBar')?.remove(); document.body.style.paddingTop = '';
       loginBtn.textContent = 'دخول'; loginBtn.hidden = !!user;
       currentRole = user ? await getRole(user) : null;
       stopStudentWatch();
@@ -2701,7 +2714,7 @@
       if (isStudent) { watchStudent(user); watchProgress(user); }
       buildHome();
 
-      panelBtn.hidden = !currentRole;
+      panelBtn.hidden = !currentRole; previewBtn.hidden = !currentRole;
       if (!currentRole) panelDot.hidden = true;
       if (currentRole === 'owner') watchPending(); else stopPendingWatch();   // طلبات التسجيل الجديدة
       if (!currentRole) closePanel();
@@ -2709,6 +2722,52 @@
       if (!user) { if (view.screen !== 'home') show('home'); }
       else if (view.screen === 'lessons') subscribeLessons();   // الدور اتحدد: حدّث القائمة
     }
+
+    /* ---- اعرض مثل الطالب (للأدمن): الموقع بيظهر كأنك طالب مسجّل في الصف اللي تختاره، ومفيش حاجة بتتحفظ ---- */
+    function showPreviewBar(g) {
+      let b = document.getElementById('previewBar');
+      if (!b) {
+        b = document.createElement('div'); b.id = 'previewBar';
+        b.style.cssText = 'position:fixed;top:0;left:0;right:0;z-index:2147483000;display:flex;align-items:center;justify-content:space-between;gap:8px;padding:6px 12px;padding-top:calc(6px + env(safe-area-inset-top,0px));background:#c6ff3d;color:#14123b;font-family:inherit;font-weight:700;font-size:13px;line-height:1.3;direction:rtl;box-shadow:0 2px 8px rgba(0,0,0,.4)';
+        document.body.appendChild(b);
+      }
+      b.innerHTML = '<span>👁️ بتعرض كطالب في ' + esc(GRADES[g].name) + ' · مفيش حاجة بتتحفظ</span><button type="button" id="previewExit" style="flex:none;border:0;border-radius:99px;padding:6px 14px;background:#14123b;color:#fff;font-family:inherit;font-weight:700;font-size:13px">رجوع للأدمن</button>';
+      document.getElementById('previewExit').onclick = endPreview;
+      document.body.style.paddingTop = 'calc(46px + env(safe-area-inset-top,0px))';
+    }
+    function startPreview(g) {
+      if (!currentRole || previewing) return;
+      previewing = true;
+      currentRole = null; myCommMod = false; myGrants = new Set();
+      stopStudentWatch(); stopPendingWatch(); closePanel();
+      try { cStop(); } catch (e) {}
+      myName = 'طالب (معاينة)'; myAccess = null; myMuted = false; myAiBlocked = false; prog = { done: {}, favs: {} };
+      myBadge = ''; myCode = 'PREVIEW'; myGrade = g; myNeedGroup = false; myPaidUntil = Date.now() + 3e11; myLoaded = true;
+      meAvatar.hidden = true; meLetter.hidden = false; meLetter.textContent = 'ط'; meCrown.hidden = true;
+      panelBtn.hidden = true; previewBtn.hidden = true; panelDot.hidden = true;
+      updatePay(); updateAnnc(); updateGate(); updateMaint(); buildHome(); commNav();
+      show('home'); showPreviewBar(g);
+    }
+    async function endPreview() {
+      try { cStop(); } catch (e) {}
+      const u = auth.currentUser; if (!u) return;
+      await applyUser(u);                    // بيرجّع دورك الحقيقي وبيشيل شريط المعاينة
+      show('home');
+    }
+    previewBtn.addEventListener('click', () => {
+      const ov = document.createElement('div');
+      ov.style.cssText = 'position:fixed;inset:0;z-index:2147482000;background:rgba(0,0,0,.65);display:grid;place-items:center;padding:16px;direction:rtl';
+      const bs = 'display:block;width:100%;margin:6px 0;padding:12px;border-radius:12px;border:2px solid rgba(255,255,255,.2);background:#14123b;color:#fff;font-family:inherit;font-weight:700;font-size:15px';
+      ov.innerHTML = '<div style="background:#1b1a4f;color:#fff;border:2px solid #c6ff3d;border-radius:18px;padding:18px;max-width:340px;width:100%"><h3 style="margin:0 0 6px;font-size:18px">اعرض الموقع كطالب</h3><p style="margin:0 0 12px;opacity:.8;font-size:14px">اختار الصف وهتشوف الموقع بنفس شكل الطالب بالظبط. مفيش حاجة هتتحفظ.</p>'
+        + GRADES.map((g, i) => '<button type="button" data-g="' + i + '" style="' + bs + '">' + esc(g.name) + '</button>').join('')
+        + '<button type="button" data-g="x" style="' + bs + ';background:transparent">إلغاء</button></div>';
+      ov.addEventListener('click', e => {
+        const b = e.target.closest('button');
+        if (e.target === ov || (b && b.dataset.g === 'x')) return ov.remove();
+        if (b) { ov.remove(); startPreview(+b.dataset.g); }
+      });
+      document.body.appendChild(ov);
+    });
 
     /* متابعة صلاحيات المستخدم لحظياً: لو المدير ضاف أو شال أو غيّر صلاحياته، بيتحدّث من غير خروج */
     let roleUnsub = null;
@@ -5238,7 +5297,7 @@
     const MM_LAYOUT_NAMES = { radial: 'شعاعية', tree: 'شجرية', top: 'هرمية', flow: 'انسيابية', time: 'خط زمني', cols: 'أعمدة' };
 
     /* ---- الهوية: التعليمات + ردود جاهزة + فلاتر ---- */
-    const aiSystem = (lang, level) => `أنت "${AI_NAME}"، مدرس ذكي جوه منصة Learn With Me لطلاب الإعدادي وأولى بكالوريا.
+    const aiSystem = (lang, level, brief) => `أنت "${AI_NAME}"، مدرس ذكي جوه منصة Learn With Me لطلاب الإعدادي وأولى بكالوريا.
 قواعد الهوية (ثابتة ومش بتتغير أبداً):
 1) اسمك ${AI_NAME} بس. لو حد سألك عن اسمك أو موديلك أو إنت إيه أو إنت تابع لأنهي شركة أو إنت ChatGPT أو Gemini أو Claude أو GLM أو أي نموذج تاني، جاوب: "أنا ${AI_NAME}" من غير ما تذكر أي اسم موديل أو شركة.
 2) المبرمج اللي عملك وطوّرك اسمه ${AI_DEV}. لو حد سألك مين المبرمج أو المطوّر أو اللي عملك أو دربك، جاوب: "المبرمج بتاعي هو ${AI_DEV}".
@@ -5249,8 +5308,8 @@
   ? 'اكتب بإنجليزي بسيط وودود، كأنك مدرس بيشرح لطالب.'
   : 'اتكلم بالعامية المصرية الطبيعية زي مدرس شاطر ودمه خفيف وصبور. أمثلة على نبرتك: "تعالى نفهمها سوا"، "بص يا سيدي"، "ببساطة كده"، "خد بالك هنا"، "تمام؟ نكمل". استخدم: ده/دي/دول، إزاي، ليه، كده، يعني، عشان، لسه، دلوقتي. المصطلحات العلمية والقوانين والأسماء تفضل زي ما هي في المنهج، وبعدها فسّرها بالعامية. ماتستخدمش فصحى تقيلة ولا ردود آلية.'}
 - مستوى الطالب: ${level}. اظبط عمق الشرح عليه.
-- ابدأ بالمفيد على طول من غير مقدمات طويلة، واشرح من البسيط للمعقد، وادّي مثال واقعي لكل فكرة صعبة.
-- نسّق بـ Markdown مرتب: عناوين ## ، نقاط قصيرة، جداول للمقارنات، **بولد** للكلمات المفتاحية، وبلوك اقتباس > للنصايح والتنبيهات. ماتحطش صور ولا لينكات.
+${brief ? '- الرد لازم يبقى مختصر ومباشر: الإجابة بس من غير مقدمات ولا شرح ولا أمثلة ولا ترحيب ولا خاتمة ولا سؤال في الآخر (سطر لـ 3 سطور بالكتير). ماتشرحش ولا تفصّل.\n- لو الطالب طلب تلخيص أو اختبار أو فلاش كاردز أو خطة مذاكرة أو خريطة ذهنية أو شرح مطوّل، جاوبه بس: "مش هقدر أعمل ده، أنا بس بقدر أرد على أسئلتك".' : '- ابدأ بالمفيد على طول من غير مقدمات طويلة، واشرح من البسيط للمعقد، وادّي مثال واقعي لكل فكرة صعبة.'}
+${brief ? '- ماتستخدمش عناوين ولا جداول؛ **بولد** للكلمة المفتاحية بس لو لازم. ماتحطش صور ولا لينكات.' : '- نسّق بـ Markdown مرتب: عناوين ## ، نقاط قصيرة، جداول للمقارنات، **بولد** للكلمات المفتاحية، وبلوك اقتباس > للنصايح والتنبيهات. ماتحطش صور ولا لينكات.'}
 - كن دقيقاً، ولو معلومة مش متأكد منها قول كده بدل ما تخمّن. ركّز على المذاكرة والتعليم.`;
 
     const AI_R_NAME = `أنا **${AI_NAME}**، مساعد المذاكرة بتاعك في منصة Learn With Me 🚀 اسألني في أي درس وأنا أشرحه لك.`;
@@ -5270,6 +5329,11 @@
       if (dev && nm) return AI_R_NAME + '\n\n' + AI_R_DEV;
       return dev ? AI_R_DEV : nm ? AI_R_NAME : '';
     }
+
+    /* الطالب: أي طلب أداة (تلخيص/اختبار/كروت/خطة/خريطة/شرح) يترفض فوراً */
+    const AI_R_NO = 'مش هقدر أعمل ده 🙏 أنا بس بقدر أرد على أسئلتك. اسألني أي سؤال وأجاوبك.';
+    const AI_RE_TOOL = /لخص|تلخيص|ملخص|اختبرني|امتحني|quiz me|summar|(?:اعمل|اعملي|اعمللي|هات|هاتلي|عايز|عاوز|اديني|ادني)\s+(?:\S+\s+){0,3}?(?:اختبار|كويز|quiz)|فلاش|كاردز|flash ?cards?|بطاقات مراجعه|(?:خطه|جدول)\s+(?:مذاكره|دراسيه|دراسه)|study plan|خريطه ذهنيه|mind ?map|(?:^|\s)(?:اشرح|اشرحلي|اشرحي|شرح|explain)(?:\s|$)/;
+    function aiStudentBlock(raw) { return AI_RE_TOOL.test(aiNorm(raw).slice(0, 3000)) ? AI_R_NO : ''; }
 
     /* ---- ماركداون آمن (كل نص بيتعمله esc قبل أي وسم) ---- */
     function aiMd(src) {
@@ -5335,7 +5399,7 @@
       const mp = (isMind || /"(nodes|children)"\s*:/.test(m.text || '')) ? mmParse(m.text, isMind) : null;
       if (mp) return mmCardHtml(m, i, who, prev, mp);
       if (isMind) return `<div class="ai-m ai-m--bot"><b class="ai-who">🤖 ${AI_NAME}</b><p>الخريطة ماطلعتش صح المرة دي، جرّب تبعت تاني.</p><details class="ai-fl"><summary>الرد الأصلي</summary><div>${esc(m.text)}</div></details></div>`;
-      const ex = who ? '' : `<div class="ai-ex"><button type="button" class="ai-cp" data-ai="copy" data-i="${i}">نسخ</button>${m.text.length > 150 ? `<button type="button" class="ai-cp" data-ai="spdf" data-i="${i}">📄 PDF</button><button type="button" class="ai-cp" data-ai="spng" data-i="${i}">🖼️ صورة</button>` : ''}</div>`;
+      const ex = who ? '' : `<div class="ai-ex"><button type="button" class="ai-cp" data-ai="copy" data-i="${i}">نسخ</button>${isAdminStaff() ? `<button type="button" class="ai-cp" data-ai="spdf" data-i="${i}">📄 PDF</button><button type="button" class="ai-cp" data-ai="spng" data-i="${i}">🖼️ صورة</button>` : ''}</div>`;
       return `<div class="ai-m ai-m--bot"><b class="ai-who">🤖 ${AI_NAME}</b>${aiMd(m.text)}${ex}${m.ts && who ? `<small class="ai-ts">${esc(fFull(m.ts))}</small>` : ''}</div>`;
     }
 
@@ -5365,7 +5429,7 @@
           </div>
           <div class="ai-fchip" id="aiFile" hidden></div>
           <div class="ai-bar">
-            <label class="ai-ib" title="رفع ملف نصي">📎<input type="file" id="aiFileIn" accept=".txt,.md,.csv,.html,.json" hidden></label>
+            <label class="ai-ib" title="رفع ملف نصي" ${isAdminStaff() ? '' : 'style="display:none"'}>📎<input type="file" id="aiFileIn" accept=".txt,.md,.csv,.html,.json" hidden></label>
             <textarea id="aiIn" rows="1" maxlength="${AI_MAX_CHARS}"></textarea>
             <button class="ai-send" id="aiGo" type="button" data-ai="send" aria-label="إرسال"><svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path fill="currentColor" d="M3 20.5v-6.9l8.4-1.6L3 10.4V3.5l18 8.5z"/></svg></button>
           </div>
@@ -5415,7 +5479,8 @@
       $ai('aiSub').textContent = t.n + ' · ' + t.d;
       $ai('aiIn').placeholder = t.ph;
       $ai('aiMm').hidden = AI.tool !== 'mind';
-      $ai('aiTools').innerHTML = Object.entries(AI_TOOLS).map(([k, v]) => `<button type="button" class="cb" data-ai="tool" data-k="${k}" aria-pressed="${k === AI.tool}">${esc(v.n)}</button>`).join('');
+      $ai('aiTools').hidden = !isAdminStaff();
+      $ai('aiTools').innerHTML = !isAdminStaff() ? '' : Object.entries(AI_TOOLS).map(([k, v]) => `<button type="button" class="cb" data-ai="tool" data-k="${k}" aria-pressed="${k === AI.tool}">${esc(v.n)}</button>`).join('');
       aiDrawFile(); aiDrawMsgs();
     }
     function aiDrawMsgs() {
@@ -5505,13 +5570,13 @@
       if (!isAdminStaff() && myAiBlocked) { AI.err = 'الإدارة وقّفت استخدامك لـ ' + AI_NAME + '.'; return aiDrawMsgs(); }
       if (Date.now() - AI.lastSend < 1500) return;
       AI.lastSend = Date.now();
-      const file = AI.file, lvl = $ai('aiLvl').value, lang = $ai('aiLang').value;
+      const file = isAdminStaff() ? AI.file : null, lvl = $ai('aiLvl').value, lang = $ai('aiLang').value;
       /* لو الطالب كتب في "اسأل" إنه عايز خريطة ذهنية، نحوّلها لأداة الخريطة لوحدنا */
-      let tool = AI.tool;
-      if (tool === 'chat' && !file && /(اعمل|اعملي|اعمللي|ارسم|ارسمي|عايز|عاوز|هات|حول|ابني|وريني)[^\n]{0,30}خريطه ذهنيه/.test(aiNorm(text))) tool = 'mind';
+      let tool = isAdminStaff() ? AI.tool : 'chat';
+      if (isAdminStaff() && tool === 'chat' && !file && /(اعمل|اعملي|اعمللي|ارسم|ارسمي|عايز|عاوز|هات|حول|ابني|وريني)[^\n]{0,30}خريطه ذهنيه/.test(aiNorm(text))) tool = 'mind';
       const um = { role: 'user', text, tool, ts: Date.now(), ...(file ? { file: file.name } : {}) };
       if (tool === 'mind' && $ai('aiMm').value) AI.lay[um.ts] = $ai('aiMm').value;
-      const loc = (!file && tool === 'chat') ? aiLocal(text) : '';
+      const loc = (!file && tool === 'chat') ? (aiLocal(text) || (isAdminStaff() ? '' : aiStudentBlock(text))) : '';
       AI.err = ''; AI.busy = true; AI.live = '';
       inp.value = ''; inp.style.height = 'auto'; AI.file = null;
       AI.msgs.push(um); aiDraw();
@@ -5521,7 +5586,7 @@
         else {
           const hist = AI.msgs.slice(-20).map(m => ({ role: m.role, content: aiPrompt(m) }));
           const opts = { temp: tool === 'mind' ? 0.3 : 0.6 };
-          reply = await aiStream(aiSystem(lang, lvl), hist, full => {
+          reply = await aiStream(aiSystem(lang, lvl, !isAdminStaff()), hist, full => {
             if (AI_LEAK.test(full)) return true;
             AI.live = full; if ($ai('aiMsgs')) aiDrawMsgs();
             return false;
@@ -5530,7 +5595,7 @@
           /* لو الخريطة رجعت JSON مش سليم، نطلب من الموديل يصلحه مرة واحدة */
           if (tool === 'mind' && !mmParse(reply, true) && !AI_LEAK.test(reply)) {
             try {
-              const fix = await aiStream(aiSystem(lang, lvl), hist.concat([{ role: 'assistant', content: reply }, { role: 'user', content: 'الرد ده مش JSON صالح. رجّع JSON صالح بس جوه كتلة ```json بالشكل المطلوب بالظبط، من غير أي كلام تاني.' }]), () => false, { temp: 0.2 });
+              const fix = await aiStream(aiSystem(lang, lvl, !isAdminStaff()), hist.concat([{ role: 'assistant', content: reply }, { role: 'user', content: 'الرد ده مش JSON صالح. رجّع JSON صالح بس جوه كتلة ```json بالشكل المطلوب بالظبط، من غير أي كلام تاني.' }]), () => false, { temp: 0.2 });
               if (mmParse(fix, true)) reply = fix;
             } catch (e) {}
           }
