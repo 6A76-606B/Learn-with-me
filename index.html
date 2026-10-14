@@ -1504,7 +1504,46 @@
     html body .hero { background: radial-gradient(800px 460px at 85% 0%, rgba(91,108,255,.32), transparent 60%), radial-gradient(600px 380px at 0% 100%, rgba(255,92,138,.2), transparent 60%), var(--ink); }
     /* تحسين أداء القوائم الطويلة: بيرسم اللي على الشاشة بس */
     html body :is(.lesson, .wa-row, .panel__body .row) { content-visibility: auto; contain-intrinsic-size: auto 84px; }
-</style>
+    /* ---- ورقة شرح/ملخص + اختبار تفاعلي ---- */
+    .ai-paper{background:#fffdf6 repeating-linear-gradient(transparent 0 31px,#e9e2f5 31px 32px);color:#1b1a3a;border:2px solid #e8c4dc;border-radius:16px;padding:14px 16px;box-shadow:0 6px 18px rgba(120,80,160,.18);line-height:2}
+    .ai-paper *{color:inherit}
+    .ai-paper h2,.ai-paper h3{background:linear-gradient(90deg,#ff6fa5,#b77be8);color:#fff!important;border-radius:14px;padding:4px 14px;display:inline-block;font-size:17px;margin:12px 0 6px}
+    .ai-paper table{border-collapse:collapse;width:100%;background:#fff}
+    .ai-paper th{background:#fbe4f0}
+    .ai-paper td,.ai-paper th{border:1.5px solid #e8c4dc;padding:6px 9px;font-size:14px}
+    .ai-paper blockquote{border-right:4px solid #b77be8;background:#f6efff;margin:8px 0;padding:6px 12px;border-radius:10px}
+    .qz-go{display:block;margin:14px auto 4px;padding:11px 20px;border:0;border-radius:14px;background:linear-gradient(90deg,#ff6fa5,#7a5cff);color:#fff;font:inherit;font-weight:700;cursor:pointer}
+    .qz{position:fixed;inset:0;z-index:9999;overflow:auto;direction:rtl;background:linear-gradient(160deg,#e8f0ff,#f6e9ff);color:#1b1a3a;font-family:inherit}
+    .qz-w{max-width:640px;margin:0 auto;padding:12px 14px 40px}
+    .qz-top{display:flex;align-items:center;gap:10px;padding:8px 0;font-size:17px}
+    .qz-x{border:0;background:#fff;border-radius:50%;width:38px;height:38px;font-size:17px;cursor:pointer;box-shadow:0 2px 8px rgba(0,0,0,.12)}
+    .qz-bar{height:8px;background:#fff;border-radius:8px;overflow:hidden;margin-bottom:12px}.qz-bar i{display:block;height:100%;background:linear-gradient(90deg,#ff6fa5,#7a5cff);transition:width .3s}
+    .qz-card{background:#fff;border:2px dashed #7aa2e8;border-radius:20px;padding:16px;margin-bottom:14px;box-shadow:0 8px 22px rgba(60,80,160,.12)}
+    .qz-card h3{margin:12px 0 8px;font-size:15px;color:#3b4ea8}
+    .qz-chips{display:flex;flex-wrap:wrap;gap:8px}
+    .qz-chip{border:2px solid #c9d6f5;background:#f4f7ff;border-radius:12px;padding:8px 12px;font:inherit;cursor:pointer;color:#1b1a3a}
+    .qz-chip[aria-pressed=true]{background:#3b4ea8;border-color:#3b4ea8;color:#fff}
+    .qz-qh{display:flex;align-items:center;gap:10px;margin-bottom:8px}
+    .qz-num{width:34px;height:34px;border-radius:50%;background:#3b4ea8;color:#fff;display:grid;place-items:center;font-weight:700}
+    .qz-ty{background:linear-gradient(90deg,#ff6fa5,#b77be8);color:#fff;border-radius:12px;padding:3px 14px;font-weight:700}
+    .qz-q{font-size:18px!important;line-height:1.9;color:#1b1a3a!important;margin:6px 0 12px!important}
+    .qz-opt{display:flex;gap:10px;align-items:center;width:100%;text-align:right;margin:8px 0;padding:12px 14px;border:2px solid #c9d6f5;background:#f4f7ff;border-radius:14px;font:inherit;font-size:16px;cursor:pointer;color:#1b1a3a}
+    .qz-opt b{background:#3b4ea8;color:#fff;border-radius:50%;width:28px;height:28px;display:grid;place-items:center;flex:none}
+    .qz-two{display:grid;grid-template-columns:1fr 1fr;gap:10px}.qz-two .qz-opt{justify-content:center;font-weight:700}
+    .qz-opt.ok,.qz-t textarea.ok{background:#d9f7e3;border-color:#2fb86b}.qz-opt.bad,.qz-t textarea.bad{background:#ffe0e0;border-color:#e5484d}
+    .qz-tx{width:100%;box-sizing:border-box;border:2px solid #c9d6f5;border-radius:14px;padding:10px;font:inherit;font-size:16px;line-height:1.8;background:#fbfcff;color:#1b1a3a;resize:vertical}
+    .qz-tw{overflow-x:auto}.qz-t{border-collapse:collapse;width:100%;min-width:420px}
+    .qz-t th{background:#3b4ea8;color:#fff;padding:8px}.qz-t td{border:1.5px solid #c9d6f5;padding:6px;vertical-align:top}
+    .qz-t textarea{width:100%;box-sizing:border-box;border:1.5px solid #c9d6f5;border-radius:8px;font:inherit;color:#1b1a3a;background:#fff}
+    .qz-ans{display:block;color:#1f8f55;font-weight:700;margin-top:3px}
+    .qz-main{display:block;width:100%;margin-top:12px;padding:12px;border:0;border-radius:14px;background:linear-gradient(90deg,#3b4ea8,#7a5cff);color:#fff;font:inherit;font-size:16px;font-weight:700;cursor:pointer}
+    .qz-main.alt{background:#fff;color:#3b4ea8;border:2px solid #3b4ea8}.qz-main:disabled{opacity:.6}
+    .qz-fb{margin-top:14px;border-radius:14px;padding:12px 14px;line-height:1.9}.qz-fb.ok{background:#e4f9ec}.qz-fb.mid{background:#fff6dc}.qz-fb.bad{background:#ffe9e9}.qz-fb p{margin:6px 0}
+    .qz-err{color:#e5484d;margin-top:8px}.qz-load{text-align:center;padding:30px 0}
+    .qz-res{text-align:center}.qz-score{width:130px;height:130px;margin:6px auto;border-radius:50%;display:grid;place-content:center;background:conic-gradient(#7a5cff calc(var(--p)*1%),#e6e9f7 0)}
+    .qz-score b{font-size:34px;background:#fff;border-radius:50%;width:104px;height:70px;display:grid;place-items:center;padding-top:34px;margin:0 auto -34px}.qz-score small{background:#fff;width:104px;margin:0 auto;padding-bottom:22px;border-radius:0 0 52px 52px}
+    .qz-acts{display:grid;grid-template-columns:1fr 1fr;gap:8px}.qz-acts .alt{grid-column:1/3}
+  </style>
 </head>
 
 <body>
@@ -1828,6 +1867,7 @@
           <div class="ctl"><span id="payStateTxt"></span><button class="tool" id="payToggle" type="button"></button></div>
           <button class="tool" id="payMsgSave" type="button" style="width:100%;margin-top:8px">حفظ الكلام</button>
           <button class="tool" id="payActAll" type="button" style="width:100%;margin-top:8px">فعّل كل الطلاب الحاليين شهر</button>
+          <button class="tool danger" id="payResetAll" type="button" style="width:100%;margin-top:8px">🚪 اخرّج كل الطلاب (يرجعوا لصفحة الاشتراك)</button>
         </div>
         <h3 style="margin:14px 0 10px">طلبات التفعيل <span class="pill" id="billCount"></span></h3>
         <div id="billList"></div>
@@ -3238,6 +3278,22 @@ const deleteUser = u => previewing ? (pvBlock(), Promise.reject(new Error('previ
         await setDoc(siteRef, { pay: { on, msg: document.getElementById('payMsgInput').value.trim() } }, { merge: true });
         toast(on ? 'الاشتراك اشتغل' : 'الاشتراك وقف');
       } catch (err) { dbError(err); }
+    });
+    document.getElementById('payResetAll').addEventListener('click', async () => {
+      if (!isOwner()) return toast('للمالك بس.');
+      if (!confirm('هتخرّج كل الطلاب؟ كلهم هيرجعوا لصفحة الاشتراك كأنهم مشتركوش، ولازم تفعّلهم من جديد.')) return;
+      if (!confirm('تأكيد أخير: ده هيأثر على كل الطلاب في نفس اللحظة.')) return;
+      const btn = document.getElementById('payResetAll'); btn.disabled = true;
+      try {
+        const list = students.filter(x => Number(x.paidUntil) > 0);
+        for (let i = 0; i < list.length; i += 150) {
+          const b = writeBatch(db);
+          list.slice(i, i + 150).forEach(st => { b.update(doc(db, 'users', st.id), { paidUntil: 0 }); bulkLog(b, st, 'إخراج من الاشتراك (جماعي)'); });
+          await b.commit();
+        }
+        await setDoc(siteRef, { pay: { on: true } }, { merge: true });
+        toast('اتخرّج ' + list.length + ' طالب ورجعوا لصفحة الاشتراك ✓');
+      } catch (err) { dbError(err); } finally { btn.disabled = false; }
     });
     document.getElementById('payActAll').addEventListener('click', async () => {
       if (!isOwner() || !confirm('تفعّل كل الطلاب الحاليين غير المفعّلين شهر؟')) return;
@@ -5468,13 +5524,13 @@ ${brief ? '- ماتستخدمش عناوين ولا جداول؛ **بولد** ل
       const mp = (isMind || /"(nodes|children)"\s*:/.test(m.text || '')) ? mmParse(m.text, isMind) : null;
       if (mp) return mmCardHtml(m, i, who, prev, mp);
       if (isMind) return `<div class="ai-m ai-m--bot"><b class="ai-who">🤖 ${AI_NAME}</b><p>الخريطة ماطلعتش صح المرة دي، جرّب تبعت تاني.</p><details class="ai-fl"><summary>الرد الأصلي</summary><div>${esc(m.text)}</div></details></div>`;
-      const ex = who ? '' : `<div class="ai-ex"><button type="button" class="ai-cp" data-ai="copy" data-i="${i}">نسخ</button>${isAdminStaff() ? `<button type="button" class="ai-cp" data-ai="spdf" data-i="${i}">📄 PDF</button><button type="button" class="ai-cp" data-ai="spng" data-i="${i}">🖼️ صورة</button>` : ''}</div>`;
+      const ex = who ? '' : `<div class="ai-ex"><button type="button" class="ai-cp" data-ai="copy" data-i="${i}">نسخ</button>${true ? `<button type="button" class="ai-cp" data-ai="spdf" data-i="${i}">📄 PDF</button><button type="button" class="ai-cp" data-ai="spng" data-i="${i}">🖼️ صورة</button>` : ''}</div>`;
       const rt = who
         ? (m.rate ? `<span class="ai-rb${m.rate < 0 ? ' bad' : ''}">${m.rate > 0 ? '👍 الطالب قيّم الرد: كويس' : '👎 الطالب قيّم الرد: ضعيف'}</span>` : '')
         : '';
       const rbtn = (!who && m.role === 'assistant') ? `<span class="ai-rate"><button type="button" data-ai="rate" data-i="${i}" data-v="1" aria-pressed="${m.rate === 1}" aria-label="الرد كويس">👍</button><button type="button" data-ai="rate" data-i="${i}" data-v="-1" aria-pressed="${m.rate === -1}" aria-label="الرد ضعيف">👎</button></span>` : '';
       const ex2 = ex ? ex.replace(/<\/div>$/, rbtn + '</div>') : '';
-      return `<div class="ai-m ai-m--bot${who && m.rate < 0 ? ' ai-m--bad' : ''}"><b class="ai-who">🤖 ${AI_NAME}</b>${aiMd(m.text)}${ex2}${rt}${m.ts && who ? `<small class="ai-ts">${esc(fFull(m.ts))}</small>` : ''}</div>`;
+      return `<div class="ai-m ai-m--bot${who && m.rate < 0 ? ' ai-m--bad' : ''}"><b class="ai-who">🤖 ${AI_NAME}</b>${aiPaper(m.text)}${ex2}${rt}${m.ts && who ? `<small class="ai-ts">${esc(fFull(m.ts))}</small>` : ''}</div>`;
     }
 
     /* تقييم رد المساعد: 👍/👎 (الضغط تاني بيشيل التقييم) */
@@ -5506,6 +5562,7 @@ ${brief ? '- ماتستخدمش عناوين ولا جداول؛ **بولد** ل
           <span class="ai-ht"><b>${AI_NAME}</b><small id="aiSub"></small></span>
           <button class="ai-hb" type="button" data-ai="hist" aria-label="المحادثات السابقة">🕘</button>
           <button class="ai-hb" type="button" data-ai="new" aria-label="محادثة جديدة">＋</button>
+          <button class="ai-hb" type="button" data-ai="qz" aria-label="اختبار تفاعلي">❓</button>
         </header>
         <div class="ai-tools" id="aiTools"></div>
         <div class="ai-msgs" id="aiMsgs"></div>
@@ -5538,6 +5595,7 @@ ${brief ? '- ماتستخدمش عناوين ولا جداول؛ **بولد** ل
         const b = e.target.closest('[data-ai]'); if (!b) return;
         const a = b.dataset.ai;
         if (a === 'send') aiSend();
+        else if (a === 'qz') qzOpen('');
         else if (a === 'new') { if (AI.busy) return; AI.cid = null; AI.msgs = []; AI.mm = {}; AI.err = ''; aiDraw(); inp.focus(); }
         else if (a === 'hist') aiHist();
         else if (a === 'tool') { AI.tool = b.dataset.k; aiDraw(); inp.focus(); }
@@ -5577,7 +5635,7 @@ ${brief ? '- ماتستخدمش عناوين ولا جداول؛ **بولد** ل
       const box = $ai('aiMsgs'); if (!box) return;
       const t = AI_TOOLS[AI.tool];
       let h = AI.msgs.map((m, i) => aiMsgHtml(m, i, null, AI.msgs[i - 1])).join('');
-      if (!AI.msgs.length && !AI.busy) h = `<div class="ai-wel"><div class="big">🚀</div><h3>${esc(t.n)}</h3><p>${esc(t.d)}</p><small>🔒 محادثاتك مع ${AI_NAME}محادثاتك محدش بيشوفها غيرك.</small></div>`;
+      if (!AI.msgs.length && !AI.busy) h = `<div class="ai-wel"><div class="big">🚀</div><h3>${esc(t.n)}</h3><p>${esc(t.d)}</p><button type="button" class="qz-go" data-ai="qz">❓ اختبرني بأسئلة تفاعلية</button><small>🔒 محادثاتك مع ${AI_NAME}محادثاتك محدش بيشوفها غيرك.</small></div>`;
       if (AI.busy) {
         const lm = AI.msgs[AI.msgs.length - 1], mindNow = lm && lm.tool === 'mind';
         h += `<div class="ai-m ai-m--bot"><b class="ai-who">🤖 ${AI_NAME}</b>${mindNow ? '<p>🧠 برسملك الخريطة الذهنية...</p><span class="ai-typing"><i></i><i></i><i></i></span>' : AI.live ? aiMd(AI.live) : '<span class="ai-typing"><i></i><i></i><i></i></span>'}</div>`;
@@ -5660,6 +5718,7 @@ ${brief ? '- ماتستخدمش عناوين ولا جداول؛ **بولد** ل
       if (!isAdminStaff() && myAiBlocked) { AI.err = 'الإدارة وقّفت استخدامك لـ ' + AI_NAME + '.'; return aiDrawMsgs(); }
       if (Date.now() - AI.lastSend < 1500) return;
       AI.lastSend = Date.now();
+      { const nt = aiNorm(text).slice(0, 3000); if (!AI.file && (AI_RE_QZ.test(nt) || (isAdminStaff() && AI.tool === 'quiz'))) { inp.value = ''; inp.style.height = 'auto'; qzOpen(nt.length < 25 ? '' : text); return; } }
       const file = isAdminStaff() ? AI.file : null, lvl = $ai('aiLvl').value, lang = $ai('aiLang').value;
       /* لو الطالب كتب في "اسأل" إنه عايز خريطة ذهنية، نحوّلها لأداة الخريطة لوحدنا */
       let tool = isAdminStaff() ? AI.tool : 'chat';
@@ -5723,6 +5782,159 @@ ${brief ? '- ماتستخدمش عناوين ولا جداول؛ **بولد** ل
       await bt.commit();
       const lastM = AI.msgs.find(x => x.role === 'assistant' && x.ts === um.ts + 1);
       if (lastM && AI.cid === cid) { lastM.id = ar.id; aiDrawMsgs(); }
+    }
+
+    /* ==========================================================
+       اختبار تفاعلي: سؤال سؤال (اختيار / صح وغلط / علل / بم تفسر / جدول)
+       ========================================================== */
+    const QZ_TYPES = { mcq: ['🔘', 'اختار الإجابة الصح'], tf: ['✅', 'صح وغلط'], why: ['❓', 'علل'], how: ['💭', 'بم تفسر'], table: ['🗂️', 'جدول'], mix: ['🎲', 'كل الأنواع'] };
+    const QZ_TL = { mcq: 'اختر الإجابة الصحيحة', tf: 'ضع (✓) أو (✗)', why: 'علل', how: 'بم تفسر', table: 'أكمل الجدول' };
+    const QZ_L = ['أ', 'ب', 'ج', 'د'];
+    const AI_RE_QZ = /اختبرني|امتحني|quiz me|(?:اعمل|اعملي|اعمللي|هات|هاتلي|عايز|عاوز|اديني|ادني)\s+(?:\S+\s+){0,3}?(?:اختبار|امتحان|كويز|quiz|اسئله)/;
+    const qz = { el: null, type: 'mix', n: 10, topic: '', qs: [], i: 0, res: [], busy: false };
+    const aiPaper = t => (t.length > 260 || /^##\s/m.test(t)) ? '<div class="ai-paper">' + aiMd(t) + '</div>' : aiMd(t);
+    const qzFmt = x => String(Math.round(x * 10) / 10);
+    const qzSame = (a, b) => { a = aiNorm(a); b = aiNorm(b); return !!a && (a === b || (a.length > 2 && b.length > 2 && (a.includes(b) || b.includes(a)))); };
+
+    function qzOpen(topic) {
+      qzClose();
+      const d = document.createElement('div'); d.className = 'qz'; qz.el = d; document.body.appendChild(d);
+      d.addEventListener('click', qzClick);
+      qz.topic = String(topic || '').slice(0, 6000);
+      qzSetup();
+    }
+    function qzClose() { if (qz.busy) { try { AI.ctrl && AI.ctrl.abort(); } catch (e) {} } if (qz.el) qz.el.remove(); qz.el = null; qz.busy = false; }
+    const qzErr = m => { const e = qz.el && qz.el.querySelector('#qzErr'); if (e) { e.textContent = m; e.hidden = false; } };
+
+    function qzSetup() {
+      const chip = (k, t, on, key) => `<button type="button" class="qz-chip" data-q="${key}" data-k="${k}" aria-pressed="${on}">${t}</button>`;
+      qz.el.innerHTML = `<div class="qz-w"><div class="qz-top"><button class="qz-x" type="button" data-q="close" aria-label="إغلاق">✕</button><b>❓ اختبار تفاعلي</b></div>
+        <div class="qz-card"><h3>نوع الأسئلة</h3><div class="qz-chips">${Object.entries(QZ_TYPES).map(([k, [i, n]]) => chip(k, i + ' ' + n, k === qz.type, 'type')).join('')}</div>
+        <h3>عدد الأسئلة</h3><div class="qz-chips">${[5, 10, 15].map(n => chip(n, n + ' أسئلة', n === qz.n, 'n')).join('')}</div>
+        <h3>الدرس أو الموضوع</h3><textarea id="qzTopic" class="qz-tx" rows="5" maxlength="6000" placeholder="اكتب اسم الدرس أو الصق المحتوى...">${esc(qz.topic)}</textarea>
+        <div class="qz-err" id="qzErr" hidden></div><button class="qz-main" type="button" data-q="start">ابدأ الاختبار 🚀</button></div></div>`;
+    }
+
+    const qzPrompt = () => {
+      const spec = {
+        mcq: '{"type":"mcq","q":"نص السؤال","opts":["..","..","..",".."],"a":0,"why":"تفسير قصير للإجابة"}   (a = رقم الإجابة الصح من 0 لـ 3)',
+        tf: '{"type":"tf","q":"عبارة","a":true,"why":"تفسير قصير"}',
+        why: '{"type":"why","q":"علل: ...","a":"الإجابة النموذجية كاملة","why":""}',
+        how: '{"type":"how","q":"بم تفسر: ...","a":"الإجابة النموذجية كاملة","why":""}',
+        table: '{"type":"table","q":"أكمل الجدول التالي:","head":["..",".."],"rows":[["معطى",""],["معطى",""]],"ans":[["معطى","الإجابة"],["معطى","الإجابة"]]}   (الخلية "" هي اللي الطالب يكملها، و ans هو الجدول كامل)'
+      };
+      const kinds = qz.type === 'mix' ? Object.keys(spec) : [qz.type];
+      return 'اعمل ' + qz.n + ' أسئلة امتحان من المحتوى ده بمستوى المنهج المصري، ' + (qz.type === 'mix' ? 'موزّعة على الأنواع دي بالتساوي' : 'كلها من النوع ده') + '. رجّع JSON صالح بس: مصفوفة جوه كتلة ```json من غير أي كلام تاني. صيغة كل نوع:\n' + kinds.map(k => spec[k]).join('\n') + '\nالقواعد: متدرّجة من السهل للصعب، صياغة واضحة زي الامتحانات الرسمية، ماتكررش سؤال، الجدول 2-4 أعمدة و3-5 صفوف.\nالمحتوى:\n---\n' + qz.topic;
+    };
+
+    function qzParse(raw) {
+      raw = String(raw || ''); let j = null; const fm = raw.match(/```(?:json)?\s*([\s\S]*?)```/i);
+      for (const c of [fm && fm[1], raw.slice(raw.indexOf('['), raw.lastIndexOf(']') + 1)]) { if (!c) continue; try { j = JSON.parse(c); if (Array.isArray(j)) break; } catch (e) { j = null; } }
+      if (!Array.isArray(j)) return [];
+      const s = x => String(x ?? '').trim();
+      return j.map(q => {
+        if (!q) return null;
+        const o = { type: s(q.type), q: s(q.q), why: s(q.why) }; if (!o.q) return null;
+        if (o.type === 'mcq') { o.opts = (q.opts || []).map(s).slice(0, 4); o.a = +q.a; if (o.opts.length < 2 || !(o.a >= 0 && o.a < o.opts.length)) return null; }
+        else if (o.type === 'tf') o.a = q.a === true || q.a === 'true' || q.a === 'صح';
+        else if (o.type === 'why' || o.type === 'how') { o.a = s(q.a); if (!o.a) return null; }
+        else if (o.type === 'table') {
+          o.head = (q.head || []).map(s); o.rows = (q.rows || []).map(r => (r || []).map(s)); o.ans = (q.ans || []).map(r => (r || []).map(s));
+          if (!o.head.length || !o.rows.length || o.ans.length !== o.rows.length || !o.rows.some(r => r.some(c => !c))) return null;
+        } else return null;
+        return o;
+      }).filter(Boolean).slice(0, qz.n);
+    }
+
+    async function qzStart() {
+      if (qz.busy) return;
+      qz.topic = qz.el.querySelector('#qzTopic').value.trim();
+      if (qz.topic.length < 6) return qzErr('اكتب اسم الدرس أو الصق المحتوى الأول.');
+      qz.busy = true; qz.el.querySelector('.qz-card').innerHTML = '<div class="qz-load"><span class="ai-typing"><i></i><i></i><i></i></span><p>بجهّزلك الأسئلة...</p></div>';
+      try {
+        const raw = await aiStream(aiSystem('العربية المصرية', 'متوسط', false), [{ role: 'user', content: qzPrompt() }], () => false, { temp: 0.4 });
+        const qs = qzParse(raw); if (!qs.length) throw new Error('bad');
+        Object.assign(qz, { qs, i: 0, res: [], busy: false }); qzShow();
+      } catch (e) { if (!qz.el || e.name === 'AbortError') return; qz.busy = false; qzSetup(); qzErr('مقدرتش أجهّز الأسئلة. جرّب تاني أو غيّر الموضوع.'); }
+    }
+
+    function qzShow() {
+      const q = qz.qs[qz.i], n = qz.qs.length; let body = '';
+      if (q.type === 'mcq') body = q.opts.map((o, k) => `<button type="button" class="qz-opt" data-q="pick" data-k="${k}"><b>${QZ_L[k]}</b><span>${esc(o)}</span></button>`).join('');
+      else if (q.type === 'tf') body = '<div class="qz-two"><button type="button" class="qz-opt" data-q="pick" data-k="1">✓ صح</button><button type="button" class="qz-opt" data-q="pick" data-k="0">✗ غلط</button></div>';
+      else if (q.type === 'table') body = `<div class="qz-tw"><table class="qz-t"><thead><tr>${q.head.map(h => `<th>${esc(h)}</th>`).join('')}</tr></thead><tbody>${q.rows.map((r, i) => `<tr>${r.map((c, j) => c ? `<td>${esc(c)}</td>` : `<td><textarea rows="2" data-r="${i}" data-c="${j}"></textarea></td>`).join('')}</tr>`).join('')}</tbody></table></div><button class="qz-main" type="button" data-q="submit">تأكيد الإجابة</button>`;
+      else body = '<textarea id="qzTx" class="qz-tx" rows="7" placeholder="اكتب إجابتك هنا (مسموح بإجابة طويلة)..."></textarea><button class="qz-main" type="button" data-q="submit">تأكيد الإجابة</button>';
+      qz.el.innerHTML = `<div class="qz-w"><div class="qz-top"><button class="qz-x" type="button" data-q="close" aria-label="إغلاق">✕</button><b>سؤال ${qz.i + 1} من ${n}</b></div><div class="qz-bar"><i style="width:${qz.i / n * 100}%"></i></div>
+        <div class="qz-card"><div class="qz-qh"><span class="qz-num">${qz.i + 1}</span><span class="qz-ty">${QZ_TL[q.type]}</span></div><h3 class="qz-q">${esc(q.q)}</h3>${body}<div id="qzFb"></div></div></div>`;
+      qz.el.scrollTop = 0;
+    }
+
+    const qzRight = q => q.type === 'mcq' ? QZ_L[q.a] + ') ' + q.opts[q.a] : q.type === 'tf' ? (q.a ? 'صح' : 'غلط') : q.type === 'table' ? q.ans.map(r => r.join(' ، ')).join(' / ') : q.a;
+    function qzDone(res) {
+      const q = qz.qs[qz.i], last = qz.i === qz.qs.length - 1; res.right = qzRight(q); qz.res[qz.i] = res;
+      const cls = res.ok >= 0.99 ? 'ok' : res.ok > 0 ? 'mid' : 'bad';
+      const fb = qz.el.querySelector('#qzFb');
+      fb.innerHTML = `<div class="qz-fb ${cls}"><b>${cls === 'ok' ? '✅ إجابة صحيحة' : cls === 'mid' ? '🟡 إجابة ناقصة (' + qzFmt(res.ok) + ')' : '❌ إجابة غلط'}</b>${(q.type === 'why' || q.type === 'how') ? '<p><u>الإجابة النموذجية:</u><br>' + esc(q.a) + '</p>' : cls !== 'ok' && q.type !== 'table' ? '<p>الإجابة الصح: <b>' + esc(res.right) + '</b></p>' : ''}${res.fb ? '<p>' + esc(res.fb) + '</p>' : ''}${q.why ? '<p>💡 ' + esc(q.why) + '</p>' : ''}<button class="qz-main" type="button" data-q="next">${last ? 'شوف النتيجة 🏁' : 'السؤال التالي ➜'}</button></div>`;
+      fb.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+    function qzPick(k) {
+      const q = qz.qs[qz.i]; if (qz.res[qz.i]) return;
+      const okk = q.type === 'mcq' ? q.a : (q.a ? 1 : 0), btns = [...qz.el.querySelectorAll('.qz-opt')];
+      btns.forEach(b => { b.disabled = true; if (+b.dataset.k === okk) b.classList.add('ok'); else if (+b.dataset.k === k) b.classList.add('bad'); });
+      qzDone({ ok: k === okk ? 1 : 0, mine: q.type === 'mcq' ? QZ_L[k] + ') ' + q.opts[k] : (k ? 'صح' : 'غلط') });
+    }
+    async function qzSubmit() {
+      const q = qz.qs[qz.i]; if (qz.busy || qz.res[qz.i]) return;
+      const sb = qz.el.querySelector('[data-q="submit"]');
+      if (q.type === 'table') {
+        let ok = 0, tot = 0; const mine = [];
+        qz.el.querySelectorAll('textarea[data-r]').forEach(t => {
+          const ex = q.ans[+t.dataset.r][+t.dataset.c], good = qzSame(t.value, ex); tot++; if (good) ok++; mine.push(t.value.trim() || '—'); t.disabled = true; t.classList.add(good ? 'ok' : 'bad');
+          if (!good) t.insertAdjacentHTML('afterend', '<small class="qz-ans">الصح: ' + esc(ex) + '</small>');
+        });
+        sb.remove(); return qzDone({ ok: tot ? ok / tot : 0, mine: mine.join(' ، ') });
+      }
+      const v = qz.el.querySelector('#qzTx').value.trim(); if (v.length < 2) return toast('اكتب إجابتك الأول.');
+      qz.busy = true; sb.disabled = true; sb.textContent = 'بصحّح إجابتك...';
+      let ok = 0, fb = '';
+      try {
+        const raw = await aiStream(aiSystem('العربية المصرية', 'متوسط', false), [{ role: 'user', content: 'السؤال: ' + q.q + '\nالإجابة النموذجية: ' + q.a + '\nإجابة الطالب: ' + v + '\n\nصحّح إجابة الطالب زي مدرس: الفكرة الصحيحة مهمة حتى لو الصياغة مختلفة. رجّع JSON بس: {"score":0 أو 0.5 أو 1,"fb":"ملاحظة قصيرة بالعامية: إيه الصح وإيه الناقص"}' }], () => false, { temp: 0.2 });
+        const j = JSON.parse(raw.match(/\{[\s\S]*\}/)[0]); ok = Math.max(0, Math.min(1, +j.score || 0)); fb = String(j.fb || '').slice(0, 600);
+      } catch (e) { if (!qz.el) return; fb = 'مقدرتش أصحح تلقائي، قارن إجابتك بالنموذجية.'; }
+      qz.busy = false; if (!qz.el) return;
+      qz.el.querySelector('#qzTx').disabled = true; sb.remove(); qzDone({ ok, mine: v, fb });
+    }
+
+    function qzMd() {
+      const n = qz.qs.length, tot = qz.res.reduce((a, r) => a + r.ok, 0), p = Math.round(tot / n * 100), c = x => String(x || '—').replace(/\|/g, '/').replace(/\n+/g, ' ');
+      let s = `## 🎯 النتيجة: ${qzFmt(tot)} من ${n}\n> ${p}% — ${p >= 85 ? 'ممتاز، كمّل كده 🌟' : p >= 60 ? 'كويس، راجع الأسئلة اللي غلطت فيها 👍' : 'محتاج مراجعة تانية للدرس، وإنت قدها 💪'}\n\n## 📋 مراجعة الأسئلة\n| # | السؤال | إجابتك | الإجابة الصح | النتيجة |\n|---|---|---|---|---|\n`;
+      qz.qs.forEach((q, i) => { const r = qz.res[i]; s += `| ${i + 1} | ${c(q.q)} | ${c(r.mine)} | ${c(r.right)} | ${r.ok >= 0.99 ? '✅' : r.ok > 0 ? '🟡' : '❌'} |\n`; });
+      s += '\n## 💡 التفسير\n' + qz.qs.map((q, i) => q.why || qz.res[i].fb ? `- **س${i + 1}:** ${(q.why || qz.res[i].fb).replace(/\n+/g, ' ')}` : '').filter(Boolean).join('\n');
+      return s;
+    }
+    async function qzResult() {
+      const n = qz.qs.length, tot = qz.res.reduce((a, r) => a + r.ok, 0), p = Math.round(tot / n * 100);
+      qz.el.innerHTML = `<div class="qz-w"><div class="qz-top"><button class="qz-x" type="button" data-q="close" aria-label="إغلاق">✕</button><b>🏁 النتيجة</b></div><div class="qz-card qz-res"><div class="qz-score" style="--p:${p}"><b>${qzFmt(tot)}</b><small>من ${n}</small></div><h3>${p}%</h3>
+        <div class="qz-acts"><button class="qz-main" type="button" data-q="pdf">📄 PDF</button><button class="qz-main" type="button" data-q="png">🖼️ صورة</button><button class="qz-main alt" type="button" data-q="again">🔁 اختبار جديد</button></div></div>
+        <div class="qz-card ai-paper">${aiMd(qzMd())}</div></div>`;
+      try { const keep = AI.cid; AI.cid = null; await aiSave({ role: 'user', text: 'اختبار تفاعلي: ' + qz.topic.slice(0, 60) + ' — النتيجة ' + qzFmt(tot) + '/' + n, tool: 'quiz', ts: Date.now() }, qzMd()); AI.cid = keep; } catch (e) {}
+    }
+    async function qzExport(kind) {
+      const bak = AI.msgs; AI.msgs = [{ role: 'user', tool: 'quiz', text: '', ts: 0 }, { role: 'assistant', text: qzMd(), ts: 1 }];
+      try { if (kind === 'pdf') aiPrintSheet(1); else await aiSheetPng(1); } finally { AI.msgs = bak; }
+    }
+    function qzClick(e) {
+      const b = e.target.closest('[data-q]'); if (!b) return; const a = b.dataset.q, k = b.dataset.k;
+      if (a === 'close') qzClose();
+      else if (a === 'type') { qz.topic = qz.el.querySelector('#qzTopic').value; qz.type = k; qzSetup(); }
+      else if (a === 'n') { qz.topic = qz.el.querySelector('#qzTopic').value; qz.n = +k; qzSetup(); }
+      else if (a === 'start') qzStart();
+      else if (a === 'pick') qzPick(+k);
+      else if (a === 'submit') qzSubmit();
+      else if (a === 'next') { qz.i++; qz.i >= qz.qs.length ? qzResult() : qzShow(); }
+      else if (a === 'pdf') qzExport('pdf');
+      else if (a === 'png') qzExport('png');
+      else if (a === 'again') qzSetup();
     }
 
     /* ==========================================================
@@ -6161,7 +6373,7 @@ ${brief ? '- ماتستخدمش عناوين ولا جداول؛ **بولد** ل
 .sx pre{background:#14123b;color:#fff;padding:12px;border-radius:10px;direction:ltr;text-align:left;white-space:pre-wrap}
 .sx pre code{background:none;color:#fff}
 .sx hr{border:0;border-top:2px dashed #cfd2ee;margin:14px 0}
-.sx .sf{padding:10px 30px 18px;color:#8b8fb5;font-size:12px;text-align:left;direction:ltr}`;
+.sx .sf{padding:10px 30px 18px;color:#8b8fb5;font-size:12px;text-align:left;direction:ltr}.sx .sb h2,.sx .sb h3{background:linear-gradient(90deg,#ff6fa5,#b77be8);color:#fff;border-radius:14px;padding:4px 16px;display:inline-block;font-size:18px;margin:16px 0 6px}.sx .sxt{border-collapse:collapse;width:100%}.sx .sxt th{background:#fbe4f0}.sx .sxt td,.sx .sxt th{border:1.5px solid #e8c4dc;padding:6px 10px}.sx .sb blockquote{border-right:4px solid #b77be8;background:#f6efff;margin:8px 0;padding:6px 12px;border-radius:10px}`;
     function aiSheetHtml(text, tag) {
       return `<div class="sx"><div class="sh"><b>🚀 ${AI_NAME}</b><span>${esc(tag)} · ${esc(new Date().toLocaleDateString('ar-EG'))}</span></div><div class="sb">${aiMd(text).replace(/class="ai-tb"/g, 'class="sxt"')}</div><div class="sf">Learn With Me · ${AI_NAME}</div></div>`;
     }
