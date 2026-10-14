@@ -1206,6 +1206,8 @@
        شكل واتساب للمحادثات (قائمة المحادثات + الشات + معلومات الرسالة)
        ========================================================== */
     #screenComm.chatmode:not([hidden]){position:fixed;top:0;bottom:0;left:0;right:0;z-index:70;width:100%;max-width:820px;min-height:0;margin:0 auto;padding:0;display:flex;flex-direction:column;background:#0b141a;overflow:hidden}
+    #screenComm.chatmode:not([hidden]){height:100vh;height:100dvh;bottom:auto}
+    html:has(#screenComm.chatmode:not([hidden])),body:has(#screenComm.chatmode:not([hidden])){overflow:hidden;overscroll-behavior:none}
     #screenComm.chatmode .topbar{display:none}
     #screenComm.chatmode #cBody{flex:1;min-height:0;display:flex;flex-direction:column}
     .wa{flex:1;min-height:0;display:flex;flex-direction:column;position:relative;color:#e9edef;background-color:#0b141a;background-image:radial-gradient(circle at 15% 20%,rgba(0,168,132,.07),transparent 42%),radial-gradient(circle at 85% 80%,rgba(83,189,235,.06),transparent 42%),url("data:image/svg+xml;utf8,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20width='140'%20height='140'%3E%3Cg%20fill='none'%20stroke='%23ffffff'%20stroke-opacity='.05'%20stroke-width='1.6'%20stroke-linecap='round'%3E%3Ccircle%20cx='22'%20cy='26'%20r='7'/%3E%3Cpath%20d='M78%2018l9%209m0-9l-9%209'/%3E%3Crect%20x='104'%20y='78'%20width='14'%20height='14'%20rx='4'/%3E%3Cpath%20d='M26%2096q9-12%2018%200'/%3E%3Ccircle%20cx='72'%20cy='112'%20r='3.5'/%3E%3Cpath%20d='M112%2022l6%2010-12%200z'/%3E%3Cpath%20d='M52%2060h12'/%3E%3C/g%3E%3C/svg%3E")}
@@ -1480,7 +1482,6 @@
     @keyframes rise { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: none; } }
     html body .screen-in { animation: rise .25s ease both; }
     /* زرار الصوت جوه شريط الأزرار */
-    html body .nav__btns #soundBtn { position: static !important; inset: auto !important; flex: 0 0 auto; width: 38px; height: 38px; margin: 0; opacity: 1; box-shadow: none; background: rgba(255,255,255,.1); }
     @media (prefers-reduced-motion: reduce) { html body * { animation: none !important; transition: none !important; } }
 
     /* ==========================================================
@@ -1974,7 +1975,7 @@
       deleteUser as _deleteUser, reauthenticateWithCredential, EmailAuthProvider
     } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js";
     import {
-      getFirestore, initializeFirestore, persistentLocalCache, persistentMultipleTabManager, CACHE_SIZE_UNLIMITED, doc, getDoc, setDoc as _setDoc, updateDoc as _updateDoc, deleteDoc as _deleteDoc,
+      getFirestore, initializeFirestore, getDocFromServer, persistentLocalCache, persistentMultipleTabManager, CACHE_SIZE_UNLIMITED, doc, getDoc, setDoc as _setDoc, updateDoc as _updateDoc, deleteDoc as _deleteDoc,
       collection, addDoc as _addDoc, query, where, orderBy, limit, onSnapshot, serverTimestamp,
       writeBatch as _writeBatch, getDocs, getCountFromServer, deleteField, increment, Bytes, arrayUnion
     } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js";
@@ -5055,16 +5056,26 @@ const deleteUser = u => previewing ? (pvBlock(), Promise.reject(new Error('previ
         ta.value = ''; autosize(); setReply(null); emo.hidden = true;
         try {
           const last = text.slice(0, 60);
-          if (o.thread) await setDoc(doc(db, 'rooms', id), { kind: o.thread, uid, name: myDisp(), grade: myGrade, last, at: serverTimestamp() }, { merge: true });
-          else if (o.thread === undefined && !o.group) await updateDoc(doc(db, 'rooms', id), { last, at: serverTimestamp() });
           const asStaff = isAdminStaff() || (myCommMod && !!o.group);   // المشرف صلاحياته في المجموعات بس، مش في محادثات داما/المستر
           const data = { uid, name: myDisp(), text, admin: asStaff, badge: asStaff ? '' : myBadge, at: serverTimestamp(), ...(reply ? { reply } : {}) };
+          const msgRef = doc(collection(db, 'rooms', id, 'msgs'));
           if (o.group && !isStaff() && R.slow) {
             const bt = writeBatch(db);
             bt.set(doc(db, 'rooms', id, 'last', uid), { at: serverTimestamp() });
-            bt.set(doc(collection(db, 'rooms', id, 'msgs')), data);
+            bt.set(msgRef, data);
             await bt.commit(); R.lastMs = Date.now();
-          } else await addDoc(collection(db, 'rooms', id, 'msgs'), data);
+          } else if (o.thread || (o.thread === undefined && !o.group)) {
+            // محادثات داما/المستر: الرسالة وملخص المحادثة في كتابة واحدة، فمفيش محادثة تظهر في القايمة من غير رسالتها
+            const bt = writeBatch(db);
+            if (o.thread) bt.set(doc(db, 'rooms', id), { kind: o.thread, uid, name: myDisp(), grade: myGrade, last, at: serverTimestamp() }, { merge: true });
+            else bt.update(doc(db, 'rooms', id), { last, at: serverTimestamp() });
+            bt.set(msgRef, data);
+            await bt.commit();
+            if (!previewing) getDocFromServer(msgRef).then(sn => { if (!sn.exists()) throw new Error('missing'); }).catch(e2 => {
+              const nt2 = document.getElementById('cNote');
+              if (nt2 && cRoom === R) { nt2.hidden = false; nt2.textContent = '⚠️ الرسالة ظهرت عندك بس السيرفر مارجّعهاش (' + (e2.code || e2.message) + ').'; }
+            });
+          } else await setDoc(msgRef, data);
         } catch (err) {
           ta.value = text; autosize();
           if (err.code === 'permission-denied' && o.group && R.slow && !isStaff()) toast('استنى شوية قبل الرسالة الجاية.');
@@ -5176,8 +5187,8 @@ const deleteUser = u => previewing ? (pvBlock(), Promise.reject(new Error('previ
             seen1 = true;
             if (prevRead !== null) { const m = list.find(x => x.uid !== uid && x._t > prevRead); firstUnread = m ? m.id : ''; }
           } else if (!wasBottom) newCnt += list.filter(m => !old.has(m.id) && m.uid !== uid).length;
-          draw();
-          if (R.info) renderInfo();
+          try { draw(); if (R.info) renderInfo(); }
+          catch (e3) { const nt3 = document.getElementById('cNote'); if (nt3) { nt3.hidden = false; nt3.textContent = '⚠️ خطأ في عرض الرسايل: ' + (e3.message || e3); } console.error(e3); }
         }, err => {
           if (o.group && err.code === 'permission-denied' && !isStaff()) { cBack.hidden = false; cBody.innerHTML = '<p class="empty">مش مسموحلك تدخل المجموعة دي دلوقتي. كلّم الإدارة.</p>'; }
           else cBody.innerHTML = `<p class="empty">${esc(authMessage(err))}</p>`;
@@ -6296,64 +6307,11 @@ ${brief ? '- ماتستخدمش عناوين ولا جداول؛ **بولد** ل
   })();
   </script>
 <script>
-/* أصوات واجهة خفيفة (Web Audio، من غير ملفات) + زرار كتم محفوظ */
+/* نقل زرار التأثيرات لشريط الأزرار العلوي بدل ما يطفو فوق الصفحة */
 (function () {
-  var ctx = null, last = 0, on = true;
-  try { on = localStorage.getItem('uiSound') !== '0'; } catch (e) {}
-  function ac() {
-    if (!ctx) { var C = window.AudioContext || window.webkitAudioContext; if (!C) return null; try { ctx = new C(); } catch (e) { return null; } }
-    if (ctx.state === 'suspended') ctx.resume();
-    return ctx;
-  }
-  function tone(f1, f2, dur, vol, type, delay) {
-    var c = ac(); if (!c) return;
-    var t = c.currentTime + (delay || 0), o = c.createOscillator(), g = c.createGain();
-    o.type = type || 'sine'; o.frequency.setValueAtTime(f1, t); o.frequency.exponentialRampToValueAtTime(f2, t + dur);
-    g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(vol, t + 0.012); g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
-    o.connect(g); g.connect(c.destination); o.start(t); o.stop(t + dur + 0.02);
-  }
-  var S = {
-    tap:   function () { tone(620, 430, 0.07, 0.035, 'sine'); },
-    soft:  function () { tone(480, 380, 0.06, 0.025, 'sine'); },
-    send:  function () { tone(520, 700, 0.09, 0.04, 'sine'); tone(780, 980, 0.11, 0.035, 'sine', 0.07); },
-    back:  function () { tone(420, 300, 0.08, 0.03, 'sine'); },
-    pick:  function () { tone(700, 900, 0.06, 0.03, 'triangle'); }
-  };
-  function play(n) { if (!on) return; var now = performance.now(); if (now - last < 45) return; last = now; try { S[n](); } catch (e) {} }
-  window.uiSound = play;
-  addEventListener('pointerdown', function (e) {
-    var t = e.target.closest && e.target.closest('button, a[href], [role=button], .btn, .tool, .gcard, .subj, .lesson, .wa-row, .cb, .ptab, .mm-chip, .qz__o, label.switch');
-    if (!t || t.disabled || t.id === 'soundBtn') return;
-    if (t.matches('.wa-send, .ai-send, #paySend, [type=submit]')) play('send');
-    else if (t.matches('.back, .wa-hb, .ai-hb, .close, [data-a=cback], [data-x=close], [aria-label*="رجوع"], [aria-label*="إغلاق"]')) play('back');
-    else if (t.matches('.qz__o, .cb, .mm-chip, .seg__btn, .ptab')) play('pick');
-    else if (t.matches('.wa-row, .lesson, .gcard, .subj')) play('soft');
-    else play('tap');
-  }, { passive: true });
-  var b = document.createElement('button'); b.id = 'soundBtn'; b.type = 'button';
-  function draw() { b.textContent = on ? '🔊' : '🔇'; b.setAttribute('aria-label', on ? 'كتم الأصوات' : 'تشغيل الأصوات'); b.setAttribute('aria-pressed', String(on)); }
-  b.style.cssText = 'position:fixed;inset-inline-start:10px;bottom:calc(84px + env(safe-area-inset-bottom,0px));z-index:9000;width:38px;height:38px;border-radius:50%;border:1px solid rgba(255,255,255,.14);background:rgba(13,12,40,.7);-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px);color:#fff;font-size:17px;line-height:1;cursor:pointer;display:grid;place-items:center;opacity:.75;box-shadow:0 6px 18px rgba(0,0,0,.4)';
-  b.addEventListener('click', function () { on = !on; try { localStorage.setItem('uiSound', on ? '1' : '0'); } catch (e) {} draw(); if (on) S.pick(); });
-  draw(); document.body.appendChild(b);
-})();
-</script>
-<script>
-/* نقل زراري الصوت والتأثيرات لشريط الأزرار العلوي بدل ما يطفوا فوق الصفحة */
-(function () {
-  var nb = document.querySelector('.nav__btns'), sb = document.getElementById('soundBtn'), fb = document.getElementById('fxBtn');
+  var nb = document.querySelector('.nav__btns'), fb = document.getElementById('fxBtn');
   if (!nb) return;
   if (fb) nb.prepend(fb);
-  if (sb) nb.prepend(sb);
-})();
-</script>
-<script>
-/* اهتزاز خفيف جدًا عند اللمس (لو الأصوات مش مكتومة) */
-(function () {
-  if (!navigator.vibrate) return;
-  addEventListener('pointerdown', function (e) {
-    if (!e.target.closest || !e.target.closest('.btn, .tool, .cb, .wa-send, .ai-send')) return;
-    try { if (localStorage.getItem('uiSound') !== '0') navigator.vibrate(5); } catch (x) {}
-  }, { passive: true });
 })();
 </script>
 </body>
