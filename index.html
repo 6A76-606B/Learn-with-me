@@ -5213,9 +5213,9 @@
        ========================================================== */
     const AI_NAME = 'Learn Ai', AI_DEV = 'داما';
     /* تنبيه أمان: المفتاح ظاهر لأي حد يفتح كود الصفحة. الأفضل تنقل الاتصال لسيرفر/Cloud Function وتشيله من هنا. */
-    const AI_KEY = 'AQ.Ab8RN6JCpPFxmdVbZ5vQob4Ftcl3248fXVOktdR9mpr6lJjQ_w';
-    const AI_URL = 'https://generativelanguage.googleapis.com/v1beta/openai/chat/completions';   // Gemini (واجهة متوافقة مع OpenAI)
-    const AI_MODELS = ['gemini-3.8-flash', 'gemini-2.5-flash', 'gemini-2.5-flash-lite'];
+    /* المفتاح محفوظ في الوسيط (Cloudflare Worker) مش في الصفحة */
+    const AI_URL = 'https://dawn-pond-dc1a.markogorge18.workers.dev/';   // Gemini (واجهة متوافقة مع OpenAI)
+    const AI_MODELS = ['gemini-3.8-flash', 'gemini-3.5-flash-lite', 'gemini-2.5-flash'];
     const AI_MAX_CHARS = 30000;
 
     const AI_TOOLS = {
@@ -5464,18 +5464,19 @@
       const ctrl = AI.ctrl = new AbortController();
       let saved = ''; try { saved = localStorage.getItem('ai_model_g') || ''; } catch (e) {}
       const list = saved ? [saved, ...AI_MODELS.filter(m => m !== saved)] : AI_MODELS;
-      let res = null, lastErr = '';
+      let res = null, lastErr = '', allErr = [];
       for (const model of list) {
-        const reqBody = JSON.stringify({ model, max_tokens: 4096, temperature: (opts && opts.temp) ?? 0.6, stream: true, reasoning_effort: 'none', messages: [{ role: 'system', content: system }, ...hist] });
+        const reqBody = JSON.stringify({ model, max_tokens: 4096, temperature: (opts && opts.temp) ?? 0.6, stream: true, reasoning_effort: /2\.5/.test(model) ? 'none' : undefined, messages: [{ role: 'system', content: system }, ...hist] });
         const send = (auth) => fetch(AI_URL, { method: 'POST', signal: ctrl.signal, headers: Object.assign({ 'content-type': 'application/json' }, auth), body: reqBody });
-        const r = await send({ 'Authorization': 'Bearer ' + AI_KEY });
+        const r = await send({});
         if (r.ok) { res = r; try { localStorage.setItem('ai_model_g', model); } catch (e) {} break; }
         const j = await r.json().catch(() => ({})), je = (Array.isArray(j) ? j[0] : j)?.error || {};
         lastErr = je.message || String(r.status);
+        allErr.push(model + ' (' + r.status + '): ' + lastErr.slice(0, 120));
         /* موديل مش موجود أو الكوتا خلصت أو السيرفر مشغول: جرّب اللي بعده. غير كده (مفتاح غلط مثلاً) وقّف */
         if (!([404, 429, 500, 503].includes(r.status) || /model/i.test(lastErr))) throw new Error(lastErr);
       }
-      if (!res) throw new Error(lastErr || 'no-model');
+      if (!res) throw new Error(allErr.join(' | ') || lastErr || 'no-model');
       const reader = res.body.getReader(), dec = new TextDecoder();
       let buf = '', full = '';
       outer: while (true) {
@@ -5541,7 +5542,7 @@
         console.warn('Learn Ai:', err);
         AI.msgs.pop(); AI.busy = false; AI.live = '';
         inp.value = text; AI.file = file;
-        AI.err = err.message === 'empty' ? 'الرد رجع فاضي، جرّب تاني.' : 'المساعد مش شغال دلوقتي. جرّب تاني بعد شوية.' + ' [' + String(err.message || err).slice(0, 160) + ']';
+        AI.err = err.message === 'empty' ? 'الرد رجع فاضي، جرّب تاني.' : 'المساعد مش شغال دلوقتي. جرّب تاني بعد شوية.' + ' [' + String(err.message || err).slice(0, 500) + ']';
         aiDraw(); return;
       }
       if (!$ai('aiMsgs')) return;
