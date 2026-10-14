@@ -1434,6 +1434,13 @@
     .ai-opts select[hidden]{display:none}
     .ai-ex{display:flex;gap:6px;flex-wrap:wrap;margin-top:6px}
     .ai-ex .ai-cp{margin-top:0}
+    .ai-rate{display:inline-flex;gap:4px;margin-inline-start:auto}
+    .ai-rate button{border:2px solid var(--mut);background:none;color:var(--mut);border-radius:99px;padding:1px 10px;font:600 13px 'IBM Plex Sans Arabic',sans-serif;cursor:pointer;line-height:1.6}
+    .ai-rate button[aria-pressed="true"]{background:var(--lime);border-color:var(--lime);color:var(--ink)}
+    .ai-rate button[data-v="-1"][aria-pressed="true"]{background:var(--pink);border-color:var(--pink);color:#fff}
+    .ai-m--bad{border-inline-start:4px solid var(--pink)}
+    .ai-rb{display:inline-block;margin-top:6px;font-size:13px;font-weight:600;color:var(--mut)}
+    .ai-rb.bad{color:var(--pink)}
     .ai-m--map{padding:10px}
     .mm-bar{display:flex;gap:6px;overflow-x:auto;padding:4px 0 8px;scrollbar-width:none;align-items:center}
     .mm-bar::-webkit-scrollbar{display:none}
@@ -1450,7 +1457,419 @@
     .mm-fb{flex:1;min-height:0;overflow:auto;display:flex;-webkit-overflow-scrolling:touch}
     .mm-fw{margin:auto;line-height:0}
     .mm-fw svg{display:block;max-width:none}
-  </style>
+  
+    /* ==========================================================
+       تحسين الشكل العام (طبقة تجميل فوق التصميم الأصلي)
+       ========================================================== */
+    :root { --r: 18px; --bd: rgba(255,255,255,.08); --sh2: 0 10px 30px rgba(0,0,0,.35); --glow: 0 0 0 1px rgba(198,255,61,.25), 0 8px 28px rgba(198,255,61,.12); }
+    html body { background: radial-gradient(1200px 600px at 85% -10%, rgba(59,59,255,.18), transparent 60%), radial-gradient(900px 500px at -10% 110%, rgba(255,92,138,.10), transparent 60%), var(--bg); background-attachment: fixed; -webkit-font-smoothing: antialiased; text-rendering: optimizeLegibility; }
+    ::selection { background: var(--lime); color: var(--ink); }
+    * { scrollbar-width: thin; scrollbar-color: rgba(169,168,216,.35) transparent; }
+    ::-webkit-scrollbar { width: 8px; height: 8px; }
+    ::-webkit-scrollbar-thumb { background: rgba(169,168,216,.3); border-radius: 99px; }
+    html body :focus-visible { outline: 3px solid var(--lime); outline-offset: 3px; border-radius: 10px; }
+
+    /* الأزرار */
+    html body .btn { letter-spacing: .2px; box-shadow: 0 5px 0 #8fbf12, 0 12px 24px rgba(198,255,61,.18); }
+    html body .btn:hover { filter: brightness(1.06); }
+    html body .tool, html body .mm-act, html body .mm-chip, html body .cb, html body .ai-cp { transition: transform .2s, background-color .2s, border-color .2s, color .2s; }
+    html body .tool:hover, html body .mm-act:hover, html body .mm-chip:hover, html body .cb:hover { transform: translateY(-2px); }
+    html body .tool:active, html body .mm-act:active, html body .mm-chip:active, html body .cb:active { transform: scale(.96); }
+    html body .cb[aria-pressed="true"], html body .mm-chip[aria-pressed="true"] { background: var(--lime); color: var(--ink); border-color: var(--lime); }
+
+    /* الكروت */
+    html body .gcard, html body .subj, html body .lesson, html body .addbox, html body .stat, html body .paycard, html body .panel__body .row, html body .gate__card, html body .poll, html body .sheet {
+      border: 1px solid var(--bd); border-radius: var(--r); box-shadow: var(--sh2);
+      background-image: linear-gradient(160deg, rgba(255,255,255,.05), rgba(255,255,255,0) 55%);
+    }
+    html body .gcard, html body .subj, html body .lesson { transition: transform .3s cubic-bezier(.3,1.5,.5,1), box-shadow .3s, border-color .3s; }
+    @media (hover: hover) {
+      html body .gcard:hover, html body .subj:hover, html body .lesson:hover { transform: translateY(-5px); border-color: rgba(198,255,61,.45); box-shadow: var(--glow), var(--sh2); }
+    }
+    html body .topbar { backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px); background-color: rgba(13,12,40,.78); border-bottom: 1px solid var(--bd); }
+    html body h1, html body h2, html body h3 { letter-spacing: .2px; }
+    html body .sec-title, html body .wa-sec { position: relative; padding-inline-start: 14px; }
+    html body .sec-title::before { content: ""; position: absolute; inset-inline-start: 0; top: 18%; bottom: 18%; width: 5px; border-radius: 99px; background: var(--lime); }
+
+    /* الحقول */
+    html body input:not([type=checkbox]):not([type=radio]):not([type=file]), html body textarea, html body select {
+      border-radius: 14px; border: 1.5px solid var(--bd); background-color: rgba(255,255,255,.05); color: var(--txt); transition: border-color .2s, box-shadow .2s, background-color .2s; }
+    html body input:focus, html body textarea:focus, html body select:focus { outline: none; border-color: var(--lime); box-shadow: 0 0 0 4px rgba(198,255,61,.15); background-color: rgba(255,255,255,.08); }
+    html body ::placeholder { color: var(--mut); opacity: .75; }
+
+    /* التابات واللوحة */
+    html body .ptab, html body .tablist button { border-radius: 99px; transition: background-color .2s, transform .2s; }
+    html body .ptab:hover { transform: translateY(-2px); }
+    html body .modal .sheet { border-radius: 24px; box-shadow: 0 24px 60px rgba(0,0,0,.55); }
+    html body .toast { border-radius: 99px; box-shadow: 0 10px 30px rgba(0,0,0,.45); backdrop-filter: blur(10px); }
+
+    /* الشات والمجتمع */
+    html body .wa-h, html body .ai-h { backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px); border-bottom: 1px solid var(--bd); }
+    html body .wa-b { border-radius: 18px; box-shadow: 0 2px 8px rgba(0,0,0,.25); }
+    html body .wa-b--me { background-image: linear-gradient(135deg, rgba(255,255,255,.12), rgba(255,255,255,0)); }
+    html body .wa-bar, html body .ai-bar { border-top: 1px solid var(--bd); backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px); }
+    html body .wa-send, html body .ai-send { box-shadow: 0 6px 16px rgba(198,255,61,.25); transition: transform .2s; }
+    html body .wa-send:active, html body .ai-send:active { transform: scale(.9); }
+    html body .wa-row { border-radius: 16px; transition: background-color .2s, transform .2s; }
+    html body .wa-row:hover { background-color: rgba(255,255,255,.06); }
+    html body .wa-row:active { transform: scale(.985); }
+    html body .wa-av { box-shadow: 0 0 0 2px rgba(255,255,255,.12); }
+
+    /* المساعد الذكي */
+    html body .ai-m { border-radius: 18px; box-shadow: 0 2px 10px rgba(0,0,0,.22); animation: pop-in .35s cubic-bezier(.2,1.2,.4,1) both; }
+    html body .ai-m--bot { border: 1px solid var(--bd); background-image: linear-gradient(160deg, rgba(255,255,255,.05), rgba(255,255,255,0) 60%); }
+    html body .mm-view { border-radius: 16px; overflow: hidden; border: 1px solid var(--bd); }
+    @keyframes pop-in { from { opacity: 0; transform: translateY(10px) scale(.98); } to { opacity: 1; transform: none; } }
+
+    /* الموبايل */
+    @media (max-width: 480px) {
+      html body .page { padding-inline: 14px; }
+      html body .btn { padding: 12px 22px; }
+      html body .hero h1 { line-height: 1.15; }
+    }
+    @media (prefers-reduced-motion: reduce) { html body .ai-m { animation: none; } html body .gcard:hover, html body .subj:hover, html body .lesson:hover { transform: none; } }
+
+    /* ==========================================================
+       بريميوم + أنيميشن (الطبقة التانية)
+       ========================================================== */
+    :root { --g1: linear-gradient(120deg, #c6ff3d, #2ed3b7 45%, #5b6cff); --g2: linear-gradient(135deg, #5b6cff, #ff5c8a); }
+    @keyframes rise   { from { opacity: 0; transform: translateY(22px) scale(.97); } to { opacity: 1; transform: none; } }
+    @keyframes shine  { to { background-position: 220% 0; } }
+    @keyframes orb    { 0%,100% { transform: translate3d(0,0,0) scale(1); } 50% { transform: translate3d(30px,-40px,0) scale(1.15); } }
+    @keyframes pulse  { 0% { box-shadow: 0 0 0 0 rgba(255,92,138,.6); } 100% { box-shadow: 0 0 0 14px rgba(255,92,138,0); } }
+    @keyframes borderflow { to { background-position: 300% 0; } }
+    @keyframes ripple { to { transform: scale(4); opacity: 0; } }
+    @keyframes floaty { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-7px); } }
+
+    /* الهيرو: كرات ضوء متحركة + عنوان بتدرّج */
+    html body .hero::after { content: ""; position: absolute; width: 420px; height: 420px; inset-inline-end: -120px; top: -100px; border-radius: 50%; background: radial-gradient(circle, rgba(91,108,255,.55), transparent 65%); filter: blur(30px); animation: orb 9s ease-in-out infinite; pointer-events: none; }
+    html body .hero__body::before { content: ""; position: absolute; width: 300px; height: 300px; inset-inline-start: -140px; bottom: -120px; border-radius: 50%; background: radial-gradient(circle, rgba(255,92,138,.4), transparent 65%); filter: blur(34px); animation: orb 11s ease-in-out infinite reverse; pointer-events: none; z-index: -1; }
+    html body .logo { background: var(--g1); background-size: 220% 100%; -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; animation: shine 6s linear infinite; }
+    html body .logo i { -webkit-text-fill-color: var(--ink); animation: floaty 3.5s ease-in-out infinite; box-shadow: 0 6px 18px rgba(198,255,61,.45); }
+
+    /* الأزرار: لمعة تعدّي + ريبل */
+    html body .btn { position: relative; overflow: hidden; isolation: isolate; }
+    html body .btn::after { content: ""; position: absolute; inset: 0; z-index: -1; background: linear-gradient(110deg, transparent 30%, rgba(255,255,255,.55) 50%, transparent 70%); background-size: 250% 100%; background-position: -120% 0; transition: background-position .8s; }
+    html body .btn:hover::after { background-position: 220% 0; }
+    .rpl { position: absolute; border-radius: 50%; width: 40px; height: 40px; margin: -20px 0 0 -20px; background: rgba(255,255,255,.45); transform: scale(0); animation: ripple .6s ease-out forwards; pointer-events: none; }
+    html body .tool, html body .mm-act, html body .cb, html body .ptab { position: relative; overflow: hidden; }
+
+    /* دخول الكروت بالتتابع */
+    html body .grade-grid > *, html body .page .subj, html body .page .lesson, html body .stats > *, html body .wa-list > *, html body .panel__body .row, html body .gate__card, html body .paycard { animation: rise .6s cubic-bezier(.2,1.1,.3,1) both; }
+    html body .grade-grid > *:nth-child(2), html body .page .subj:nth-child(2), html body .page .lesson:nth-child(2), html body .stats > *:nth-child(2), html body .wa-list > *:nth-child(2) { animation-delay: .08s; }
+    html body .grade-grid > *:nth-child(3), html body .page .subj:nth-child(3), html body .page .lesson:nth-child(3), html body .stats > *:nth-child(3), html body .wa-list > *:nth-child(3) { animation-delay: .16s; }
+    html body .grade-grid > *:nth-child(4), html body .page .subj:nth-child(4), html body .page .lesson:nth-child(4), html body .stats > *:nth-child(4), html body .wa-list > *:nth-child(4) { animation-delay: .24s; }
+    html body .grade-grid > *:nth-child(n+5), html body .page .subj:nth-child(n+5), html body .page .lesson:nth-child(n+5), html body .wa-list > *:nth-child(n+5) { animation-delay: .32s; }
+
+    /* كروت بإطار متدرّج متحرك عند الوقوف */
+    @media (hover: hover) {
+      html body .gcard::before, html body .subj::before { content: ""; position: absolute; inset: -1px; border-radius: inherit; padding: 1.5px; background: var(--g1); background-size: 300% 100%; -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0); -webkit-mask-composite: xor; mask-composite: exclude; opacity: 0; transition: opacity .3s; pointer-events: none; animation: borderflow 4s linear infinite; }
+      html body .gcard:hover::before, html body .subj:hover::before { opacity: 1; }
+    }
+    html body .gcard, html body .subj { position: relative; }
+    html body .subj__ic, html body .gcard__num { transition: transform .4s cubic-bezier(.3,1.7,.5,1); }
+    html body .gcard:hover .gcard__num, html body .subj:hover .subj__ic { transform: scale(1.18) rotate(-6deg); }
+
+    /* تفاصيل حية */
+    html body .dot, html body .bell .dot { animation: pulse 1.6s ease-out infinite; }
+    html body .ai-logo, html body .wel .big, html body .ai-wel .big { animation: floaty 3.2s ease-in-out infinite; }
+    html body .progress__bar > *, html body .progress__bar { transition: width .9s cubic-bezier(.2,1,.3,1); }
+    html body .progress__bar > * { background: var(--g1); background-size: 220% 100%; animation: shine 3s linear infinite; }
+    html body .wa-b, html body .m, html body .mrow { animation: rise .35s cubic-bezier(.2,1.2,.4,1) both; }
+    html body .ai-typing i { animation-duration: .9s; }
+    html body .modal .sheet { animation: rise .45s cubic-bezier(.2,1.2,.4,1) both; }
+    html body .toast { animation: rise .35s ease both; }
+    html body .wa-send, html body .ai-send { background-image: var(--g1); background-size: 200% 100%; transition: background-position .5s, transform .2s; }
+    html body .wa-send:hover, html body .ai-send:hover { background-position: 100% 0; }
+    html body .qz__o { transition: transform .2s, background-color .25s, border-color .25s; }
+    html body .qz__o:hover { transform: translateX(-4px); }
+    @media (prefers-reduced-motion: reduce) {
+      html body *, html body *::before, html body *::after { animation-duration: .001s !important; animation-iteration-count: 1 !important; transition-duration: .001s !important; }
+    }
+
+    /* ==========================================================
+       الطبقة التالتة: زجاج + شفق متحرك + إضاءة تتبع الإصبع/الماوس
+       ========================================================== */
+    @keyframes aur1 { 0%,100% { transform: translate3d(-8%,-6%,0) rotate(0deg) scale(1); } 50% { transform: translate3d(10%,8%,0) rotate(25deg) scale(1.25); } }
+    @keyframes aur2 { 0%,100% { transform: translate3d(8%,6%,0) scale(1.1); } 50% { transform: translate3d(-12%,-10%,0) scale(.9); } }
+    @keyframes aur3 { 0%,100% { transform: translate3d(0,10%,0) scale(1); } 50% { transform: translate3d(-6%,-12%,0) scale(1.3); } }
+    @keyframes sparkle { 0%,100% { opacity: .15; transform: scale(.6); } 50% { opacity: 1; transform: scale(1.2); } }
+    @keyframes textflow { to { background-position: 300% 0; } }
+    @keyframes glowbar { 0%,100% { box-shadow: 0 0 10px rgba(198,255,61,.6); } 50% { box-shadow: 0 0 22px rgba(198,255,61,1); } }
+
+    .aurora { position: fixed; inset: 0; z-index: -1; overflow: hidden; pointer-events: none; }
+    .aurora i { position: absolute; width: 60vmax; height: 60vmax; border-radius: 50%; filter: blur(80px); opacity: .5; will-change: transform; }
+    .aurora i:nth-child(1) { top: -25vmax; inset-inline-end: -20vmax; background: radial-gradient(circle, #3b3bff, transparent 65%); animation: aur1 18s ease-in-out infinite; }
+    .aurora i:nth-child(2) { bottom: -30vmax; inset-inline-start: -25vmax; background: radial-gradient(circle, #ff5c8a, transparent 65%); opacity: .32; animation: aur2 22s ease-in-out infinite; }
+    .aurora i:nth-child(3) { top: 30%; inset-inline-start: 25%; width: 40vmax; height: 40vmax; background: radial-gradient(circle, #2ed3b7, transparent 65%); opacity: .2; animation: aur3 26s ease-in-out infinite; }
+
+    #scrollbar { position: fixed; top: 0; inset-inline: 0; height: 4px; z-index: 9999; background: transparent; pointer-events: none; }
+    #scrollbar b { display: block; height: 100%; width: 100%; transform-origin: right; transform: scaleX(0); background: var(--g1); background-size: 300% 100%; animation: textflow 4s linear infinite, glowbar 2s ease-in-out infinite; border-radius: 0 0 6px 6px; }
+
+    /* زجاج حقيقي للكروت */
+    html body .gcard, html body .subj, html body .lesson, html body .addbox, html body .stat, html body .paycard, html body .gate__card, html body .poll, html body .ai-m--bot {
+      background-color: rgba(26,24,80,.55); -webkit-backdrop-filter: blur(16px) saturate(140%); backdrop-filter: blur(16px) saturate(140%);
+      box-shadow: 0 12px 40px rgba(0,0,0,.35), inset 0 1px 0 rgba(255,255,255,.12);
+    }
+    /* إضاءة بتتبع المؤشر/الإصبع جوه الكارت */
+    html body .gcard, html body .subj, html body .lesson, html body .stat, html body .addbox { --mx: 50%; --my: 0%; }
+    html body .gcard::after, html body .subj::after, html body .lesson::after, html body .stat::after, html body .addbox::after {
+      content: ""; position: absolute; inset: 0; border-radius: inherit; pointer-events: none; opacity: 0; transition: opacity .3s;
+      background: radial-gradient(260px circle at var(--mx) var(--my), rgba(198,255,61,.18), transparent 60%); }
+    html body .gcard:hover::after, html body .subj:hover::after, html body .lesson:hover::after, html body .stat:hover::after, html body .addbox:hover::after, html body .is-touch::after { opacity: 1; }
+    html body .lesson, html body .stat, html body .addbox { position: relative; }
+
+    /* عناوين بتدرّج متحرك */
+    html body .page h1, html body .page__title, html body .sec-title, html body .hero h1 .highlight {
+      background-size: 300% 100%; animation: textflow 7s linear infinite; }
+    html body .page h1, html body .page__title { background-image: var(--g1); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; }
+    html body .hero h1 .highlight { background-image: linear-gradient(110deg, #c6ff3d, #e6ff8a, #c6ff3d, #8cff6a, #c6ff3d); box-shadow: 0 10px 40px rgba(198,255,61,.35); }
+
+    /* نجوم لامعة في الهيرو */
+    html body .hero__body::after { content: ""; position: absolute; width: 4px; height: 4px; border-radius: 50%; inset-inline-end: 12%; top: 8%; background: #fff; color: #fff;
+      box-shadow: -40px 80px 0 0 #c6ff3d, 60px 160px 0 -1px #ff5c8a, -120px 30px 0 -1px #fff, 140px 40px 0 0 #5b6cff, -200px 200px 0 -1px #2ed3b7, 20px 260px 0 0 #fff;
+      animation: sparkle 3s ease-in-out infinite; pointer-events: none; }
+
+    /* النافبار السفلي */
+    html body .bnav { background: rgba(13,12,40,.72); -webkit-backdrop-filter: blur(20px) saturate(160%); backdrop-filter: blur(20px) saturate(160%); border-top: 1px solid rgba(255,255,255,.1); box-shadow: 0 -10px 40px rgba(0,0,0,.4); }
+    html body .bnav button, html body .bnav a { transition: transform .3s cubic-bezier(.3,1.7,.5,1), color .2s; }
+    html body .bnav button:active, html body .bnav a:active { transform: scale(.88); }
+    html body .bnav [aria-current], html body .bnav .on, html body .bnav [aria-selected="true"] { color: var(--lime); text-shadow: 0 0 14px rgba(198,255,61,.7); transform: translateY(-3px); }
+
+    /* ميزات الواتساب والشات */
+    html body .wa-b--me { background-image: var(--g2); box-shadow: 0 6px 20px rgba(91,108,255,.35); border: 0; }
+    html body .wa-down { animation: floaty 2s ease-in-out infinite; box-shadow: 0 8px 24px rgba(0,0,0,.4); }
+
+    /* تحويل ناعم بين الشاشات */
+    html body .screen-in { animation: rise .55s cubic-bezier(.2,1.1,.3,1) both; }
+
+    /* ==========================================================
+       الطبقة الرابعة: أنيميشن لكل عنصر تقريبًا
+       ========================================================== */
+    @keyframes fadein { from { opacity: 0; } to { opacity: 1; } }
+    @keyframes wobble { 0%,100% { transform: rotate(0); } 25% { transform: rotate(-9deg); } 75% { transform: rotate(9deg); } }
+    @keyframes ring   { 0%,100% { transform: rotate(0); } 15% { transform: rotate(16deg); } 30% { transform: rotate(-14deg); } 45% { transform: rotate(10deg); } 60% { transform: rotate(-8deg); } 75% { transform: rotate(4deg); } }
+    @keyframes bounce { 0%,100% { transform: scale(1); } 40% { transform: scale(1.35) rotate(-8deg); } 70% { transform: scale(.95); } }
+    @keyframes breathe { 0%,100% { opacity: .55; } 50% { opacity: 1; } }
+    @keyframes swing  { 0%,100% { transform: rotate(-6deg); } 50% { transform: rotate(6deg); } }
+    @keyframes tickpop { 0% { transform: scale(0) rotate(-30deg); opacity: 0; } 70% { transform: scale(1.25) rotate(6deg); opacity: 1; } 100% { transform: scale(1) rotate(0); } }
+    @keyframes ringout { 0% { transform: scale(.9); opacity: .7; } 100% { transform: scale(1.8); opacity: 0; } }
+    @keyframes growx  { from { transform: scaleX(0); } to { transform: scaleX(1); } }
+    @keyframes slidein { from { opacity: 0; transform: translateX(26px); } to { opacity: 1; transform: none; } }
+
+    /* ظهور تدريجي عند التمرير (بيتفعّل بالسكريبت بس) */
+    .rv { opacity: 0; transform: translateY(26px) scale(.98); transition: opacity .7s ease, transform .7s cubic-bezier(.2,1.1,.3,1); transition-delay: var(--d, 0s); }
+    .rv.in { opacity: 1; transform: none; }
+
+    /* عناصر بتتحرك وهي ساكنة */
+    html body .helper__ic, html body .gcard__num { animation: floaty 4s ease-in-out infinite; }
+    html body .crown { transform-origin: 50% 100%; animation: swing 2.8s ease-in-out infinite; }
+    html body .empty { animation: breathe 2.2s ease-in-out infinite; }
+    html body .video__play { position: relative; }
+    html body .video__play::after { content: ""; position: absolute; inset: 0; border-radius: 50%; border: 3px solid rgba(255,255,255,.7); animation: ringout 1.8s ease-out infinite; pointer-events: none; }
+    html body .badge { background-size: 220% 100%; animation: shine 5s linear infinite; }
+
+    /* hover/لمس: حركات صغيرة */
+    @media (hover: hover) {
+      html body .bell:hover { animation: ring .9s ease; transform-origin: 50% 0; }
+      html body .theme-btn:hover { transform: rotate(40deg) scale(1.15); }
+      html body .chip:hover, html body .pill:hover { animation: wobble .5s ease; }
+      html body .avatar:hover, html body .mav:hover, html body .wa-av:hover { transform: scale(1.12) rotate(-5deg); }
+      html body .star:hover, html body .stars button:hover { animation: bounce .5s ease; }
+      html body .helper:hover .helper__go, html body .helper__go:hover { transform: translateX(-6px); }
+      html body .panel__body .row:hover, html body .mrow:hover { transform: translateX(-5px); }
+      html body .back:hover { transform: translateX(5px); }
+      html body a:not(.btn):hover { text-decoration-color: var(--lime); }
+      html body .bnav button:hover, html body .bnav a:hover { transform: translateY(-4px); }
+    }
+    html body .avatar, html body .mav, html body .wa-av, html body .theme-btn, html body .helper__go, html body .back, html body .panel__body .row, html body .mrow, html body .star { transition: transform .35s cubic-bezier(.3,1.6,.5,1); }
+    html body a { text-decoration-thickness: 2px; text-underline-offset: 4px; transition: color .2s, text-decoration-color .2s; }
+
+    /* نوافذ وقوائم */
+    html body .modal { animation: fadein .3s ease both; }
+    html body .tablist { animation: rise .3s ease both; }
+    html body .tablist > * { animation: slidein .4s cubic-bezier(.2,1.1,.3,1) both; }
+    html body .tablist > *:nth-child(2) { animation-delay: .05s; } html body .tablist > *:nth-child(3) { animation-delay: .1s; } html body .tablist > *:nth-child(4) { animation-delay: .15s; } html body .tablist > *:nth-child(n+5) { animation-delay: .2s; }
+    html body .wa-sheet { animation: rise .35s cubic-bezier(.2,1.2,.4,1) both; }
+    html body .wa-sheet-bg, html body .wa-rxbar { animation: fadein .25s ease both; }
+    html body .wa-rxbar button { transition: transform .25s cubic-bezier(.3,1.8,.5,1); }
+    html body .wa-rxbar button:hover, html body .wa-rxbar button:active { transform: scale(1.4) translateY(-6px); }
+    html body .wa-rx, html body .wa-rxc { animation: tickpop .35s cubic-bezier(.3,1.6,.5,1) both; }
+    html body .wa-tk { animation: tickpop .3s ease both; }
+    html body .done__tick { animation: tickpop .6s cubic-bezier(.3,1.6,.5,1) both; }
+    html body .pwrap, html body .field { transition: transform .25s; }
+    html body .field:focus-within { transform: translateY(-2px); }
+    html body .seg__thumb { transition: transform .45s cubic-bezier(.3,1.5,.5,1), width .45s; }
+    html body .qz__o--ok { animation: bounce .55s ease; }
+    html body .qz__o--bad { animation: shake .45s ease; }
+    html body .qz__score { animation: tickpop .6s cubic-bezier(.3,1.6,.5,1) both; }
+
+    /* أشرطة ورسوم بتنمو */
+    html body .hbar > *, html body .bars > *, html body .rate-bar > *, html body .poll__o i, html body .wa-pbar > * { transform-origin: right; animation: growx .9s cubic-bezier(.2,1,.3,1) both; }
+    html body .stat { animation: rise .6s cubic-bezier(.2,1.1,.3,1) both, floaty 6s ease-in-out 1s infinite; }
+
+    /* صور وفيديو */
+    html body img { animation: fadein .6s ease both; }
+    html body .video, html body .lbox img, html body .imgbox img { transition: transform .5s cubic-bezier(.2,1,.3,1), box-shadow .4s; }
+    @media (hover: hover) { html body .video:hover { transform: scale(1.015); box-shadow: 0 18px 50px rgba(0,0,0,.5); } }
+
+    /* المساعد والمجتمع */
+    html body .ai-wel h3, html body .ai-wel p { animation: rise .6s ease both; } html body .ai-wel p { animation-delay: .12s; }
+    html body .ai-tb, html body .ai-fchip { transition: transform .25s cubic-bezier(.3,1.6,.5,1), background-color .2s; }
+    html body .ai-tb:hover { transform: translateY(-3px) scale(1.04); }
+    html body .ai-m--me { animation: slidein .35s cubic-bezier(.2,1.2,.4,1) both; }
+    html body .ai-typing i { animation: bounce 1s ease-in-out infinite; } html body .ai-typing i:nth-child(2) { animation-delay: .15s; } html body .ai-typing i:nth-child(3) { animation-delay: .3s; }
+    html body .alert-banner, html body .annc { animation: slidein .5s cubic-bezier(.2,1.1,.3,1) both; }
+    html body .shake { animation: shake .45s ease; }
+
+    @media (prefers-reduced-motion: reduce) { .rv { opacity: 1; transform: none; transition: none; } }
+
+    /* ==========================================================
+       الطبقة الخامسة: كونفيتي + شرارات + مغناطيس + بارالاكس + وضع خفيف تلقائي
+       ========================================================== */
+    @keyframes spark { 0% { transform: translate(0,0) scale(1); opacity: 1; } 100% { transform: translate(var(--tx), var(--ty)) scale(0); opacity: 0; } }
+    @keyframes jelly { 0% { transform: scale(1,1); } 30% { transform: scale(1.12,.88); } 55% { transform: scale(.94,1.07); } 80% { transform: scale(1.03,.98); } 100% { transform: scale(1,1); } }
+    @keyframes inkfill { from { background-position: 100% 0; } to { background-position: 0 0; } }
+    .spk { position: fixed; z-index: 9998; width: 7px; height: 7px; margin: -3.5px 0 0 -3.5px; border-radius: 50%; pointer-events: none; animation: spark .65s cubic-bezier(.2,.8,.3,1) forwards; }
+    #cfx { position: fixed; inset: 0; width: 100%; height: 100%; z-index: 9997; pointer-events: none; }
+    #cglow { position: fixed; z-index: 9990; top: 0; left: 0; width: 320px; height: 320px; margin: -160px 0 0 -160px; border-radius: 50%; pointer-events: none; opacity: 0; transition: opacity .4s; background: radial-gradient(circle, rgba(198,255,61,.10), transparent 65%); mix-blend-mode: screen; will-change: transform; }
+    html body .jelly { animation: jelly .5s ease; }
+    html body .hero__body { transform: translate3d(0, calc(var(--py, 0) * -.25px), 0); will-change: transform; }
+    html body .hero::after { transform: translate3d(0, calc(var(--py, 0) * .15px), 0); }
+    html body .btn { transition: transform .25s cubic-bezier(.3,1.6,.5,1), box-shadow .25s, filter .2s; will-change: transform; }
+    html body input:focus, html body textarea:focus { caret-color: var(--lime); }
+    html body .tool:active, html body .mm-act:active, html body .cb:active { animation: jelly .4s ease; }
+    html body .hero h1 .word { transition: transform .35s cubic-bezier(.3,1.7,.5,1), color .25s; }
+    @media (hover: hover) { html body .hero h1 .word:hover { transform: translateY(-6px) rotate(-3deg) scale(1.06); } }
+
+    /* وضع خفيف: بيتفعّل تلقائيًا على الأجهزة الضعيفة */
+    html.lite .aurora, html.lite #cglow { display: none; }
+    html.lite body *, html.lite body *::before, html.lite body *::after { animation-iteration-count: 1 !important; -webkit-backdrop-filter: none !important; backdrop-filter: none !important; }
+    html.lite .gcard, html.lite .subj, html.lite .lesson, html.lite .addbox, html.lite .stat, html.lite .paycard { background-color: var(--card) !important; }
+    @media (prefers-reduced-motion: reduce) { #cglow, .spk, #cfx { display: none; } html body .hero__body { transform: none; } }
+
+    /* ==========================================================
+       الطبقة السادسة: تحسين الشكل (طباعة، مسافات، تفاصيل فاخرة)
+       ========================================================== */
+    :root { --ease: cubic-bezier(.2,1.1,.3,1); --line: linear-gradient(90deg, transparent, rgba(255,255,255,.18), transparent); }
+    html body { font-size: 16.5px; line-height: 1.85; letter-spacing: .1px; }
+    html body h1 { font-size: clamp(30px, 7vw, 52px); letter-spacing: .3px; text-wrap: balance; }
+    html body h2 { font-size: clamp(24px, 5vw, 34px); text-wrap: balance; }
+    html body h3 { font-size: clamp(19px, 4vw, 24px); }
+    html body p, html body li { text-wrap: pretty; }
+    html body .note-s, html body .page__sub, html body .sheet__sub { color: var(--mut); font-size: 14.5px; }
+
+    /* حبيبات خفيفة فوق الخلفية = ملمس فاخر */
+    .aurora::after { content: ""; position: absolute; inset: 0; opacity: .05; mix-blend-mode: overlay; background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.8' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 1  0 0 0 0 1  0 0 0 0 1  0 0 0 .55 0'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>"); }
+
+    /* خط متوهج رفيع تحت الشريط العلوي */
+    html body .topbar { position: sticky; }
+    html body .topbar::after { content: ""; position: absolute; inset-inline: 0; bottom: -1px; height: 1.5px; background: linear-gradient(90deg, transparent, #5b6cff, #c6ff3d, #ff5c8a, transparent); background-size: 300% 100%; animation: textflow 6s linear infinite; opacity: .8; }
+
+    /* أحجام لمس مريحة */
+    html body .btn, html body .tool, html body .cb { min-height: 44px; display: inline-flex; align-items: center; justify-content: center; gap: 8px; }
+    html body input:not([type=checkbox]):not([type=radio]):not([type=file]):not([type=range]), html body select { min-height: 50px; padding-inline: 16px; font-size: 16px; }
+    html body textarea { padding: 14px 16px; font-size: 16px; line-height: 1.7; }
+
+    /* بطاقات بترتيب أنضف */
+    html body .addbox, html body .paycard, html body .gate__card { padding: 20px; }
+    html body .gcard, html body .subj { padding: 22px 20px; }
+    html body .lesson { padding: 16px 18px; }
+    html body .panel__body .row { padding: 14px 16px; margin-block: 8px; }
+    html body hr, html body .sep { border: 0; height: 1px; background: var(--line); margin-block: 18px; }
+
+    /* شارات وشرائح بتدرّج */
+    html body .chip, html body .pill, html body .badge { border-radius: 99px; padding: 3px 12px; font-weight: 600; letter-spacing: .2px; border: 1px solid rgba(255,255,255,.14); backdrop-filter: blur(6px); }
+    html body .badge--owner { background-image: linear-gradient(120deg, #ffb020, #ff5c8a, #ffb020); color: #1b1230; border: 0; }
+    html body .badge--admin { background-image: linear-gradient(120deg, #5b6cff, #8f6bff, #5b6cff); color: #fff; border: 0; }
+
+    /* الهيرو: وهج أقوى وشبكة بتتلاشى */
+    html body .hero { background: radial-gradient(900px 520px at 80% 0%, rgba(91,108,255,.35), transparent 60%), radial-gradient(700px 420px at 0% 100%, rgba(255,92,138,.22), transparent 60%), var(--ink); }
+    html body .hero::before { -webkit-mask-image: radial-gradient(ellipse at 50% 30%, #000 20%, transparent 75%); mask-image: radial-gradient(ellipse at 50% 30%, #000 20%, transparent 75%); }
+    html body .hero p { color: #d8d7ff; font-size: clamp(17px, 3.6vw, 20px); text-shadow: 0 2px 20px rgba(0,0,0,.3); }
+
+    /* الشريط السفلي بشكل كبسولة */
+    html body .bnav { border-radius: 24px 24px 0 0; padding-top: 6px; }
+
+    /* ظهور الشرايح والخيارات بالتتابع */
+    html body .chips > *, html body .ai-opts > *, html body .ai-tools > *, html body .gradesel > * { animation: rise .5s var(--ease) both; }
+    html body .chips > *:nth-child(2), html body .ai-opts > *:nth-child(2), html body .ai-tools > *:nth-child(2) { animation-delay: .05s; }
+    html body .chips > *:nth-child(3), html body .ai-opts > *:nth-child(3), html body .ai-tools > *:nth-child(3) { animation-delay: .1s; }
+    html body .chips > *:nth-child(4), html body .ai-opts > *:nth-child(4), html body .ai-tools > *:nth-child(4) { animation-delay: .15s; }
+    html body .chips > *:nth-child(n+5), html body .ai-opts > *:nth-child(n+5), html body .ai-tools > *:nth-child(n+5) { animation-delay: .2s; }
+
+    /* تحميل بلمعة بدل نص ثابت */
+    html body .wait__dots i { background: var(--g1); }
+    html body .progress__bar { border-radius: 99px; overflow: hidden; background: rgba(255,255,255,.08); }
+
+    /* زرار تحكم في التأثيرات */
+    #fxBtn { position: fixed; inset-inline-start: 10px; bottom: calc(130px + env(safe-area-inset-bottom, 0px)); z-index: 9000; width: 38px; height: 38px; border-radius: 50%; border: 1px solid rgba(255,255,255,.14); background: rgba(13,12,40,.7); -webkit-backdrop-filter: blur(10px); backdrop-filter: blur(10px); color: #fff; font-size: 17px; cursor: pointer; display: grid; place-items: center; opacity: .75; box-shadow: 0 6px 18px rgba(0,0,0,.4); }
+    #fxBtn[aria-pressed="false"] { opacity: .5; }
+
+    /* ==========================================================
+       الطبقة 7: انتقالات الشاشات والتمرير
+       ========================================================== */
+    @keyframes enterL { from { opacity: 0; transform: translateX(-34px) scale(.985); filter: blur(6px); } to { opacity: 1; transform: none; filter: none; } }
+    @keyframes sweep { from { transform: translateX(120%) skewX(-18deg); } to { transform: translateX(-220%) skewX(-18deg); } }
+    html body .screen-in, html body .page { animation: enterL .55s var(--ease) both; }
+    html body .topbar { transition: padding .3s var(--ease), background-color .3s, box-shadow .3s; }
+    html.scrolled body .topbar { padding-block: 6px; background-color: rgba(13,12,40,.9); box-shadow: 0 10px 30px rgba(0,0,0,.45); }
+    @supports (animation-timeline: view()) {
+      html body .sec-title { animation: rise linear both; animation-timeline: view(); animation-range: entry 0% entry 55%; }
+    }
+
+    /* ==========================================================
+       الطبقة 8: تفاعلات الفورم والإرسال
+       ========================================================== */
+    @keyframes fly { 0% { transform: none; } 40% { transform: translate(-14px,-10px) rotate(-18deg) scale(1.15); } 100% { transform: translate(-34px,-30px) rotate(-30deg) scale(.4); opacity: 0; } }
+    @keyframes pop { 0% { transform: scale(.6); } 60% { transform: scale(1.18); } 100% { transform: scale(1); } }
+    html body .wa-send.fly svg, html body .ai-send.fly svg, html body .wa-send.fly, html body .ai-send.fly { animation: fly .45s ease-in both; }
+    html body input[type=checkbox], html body input[type=radio] { accent-color: var(--lime); transition: transform .2s; }
+    html body input[type=checkbox]:checked, html body input[type=radio]:checked { animation: pop .3s var(--ease); }
+    html body .field:focus-within > span, html body .field:focus-within > label { color: var(--lime); transition: color .2s; }
+    html body .eye:active { animation: pop .25s ease; }
+    html body input:invalid:not(:placeholder-shown) { border-color: var(--pink); }
+    html body .error { animation: shake .45s ease, rise .3s ease; }
+
+    /* ==========================================================
+       الطبقة 9: لمعة هولوجرام وظلال بعمق وهوية بلون الصف
+       ========================================================== */
+    html body .gcard, html body .subj, html body .lesson { overflow: hidden; }
+    html body .gcard > *, html body .subj > * { position: relative; z-index: 1; }
+    @media (hover: hover) {
+      html body .gcard:hover::before, html body .subj:hover::before { z-index: 0; }
+      html body .gcard:hover, html body .subj:hover { background-image: linear-gradient(160deg, rgba(255,255,255,.09), rgba(255,255,255,0) 55%), linear-gradient(135deg, color-mix(in srgb, var(--acc) 22%, transparent), transparent 60%); }
+    }
+    html body .page h1::after, html body .page__title::after { content: ""; display: block; width: 64px; height: 4px; margin-top: 8px; border-radius: 99px; background: var(--acc, var(--lime)); box-shadow: 0 0 16px var(--acc, var(--lime)); transform-origin: right; animation: growx .8s var(--ease) .2s both; }
+    html body .subj__ic, html body .gcard__num { filter: drop-shadow(0 8px 14px rgba(0,0,0,.4)); }
+    html body .stat { border-top: 2px solid var(--acc, var(--lime)); }
+    html body .lesson::before { content: ""; position: absolute; inset-block: 0; width: 60px; background: linear-gradient(90deg, transparent, rgba(255,255,255,.14), transparent); transform: translateX(120%) skewX(-18deg); pointer-events: none; }
+    @media (hover: hover) { html body .lesson:hover::before { animation: sweep 1.1s ease; } }
+    html body .loading, html body .wait__out { background: linear-gradient(100deg, rgba(255,255,255,.04) 30%, rgba(255,255,255,.14) 50%, rgba(255,255,255,.04) 70%); background-size: 220% 100%; animation: shine 1.4s linear infinite; border-radius: 12px; }
+
+    /* ==========================================================
+       الطبقة 10: لمسات أخيرة، وتوفير بطارية
+       ========================================================== */
+    @keyframes nudge { 0%,88%,100% { transform: none; } 92% { transform: scale(1.06); } 96% { transform: scale(.98); } }
+    @keyframes intro { from { opacity: 0; filter: blur(14px); } to { opacity: 1; filter: none; } }
+    html body .hero .btn, html body .gate__card .btn, html body .paycard .btn { animation: pop .6s var(--ease) 1.2s both, nudge 6s ease-in-out 3s infinite; }
+    @keyframes introf { from { opacity: 0; } to { opacity: 1; } }
+    html body { animation: introf .6s ease-out both; }
+    html.paused body *, html.paused body *::before, html.paused body *::after { animation-play-state: paused !important; }
+    html body .toast, html body .wa-note { border: 1px solid var(--bd); }
+    html body :is(button, a, [role=button]) { -webkit-tap-highlight-color: transparent; touch-action: manipulation; }
+    html body .gcard:active, html body .subj:active, html body .lesson:active, html body .wa-row:active { transform: scale(.975); transition-duration: .12s; }
+    html.lite body .topbar::after, html.lite body .lesson::before, html.lite body .stat, html.lite body .hero .btn { animation: none !important; }
+    @media (prefers-reduced-motion: reduce) { html body, html body .screen-in, html body .page { animation: none !important; filter: none !important; } }
+
+    /* زراري الصوت والتأثيرات: فوق بدل تحت */
+    html body #soundBtn, html body #fxBtn { top: calc(env(safe-area-inset-top, 0px) + 66px) !important; bottom: auto !important; width: 36px; height: 36px; font-size: 16px; }
+    html body #soundBtn { inset-inline-start: 10px !important; }
+    html body #fxBtn { inset-inline-start: 54px !important; }
+
+    /* زراري الصوت والتأثيرات جوه شريط الأزرار العلوي (مش فوق أي حاجة) */
+    html body .nav__btns #soundBtn, html body .nav__btns #fxBtn { position: static !important; inset: auto !important; flex: 0 0 auto; width: 38px; height: 38px; margin: 0; opacity: 1; box-shadow: none; background: rgba(255,255,255,.1); }
+</style>
 </head>
 
 <body>
@@ -5014,7 +5433,12 @@ const deleteUser = u => previewing ? (pvBlock(), Promise.reject(new Error('previ
           } else await addDoc(collection(db, 'rooms', id, 'msgs'), data);
         } catch (err) {
           ta.value = text; autosize();
-          if (err.code === 'permission-denied' && o.group && R.slow && !isStaff()) toast('استنى شوية قبل الرسالة الجاية.'); else dbError(err);
+          if (err.code === 'permission-denied' && o.group && R.slow && !isStaff()) toast('استنى شوية قبل الرسالة الجاية.');
+          else {
+            dbError(err);
+            const nt = document.getElementById('cNote');
+            if (nt) { nt.hidden = false; nt.textContent = '⚠️ الرسالة ماتبعتتش (' + (err.code === 'permission-denied' ? 'صلاحيات Firestore' : 'نت') + '). جرّب تبعت تاني.'; setTimeout(() => { if (nt.textContent.startsWith('⚠️')) nt.hidden = true; }, 12000); }
+          }
         }
       });
 
@@ -5400,7 +5824,27 @@ ${brief ? '- ماتستخدمش عناوين ولا جداول؛ **بولد** ل
       if (mp) return mmCardHtml(m, i, who, prev, mp);
       if (isMind) return `<div class="ai-m ai-m--bot"><b class="ai-who">🤖 ${AI_NAME}</b><p>الخريطة ماطلعتش صح المرة دي، جرّب تبعت تاني.</p><details class="ai-fl"><summary>الرد الأصلي</summary><div>${esc(m.text)}</div></details></div>`;
       const ex = who ? '' : `<div class="ai-ex"><button type="button" class="ai-cp" data-ai="copy" data-i="${i}">نسخ</button>${isAdminStaff() ? `<button type="button" class="ai-cp" data-ai="spdf" data-i="${i}">📄 PDF</button><button type="button" class="ai-cp" data-ai="spng" data-i="${i}">🖼️ صورة</button>` : ''}</div>`;
-      return `<div class="ai-m ai-m--bot"><b class="ai-who">🤖 ${AI_NAME}</b>${aiMd(m.text)}${ex}${m.ts && who ? `<small class="ai-ts">${esc(fFull(m.ts))}</small>` : ''}</div>`;
+      const rt = who
+        ? (m.rate ? `<span class="ai-rb${m.rate < 0 ? ' bad' : ''}">${m.rate > 0 ? '👍 الطالب قيّم الرد: كويس' : '👎 الطالب قيّم الرد: ضعيف'}</span>` : '')
+        : '';
+      const rbtn = (!who && m.role === 'assistant') ? `<span class="ai-rate"><button type="button" data-ai="rate" data-i="${i}" data-v="1" aria-pressed="${m.rate === 1}" aria-label="الرد كويس">👍</button><button type="button" data-ai="rate" data-i="${i}" data-v="-1" aria-pressed="${m.rate === -1}" aria-label="الرد ضعيف">👎</button></span>` : '';
+      const ex2 = ex ? ex.replace(/<\/div>$/, rbtn + '</div>') : '';
+      return `<div class="ai-m ai-m--bot${who && m.rate < 0 ? ' ai-m--bad' : ''}"><b class="ai-who">🤖 ${AI_NAME}</b>${aiMd(m.text)}${ex2}${rt}${m.ts && who ? `<small class="ai-ts">${esc(fFull(m.ts))}</small>` : ''}</div>`;
+    }
+
+    /* تقييم رد المساعد: 👍/👎 (الضغط تاني بيشيل التقييم) */
+    async function aiRate(i, v) {
+      const m = AI.msgs[i];
+      if (!m || m.role !== 'assistant' || !AI.cid) return;
+      if (!m.id) return toast('استنى لحظة لحد ما الرد يتحفظ.');
+      const old = m.rate || 0, nv = old === v ? 0 : v;
+      const dDown = (nv === -1 ? 1 : 0) - (old === -1 ? 1 : 0), dUp = (nv === 1 ? 1 : 0) - (old === 1 ? 1 : 0);
+      m.rate = nv; aiDrawMsgs();
+      try {
+        await updateDoc(doc(db, 'aiUsers', AI.uid, 'chats', AI.cid, 'msgs', m.id), { rate: nv, rateAt: Date.now() });
+        if (dDown || dUp) await setDoc(doc(db, 'aiUsers', AI.uid), { down: increment(dDown), up: increment(dUp) }, { merge: true });
+        toast(nv === 0 ? 'اتشال التقييم' : 'شكرًا على تقييمك 🙏');
+      } catch (err) { m.rate = old; aiDrawMsgs(); toast('التقييم ماتحفظش، جرّب تاني.'); }
     }
 
     function commAi() {
@@ -5454,6 +5898,7 @@ ${brief ? '- ماتستخدمش عناوين ولا جداول؛ **بولد** ل
         else if (a === 'tool') { AI.tool = b.dataset.k; aiDraw(); inp.focus(); }
         else if (a === 'unfile') { AI.file = null; inp.value = ''; aiDrawFile(); grow(); }
         else if (a === 'copy') { const m = AI.msgs[+b.dataset.i]; if (m) { copyText(m.text, 'اتنسخ'); } }
+        else if (a === 'rate') aiRate(+b.dataset.i, +b.dataset.v);
         else if (a === 'mmlay') mmSet(+b.dataset.i, { layout: b.dataset.l });
         else if (a === 'mmth') mmSet(+b.dataset.i, { theme: b.dataset.t });
         else if (a === 'mmzoom') mmFull(+b.dataset.i);
@@ -5627,9 +6072,12 @@ ${brief ? '- ماتستخدمش عناوين ولا جداول؛ **بولد** ل
       } else bt.set(doc(db, 'aiUsers', uid, 'chats', cid), { upd: now }, { merge: true });
       const mc = collection(db, 'aiUsers', uid, 'chats', cid, 'msgs');
       bt.set(doc(mc), { role: 'user', text: um.text, tool: um.tool, ts: um.ts, ...(um.file ? { file: um.file } : {}), at: serverTimestamp() });
-      bt.set(doc(mc), { role: 'assistant', text: reply, ts: um.ts + 1, at: serverTimestamp() });
+      const ar = doc(mc);
+      bt.set(ar, { role: 'assistant', text: reply, ts: um.ts + 1, at: serverTimestamp() });
       bt.set(doc(db, 'aiUsers', uid), { uid, name: isAdminStaff() ? myDisp() : (myName || 'طالب'), code: myCode || '', grade: !isAdminStaff() && Number.isInteger(myGrade) ? myGrade : null, last: um.text.slice(0, 80), upd: now, n: increment(2), at: serverTimestamp() }, { merge: true });
       await bt.commit();
+      const lastM = AI.msgs.find(x => x.role === 'assistant' && x.ts === um.ts + 1);
+      if (lastM && AI.cid === cid) { lastM.id = ar.id; aiDrawMsgs(); }
     }
 
     /* ==========================================================
@@ -6123,12 +6571,12 @@ ${brief ? '- ماتستخدمش عناوين ولا جداول؛ **بولد** ل
       const listEl = $ai('aList');
       const draw = () => {
         const ql = q.trim().toLowerCase(), qc = q.toUpperCase().replace(/[\s-]/g, '');
-        const shown = all.filter(s => (gf === -2 ? s.aiBlocked : (gf < 0 || s.grade === gf)) && (!ql || (s.name || '').toLowerCase().includes(ql) || (qc && (s.code || '').includes(qc))))
-          .sort((a, b) => (b.upd || 0) - (a.upd || 0) || String(a.name || '').localeCompare(String(b.name || ''), 'ar'));
-        $ai('aChips').innerHTML = [[-1, 'الكل'], [-2, '🚫 ممنوعين']].concat(GRADES.map((x, i) => [i, x.name])).map(([i, n]) =>
-          `<button type="button" class="cb" data-g="${i}" aria-pressed="${gf === i}">${esc(n)} (${all.filter(s => i === -2 ? s.aiBlocked : (i < 0 || s.grade === i)).length})</button>`).join('');
+        const shown = all.filter(s => (gf === -2 ? s.aiBlocked : gf === -3 ? s.down > 0 : (gf < 0 || s.grade === gf)) && (!ql || (s.name || '').toLowerCase().includes(ql) || (qc && (s.code || '').includes(qc))))
+          .sort((a, b) => (gf === -3 ? (b.down || 0) - (a.down || 0) : 0) || (b.upd || 0) - (a.upd || 0) || String(a.name || '').localeCompare(String(b.name || ''), 'ar'));
+        $ai('aChips').innerHTML = [[-1, 'الكل'], [-2, '🚫 ممنوعين'], [-3, '👎 ردود ضعيفة']].concat(GRADES.map((x, i) => [i, x.name])).map(([i, n]) =>
+          `<button type="button" class="cb" data-g="${i}" aria-pressed="${gf === i}">${esc(n)} (${all.filter(s => i === -2 ? s.aiBlocked : i === -3 ? s.down > 0 : (i < 0 || s.grade === i)).length})</button>`).join('');
         $ai('aCount').textContent = shown.length + ' من ' + all.length;
-        listEl.innerHTML = shown.length ? shown.map(s => `<button type="button" class="wa-row" data-ai="stu" data-id="${esc(s.id)}"><span class="wa-av" style="background:${waAvBg(s.id)}">${esc(initial(s.name))}</span><span class="wa-rt"><b>${esc(s.name || 'طالب')}</b><small>${esc(Number.isInteger(s.grade) && GRADES[s.grade] ? GRADES[s.grade].name : 'من غير صف')} · ${s.n ? s.n + ' رسالة · آخر نشاط ' + esc(fShort(s.upd)) : 'ماستخدمش لسه'}${s.aiBlocked ? ' · 🚫 ممنوع' : ''}</small></span><code class="ai-code">${esc(s.code || '—')}</code></button>`).join('')
+        listEl.innerHTML = shown.length ? shown.map(s => `<button type="button" class="wa-row" data-ai="stu" data-id="${esc(s.id)}"><span class="wa-av" style="background:${waAvBg(s.id)}">${esc(initial(s.name))}</span><span class="wa-rt"><b>${esc(s.name || 'طالب')}</b><small>${esc(Number.isInteger(s.grade) && GRADES[s.grade] ? GRADES[s.grade].name : 'من غير صف')} · ${s.n ? s.n + ' رسالة · آخر نشاط ' + esc(fShort(s.upd)) : 'ماستخدمش لسه'}${s.aiBlocked ? ' · 🚫 ممنوع' : ''}${s.down > 0 ? ' · 👎 ' + s.down : ''}${s.up > 0 ? ' · 👍 ' + s.up : ''}</small></span><code class="ai-code">${esc(s.code || '—')}</code></button>`).join('')
           : '<p class="empty">مفيش طلاب هنا.</p>';
       };
       $ai('aQ').addEventListener('input', e => { q = e.target.value; draw(); });
@@ -6164,7 +6612,7 @@ ${brief ? '- ماتستخدمش عناوين ولا جداول؛ **بولد** ل
       cStop(); cTitle.textContent = s.name || 'طالب'; cBack.hidden = false;
       cBody.innerHTML = `<div id="aiAdm"><button type="button" class="tool" data-ai="up">→ كل الطلاب</button>
         <div class="addbox" style="margin-top:10px"><h3>${esc(s.name || 'طالب')}</h3>
-          <p class="note-s">${esc(Number.isInteger(s.grade) && GRADES[s.grade] ? GRADES[s.grade].name : 'من غير صف')} · ${s.n || 0} رسالة</p>
+          <p class="note-s">${esc(Number.isInteger(s.grade) && GRADES[s.grade] ? GRADES[s.grade].name : 'من غير صف')} · ${s.n || 0} رسالة · 👍 ${s.up || 0} · 👎 ${s.down || 0}</p>
           <p>الكود: <code class="ai-code">${esc(s.code || '—')}</code> ${s.code ? `<button type="button" class="tool" data-ai="cc" data-c="${esc(s.code)}">نسخ</button>` : ''}</p>
           <p class="note-s" id="aBlkSt"></p>
           <button type="button" class="tool" id="aBlkBtn" data-ai="blk"></button></div>
@@ -6213,5 +6661,209 @@ ${brief ? '- ماتستخدمش عناوين ولا جداول؛ **بولد** ل
     addEventListener('online', sync); addEventListener('offline', sync); sync();
   })();
   </script>
+<script>
+/* ريبل على الأزرار + ظهور تدريجي للعناصر عند التمرير */
+(function () {
+  addEventListener('pointerdown', function (e) {
+    var b = e.target.closest && e.target.closest('.btn, .tool, .mm-act, .cb, .ptab'); if (!b) return;
+    var r = b.getBoundingClientRect(), d = document.createElement('span'); d.className = 'rpl';
+    d.style.left = (e.clientX - r.left) + 'px'; d.style.top = (e.clientY - r.top) + 'px';
+    b.appendChild(d); setTimeout(function () { d.remove(); }, 650);
+  }, { passive: true });
+})();
+</script>
+<script>
+/* خلفية الشفق + شريط التقدم + إضاءة الكروت + ميلان 3D */
+(function () {
+  var a = document.createElement('div'); a.className = 'aurora'; a.innerHTML = '<i></i><i></i><i></i>'; document.body.prepend(a);
+  var sb = document.createElement('div'); sb.id = 'scrollbar'; sb.innerHTML = '<b></b>'; document.body.appendChild(sb);
+  var bar = sb.firstChild, tick = false;
+  function upd() { var h = document.documentElement.scrollHeight - innerHeight; bar.style.transform = 'scaleX(' + (h > 0 ? Math.min(1, scrollY / h) : 0) + ')'; tick = false; }
+  addEventListener('scroll', function () { if (!tick) { tick = true; requestAnimationFrame(upd); } }, { passive: true }); upd();
+  var SEL = '.gcard, .subj, .lesson, .stat, .addbox', fine = matchMedia('(hover:hover) and (pointer:fine)').matches;
+  function move(e) {
+    var c = e.target.closest && e.target.closest(SEL); if (!c) return;
+    var r = c.getBoundingClientRect(), x = e.clientX - r.left, y = e.clientY - r.top;
+    c.style.setProperty('--mx', x + 'px'); c.style.setProperty('--my', y + 'px');
+    if (fine && (c.matches('.gcard, .subj'))) c.style.transform = 'perspective(700px) rotateX(' + ((.5 - y / r.height) * 7).toFixed(2) + 'deg) rotateY(' + ((x / r.width - .5) * 7).toFixed(2) + 'deg) translateY(-5px)';
+    else if (!fine) c.classList.add('is-touch');
+  }
+  addEventListener('pointermove', move, { passive: true });
+  addEventListener('pointerdown', move, { passive: true });
+  addEventListener('pointerout', function (e) { var c = e.target.closest && e.target.closest(SEL); if (c && !c.contains(e.relatedTarget)) { c.style.transform = ''; c.classList.remove('is-touch'); } }, { passive: true });
+  addEventListener('pointerup', function () { document.querySelectorAll('.is-touch').forEach(function (n) { n.classList.remove('is-touch'); }); }, { passive: true });
+})();
+</script>
+<script>
+/* أصوات واجهة خفيفة (Web Audio، من غير ملفات) + زرار كتم محفوظ */
+(function () {
+  var ctx = null, last = 0, on = true;
+  try { on = localStorage.getItem('uiSound') !== '0'; } catch (e) {}
+  function ac() {
+    if (!ctx) { var C = window.AudioContext || window.webkitAudioContext; if (!C) return null; try { ctx = new C(); } catch (e) { return null; } }
+    if (ctx.state === 'suspended') ctx.resume();
+    return ctx;
+  }
+  function tone(f1, f2, dur, vol, type, delay) {
+    var c = ac(); if (!c) return;
+    var t = c.currentTime + (delay || 0), o = c.createOscillator(), g = c.createGain();
+    o.type = type || 'sine'; o.frequency.setValueAtTime(f1, t); o.frequency.exponentialRampToValueAtTime(f2, t + dur);
+    g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(vol, t + 0.012); g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+    o.connect(g); g.connect(c.destination); o.start(t); o.stop(t + dur + 0.02);
+  }
+  var S = {
+    tap:   function () { tone(620, 430, 0.07, 0.035, 'sine'); },
+    soft:  function () { tone(480, 380, 0.06, 0.025, 'sine'); },
+    send:  function () { tone(520, 700, 0.09, 0.04, 'sine'); tone(780, 980, 0.11, 0.035, 'sine', 0.07); },
+    back:  function () { tone(420, 300, 0.08, 0.03, 'sine'); },
+    pick:  function () { tone(700, 900, 0.06, 0.03, 'triangle'); }
+  };
+  function play(n) { if (!on) return; var now = performance.now(); if (now - last < 45) return; last = now; try { S[n](); } catch (e) {} }
+  window.uiSound = play;
+  addEventListener('pointerdown', function (e) {
+    var t = e.target.closest && e.target.closest('button, a[href], [role=button], .btn, .tool, .gcard, .subj, .lesson, .wa-row, .cb, .ptab, .mm-chip, .qz__o, label.switch');
+    if (!t || t.disabled || t.id === 'soundBtn') return;
+    if (t.matches('.wa-send, .ai-send, #paySend, [type=submit]')) play('send');
+    else if (t.matches('.back, .wa-hb, .ai-hb, .close, [data-a=cback], [data-x=close], [aria-label*="رجوع"], [aria-label*="إغلاق"]')) play('back');
+    else if (t.matches('.qz__o, .cb, .mm-chip, .seg__btn, .ptab')) play('pick');
+    else if (t.matches('.wa-row, .lesson, .gcard, .subj')) play('soft');
+    else play('tap');
+  }, { passive: true });
+  var b = document.createElement('button'); b.id = 'soundBtn'; b.type = 'button';
+  function draw() { b.textContent = on ? '🔊' : '🔇'; b.setAttribute('aria-label', on ? 'كتم الأصوات' : 'تشغيل الأصوات'); b.setAttribute('aria-pressed', String(on)); }
+  b.style.cssText = 'position:fixed;inset-inline-start:10px;bottom:calc(84px + env(safe-area-inset-bottom,0px));z-index:9000;width:38px;height:38px;border-radius:50%;border:1px solid rgba(255,255,255,.14);background:rgba(13,12,40,.7);-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px);color:#fff;font-size:17px;line-height:1;cursor:pointer;display:grid;place-items:center;opacity:.75;box-shadow:0 6px 18px rgba(0,0,0,.4)';
+  b.addEventListener('click', function () { on = !on; try { localStorage.setItem('uiSound', on ? '1' : '0'); } catch (e) {} draw(); if (on) S.pick(); });
+  draw(); document.body.appendChild(b);
+})();
+</script>
+<script>
+/* ظهور العناصر تدريجيًا وهي داخلة الشاشة (بما فيها اللي بتتضاف ديناميك) */
+(function () {
+  if (!('IntersectionObserver' in window) || matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+  var SEL = '.sec-title, .helper, .annc, .qz, .cm, .msg, .day, .lbox, .gbox, .thumbs, .progress, .bars, .hbar, .poll, .stu-mail, .pinned, .rate-sum, .dev, .wa-sec, .ai-conv > *';
+  var io = new IntersectionObserver(function (es) {
+    es.forEach(function (e) { if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target); } });
+  }, { threshold: .08, rootMargin: '0px 0px -6% 0px' });
+  function reg(n) {
+    if (n.nodeType !== 1 || n.__rv) return; n.__rv = 1;
+    var all = n.matches && n.matches(SEL) ? [n] : []; if (n.querySelectorAll) all = all.concat([].slice.call(n.querySelectorAll(SEL)));
+    all.forEach(function (el, k) {
+      if (el.__rv2) return; el.__rv2 = 1;
+      var r = el.getBoundingClientRect(); if (r.height === 0 && !el.offsetParent) { /* مخفي حاليًا: هنسجله برضه */ }
+      el.style.setProperty('--d', Math.min(k, 6) * 0.06 + 's'); el.classList.add('rv'); io.observe(el);
+    });
+  }
+  reg(document.body);
+  new MutationObserver(function (ms) { ms.forEach(function (m) { m.addedNodes.forEach(reg); }); }).observe(document.body, { childList: true, subtree: true });
+  setTimeout(function () { document.querySelectorAll('.rv:not(.in)').forEach(function (el) { var r = el.getBoundingClientRect(); if (r.top < innerHeight) el.classList.add('in'); }); }, 1500);
+})();
+</script>
+<script>
+/* كونفيتي، شرارات عند الضغط، أزرار مغناطيسية، بارالاكس، اهتزاز خفيف، ووضع خفيف للأجهزة الضعيفة */
+(function () {
+  var rm = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  var weak = (navigator.hardwareConcurrency && navigator.hardwareConcurrency <= 4) || (navigator.deviceMemory && navigator.deviceMemory <= 2);
+  if (weak) document.documentElement.classList.add('lite');
+  var fine = matchMedia('(hover:hover) and (pointer:fine)').matches;
+  var COL = ['#c6ff3d', '#ff5c8a', '#5b6cff', '#2ed3b7', '#ffb020', '#ffffff'];
+  function soundOn() { try { return localStorage.getItem('uiSound') !== '0'; } catch (e) { return true; } }
+
+  /* شرارات صغيرة عند الضغط على الأزرار */
+  function sparks(x, y) {
+    if (rm) return;
+    for (var k = 0; k < 7; k++) {
+      var d = document.createElement('i'), a = Math.random() * 6.283, r = 26 + Math.random() * 34;
+      d.className = 'spk'; d.style.left = x + 'px'; d.style.top = y + 'px'; d.style.background = COL[k % COL.length];
+      d.style.setProperty('--tx', Math.cos(a) * r + 'px'); d.style.setProperty('--ty', Math.sin(a) * r + 'px');
+      document.body.appendChild(d); setTimeout(function (n) { n.remove(); }.bind(null, d), 700);
+    }
+  }
+  addEventListener('pointerdown', function (e) {
+    var b = e.target.closest && e.target.closest('.btn, .tool, .mm-act, .cb, .wa-send, .ai-send');
+    if (!b || b.disabled) return;
+    if (!document.documentElement.classList.contains('lite')) sparks(e.clientX, e.clientY);
+    b.classList.remove('jelly'); void b.offsetWidth; b.classList.add('jelly');
+    if (navigator.vibrate && soundOn()) try { navigator.vibrate(6); } catch (x) {}
+  }, { passive: true });
+
+  /* كونفيتي */
+  var cv = null, cx = null, parts = [], run = false;
+  function frame() {
+    cx.clearRect(0, 0, cv.width, cv.height);
+    parts = parts.filter(function (p) { return p.y < cv.height + 20 && p.l > 0; });
+    parts.forEach(function (p) {
+      p.vy += .12; p.x += p.vx; p.y += p.vy; p.vx *= .99; p.r += p.vr; p.l -= 1;
+      cx.save(); cx.translate(p.x, p.y); cx.rotate(p.r); cx.globalAlpha = Math.min(1, p.l / 40); cx.fillStyle = p.c; cx.fillRect(-p.s / 2, -p.s / 3, p.s, p.s * .6); cx.restore();
+    });
+    if (parts.length) requestAnimationFrame(frame); else { run = false; cv.remove(); cv = null; }
+  }
+  window.confetti = function (x, y) {
+    if (rm || document.documentElement.classList.contains('lite')) return;
+    if (!cv) { cv = document.createElement('canvas'); cv.id = 'cfx'; cv.width = innerWidth; cv.height = innerHeight; document.body.appendChild(cv); cx = cv.getContext('2d'); }
+    x = x == null ? innerWidth / 2 : x; y = y == null ? innerHeight * .4 : y;
+    for (var k = 0; k < 90; k++) { var a = -Math.PI / 2 + (Math.random() - .5) * 2.2, v = 5 + Math.random() * 9;
+      parts.push({ x: x, y: y, vx: Math.cos(a) * v, vy: Math.sin(a) * v, s: 6 + Math.random() * 7, c: COL[k % COL.length], r: Math.random() * 6, vr: (Math.random() - .5) * .4, l: 90 + Math.random() * 60 }); }
+    if (!run) { run = true; requestAnimationFrame(frame); }
+  };
+  /* بيطلق الكونفيتي لوحده لما تظهر نتيجة اختبار أو علامة نجاح */
+  var seen = new WeakSet();
+  function chk(n) {
+    if (n.nodeType !== 1) return;
+    var hit = n.matches && (n.matches('.done__tick, .qz__score') ? n : null) || (n.querySelector && n.querySelector('.done__tick, .qz__score'));
+    if (hit && !seen.has(hit)) { seen.add(hit); setTimeout(function () { confetti(); }, 250); }
+  }
+  new MutationObserver(function (ms) { ms.forEach(function (m) { m.addedNodes.forEach(chk); }); }).observe(document.body, { childList: true, subtree: true });
+
+  if (fine && !rm) {
+    /* أزرار مغناطيسية */
+    addEventListener('pointermove', function (e) {
+      var b = e.target.closest && e.target.closest('.btn'); if (!b) return;
+      var r = b.getBoundingClientRect(), dx = (e.clientX - r.left - r.width / 2) / r.width, dy = (e.clientY - r.top - r.height / 2) / r.height;
+      b.style.translate = (dx * 8).toFixed(1) + 'px ' + (dy * 6).toFixed(1) + 'px';
+    }, { passive: true });
+    addEventListener('pointerout', function (e) { var b = e.target.closest && e.target.closest('.btn'); if (b) b.style.translate = ''; }, { passive: true });
+    /* هالة بتتبع الماوس */
+    var g = document.createElement('div'); g.id = 'cglow'; document.body.appendChild(g);
+    var gx = 0, gy = 0, gt = false;
+    addEventListener('pointermove', function (e) { gx = e.clientX; gy = e.clientY; g.style.opacity = 1; if (!gt) { gt = true; requestAnimationFrame(function () { g.style.transform = 'translate3d(' + gx + 'px,' + gy + 'px,0)'; gt = false; }); } }, { passive: true });
+    document.addEventListener('pointerleave', function () { g.style.opacity = 0; });
+  }
+  /* بارالاكس للهيرو */
+  if (!rm) { var pt = false; addEventListener('scroll', function () { if (pt) return; pt = true; requestAnimationFrame(function () { document.documentElement.style.setProperty('--py', Math.min(scrollY, 700)); pt = false; }); }, { passive: true }); }
+})();
+</script>
+<script>
+/* زرار ✨ للتحكم في التأثيرات (كاملة / خفيفة)، واختيارك بيتحفظ */
+(function () {
+  var h = document.documentElement, saved = null;
+  try { saved = localStorage.getItem('uiFx'); } catch (e) {}
+  if (saved === 'lite') h.classList.add('lite'); else if (saved === 'full') h.classList.remove('lite');
+  var b = document.createElement('button'); b.id = 'fxBtn'; b.type = 'button'; b.textContent = '✨';
+  function draw() { var full = !h.classList.contains('lite'); b.setAttribute('aria-pressed', String(full)); b.setAttribute('aria-label', full ? 'تقليل التأثيرات' : 'تشغيل كل التأثيرات'); b.title = full ? 'التأثيرات: كاملة' : 'التأثيرات: خفيفة'; }
+  b.addEventListener('click', function () { var lite = !h.classList.contains('lite'); h.classList.toggle('lite', lite); try { localStorage.setItem('uiFx', lite ? 'lite' : 'full'); } catch (e) {} draw(); if (window.uiSound) window.uiSound('pick'); });
+  draw(); document.body.appendChild(b);
+})();
+</script>
+<script>
+/* الطبقات 7 إلى 10: شريط علوي ينكمش، طيران زرار الإرسال، وإيقاف الحركة لما التبويب يتخبّى */
+(function () {
+  var h = document.documentElement, t = false;
+  addEventListener('scroll', function () { if (t) return; t = true; requestAnimationFrame(function () { h.classList.toggle('scrolled', scrollY > 24); t = false; }); }, { passive: true });
+  addEventListener('pointerdown', function (e) {
+    var b = e.target.closest && e.target.closest('.wa-send, .ai-send'); if (!b) return;
+    b.classList.add('fly'); setTimeout(function () { b.classList.remove('fly'); }, 480);
+  }, { passive: true });
+  document.addEventListener('visibilitychange', function () { h.classList.toggle('paused', document.hidden); });
+})();
+</script>
+<script>
+/* نقل زراري الصوت والتأثيرات لشريط الأزرار العلوي بدل ما يطفوا فوق الصفحة */
+(function () {
+  var nb = document.querySelector('.nav__btns'), sb = document.getElementById('soundBtn'), fb = document.getElementById('fxBtn');
+  if (!nb) return;
+  if (fb) nb.prepend(fb);
+  if (sb) nb.prepend(sb);
+})();
+</script>
 </body>
 </html>
