@@ -1513,7 +1513,7 @@
     .ai-paper td,.ai-paper th{border:1.5px solid #e8c4dc;padding:6px 9px;font-size:14px}
     .ai-paper blockquote{border-right:4px solid #b77be8;background:#f6efff;margin:8px 0;padding:6px 12px;border-radius:10px}
     .qz-go{display:block;margin:14px auto 4px;padding:11px 20px;border:0;border-radius:14px;background:linear-gradient(90deg,#ff6fa5,#7a5cff);color:#fff;font:inherit;font-weight:700;cursor:pointer}
-    .qz{position:fixed;inset:0;z-index:9999;overflow:auto;direction:rtl;background:linear-gradient(160deg,#e8f0ff,#f6e9ff);color:#1b1a3a;font-family:inherit}
+    .qzov{position:fixed;inset:0;z-index:9999;overflow:auto;direction:rtl;background:linear-gradient(160deg,#e8f0ff,#f6e9ff);color:#1b1a3a;font-family:inherit}
     .qz-w{max-width:640px;margin:0 auto;padding:12px 14px 40px}
     .qz-top{display:flex;align-items:center;gap:10px;padding:8px 0;font-size:17px}
     .qz-x{border:0;background:#fff;border-radius:50%;width:38px;height:38px;font-size:17px;cursor:pointer;box-shadow:0 2px 8px rgba(0,0,0,.12)}
@@ -1542,7 +1542,57 @@
     .qz-err{color:#e5484d;margin-top:8px}.qz-load{text-align:center;padding:30px 0}
     .qz-res{text-align:center}.qz-score{width:130px;height:130px;margin:6px auto;border-radius:50%;display:grid;place-content:center;background:conic-gradient(#7a5cff calc(var(--p)*1%),#e6e9f7 0)}
     .qz-score b{font-size:34px;background:#fff;border-radius:50%;width:104px;height:70px;display:grid;place-items:center;padding-top:34px;margin:0 auto -34px}.qz-score small{background:#fff;width:104px;margin:0 auto;padding-bottom:22px;border-radius:0 0 52px 52px}
-    .qz-acts{display:grid;grid-template-columns:1fr 1fr;gap:8px}.qz-acts .alt{grid-column:1/3}
+    .qz-acts{display:grid;grid-template-columns:1fr 1fr;gap:8px}.qz-acts .wide{grid-column:1/3}
+    .qz-hint{border:0;background:#fff6dc;color:#8a6100;border-radius:10px;padding:6px 12px;font:inherit;cursor:pointer;margin-bottom:8px}.qz-hintbox{background:#fff6dc;border-radius:10px;padding:8px 12px;margin-bottom:10px;line-height:1.8}
+    .qz-calc{display:flex;gap:8px;align-items:center}.qz-calc input{flex:1}.qz-calc b{color:#3b4ea8}
+    .qz-br{display:flex;align-items:center;gap:8px;margin:6px 0;font-size:14px}.qz-br span{width:110px;text-align:right}.qz-br i{flex:1;height:10px;background:#e6e9f7;border-radius:8px;overflow:hidden}.qz-br u{display:block;height:100%;background:linear-gradient(90deg,#ff6fa5,#7a5cff)}.qz-br b{width:42px}
+    .ai-pic{width:20px;height:20px;border-radius:50%;object-fit:cover;vertical-align:middle;background:#000;box-shadow:0 0 0 1.5px #d9a93a}
+    .ai-logo{padding:0;overflow:hidden;background:#000;box-shadow:0 0 0 2px #d9a93a,0 3px 0 #8a6a1c}.ai-logo .ai-pic{width:100%;height:100%;box-shadow:none}
+    .ai-wel .big .ai-pic{width:112px;height:112px;box-shadow:0 0 0 3px #d9a93a,0 0 26px rgba(60,120,255,.55)}
+    .wa-av .ai-pic{width:100%;height:100%;box-shadow:none}
+
+    .ai-paper.ex{border:0;padding:0 0 12px;overflow:hidden;box-shadow:0 10px 28px rgba(122,92,255,.22)}
+    .ai-paper.ex::before{content:'📘 ورقة شرح';display:block;background:linear-gradient(90deg,#7a5cff,#ff6fa5);color:#fff!important;font-weight:700;padding:9px 16px;margin-bottom:8px}
+    .ai-paper.ex>*{margin-right:14px;margin-left:14px}.ai-paper.ex>h2,.ai-paper.ex>h3,.ai-paper.ex>h4{margin-right:14px}
+    .ai-paper b,.ai-paper strong{background:linear-gradient(transparent 60%,#ffe58a 60%);padding:0 2px}
+    .ai-paper h2:nth-of-type(4n+2),.ai-paper h3:nth-of-type(4n+2){background:linear-gradient(90deg,#7a5cff,#5aa0ff)}
+    .ai-paper h2:nth-of-type(4n+3),.ai-paper h3:nth-of-type(4n+3){background:linear-gradient(90deg,#1fb98a,#52d6a8)}
+    .ai-paper h2:nth-of-type(4n),.ai-paper h3:nth-of-type(4n){background:linear-gradient(90deg,#f5a623,#ff8a3d)}
+    .ai-paper h4{color:#7a5cff!important;margin:10px 0 2px}
+    .ai-paper tr:nth-child(even) td{background:#faf5ff}.ai-paper th{background:linear-gradient(90deg,#fbe4f0,#ece4ff)}
+    .ai-paper blockquote{background:#fff6dc;border-right:5px solid #f5a623}
+    .ai-paper ul,.ai-paper ol{padding-right:22px}.ai-paper li::marker{color:#ff6fa5}
+
+  
+    /* ==========================================================
+       لمسة جمال عامة للمنصة (فوق التصميم الحالي)
+       ========================================================== */
+    :root{--g1:rgba(59,59,255,.20);--g2:rgba(255,92,138,.11);--ring:color-mix(in srgb,var(--txt) 9%,transparent)}
+    :root[data-theme="light"]{--g1:rgba(59,59,255,.07);--g2:rgba(255,92,138,.06)}
+    html{-webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility;scrollbar-width:thin;scrollbar-color:color-mix(in srgb,var(--mut) 55%,transparent) transparent}
+    ::selection{background:var(--pink);color:#fff}
+    ::-webkit-scrollbar{width:8px;height:8px}::-webkit-scrollbar-thumb{background:color-mix(in srgb,var(--mut) 50%,transparent);border-radius:8px}::-webkit-scrollbar-track{background:transparent}
+    body,.panel{background-image:radial-gradient(900px 520px at 92% -6%,var(--g1),transparent 65%),radial-gradient(700px 480px at -6% 38%,var(--g2),transparent 65%);background-attachment:fixed}
+    :focus-visible{outline:3px solid var(--pink);outline-offset:3px}
+
+    .btn{background:linear-gradient(180deg,#dcff7a,#c6ff3d 52%,#a9e02a);box-shadow:0 5px 0 #8fbf12,0 14px 26px rgba(198,255,61,.25),inset 0 2px 0 rgba(255,255,255,.55)}
+    .btn:hover{filter:brightness(1.05)}
+    .btn:active{box-shadow:0 1px 0 #8fbf12,inset 0 2px 0 rgba(255,255,255,.4)}
+
+    .gcard{box-shadow:0 16px 32px rgba(0,0,0,.38),inset 0 -7px 0 rgba(0,0,0,.16),inset 0 2px 0 rgba(255,255,255,.3)}
+    .subj{box-shadow:0 8px 0 color-mix(in srgb,var(--acc) 60%,#000),0 20px 32px rgba(0,0,0,.28),inset 0 2px 0 rgba(255,255,255,.28)}
+    .lesson,.row,.stat{box-shadow:0 0 0 1px var(--ring),0 12px 26px rgba(0,0,0,.16);transition:transform .3s cubic-bezier(.3,1.5,.5,1),box-shadow .3s}
+    @media (hover:hover){.lesson:hover,.row:hover{transform:translateY(-3px);box-shadow:0 0 0 1px color-mix(in srgb,var(--acc) 45%,transparent),0 18px 34px rgba(0,0,0,.24)}}
+    .lesson{background:linear-gradient(135deg,var(--card),color-mix(in srgb,var(--card) 86%,var(--acc)))}
+    .stat{background:linear-gradient(160deg,var(--card),color-mix(in srgb,var(--card) 88%,var(--blue)))}
+
+    .field input:focus,.field textarea:focus{outline:none;border-color:var(--blue);box-shadow:0 0 0 4px rgba(59,59,255,.25)}
+    .modal{backdrop-filter:blur(10px) saturate(1.2);-webkit-backdrop-filter:blur(10px) saturate(1.2)}
+    .sheet{box-shadow:0 30px 70px rgba(0,0,0,.5),0 0 0 1px var(--ring)}
+    .toast{background:rgba(20,18,59,.92);backdrop-filter:blur(10px);box-shadow:0 12px 32px rgba(0,0,0,.4),0 0 0 1px rgba(255,255,255,.1)}
+    .chip{box-shadow:0 2px 0 rgba(0,0,0,.18),inset 0 1px 0 rgba(255,255,255,.5)}
+    .ptab{box-shadow:0 0 0 1px var(--ring)}
+    .ai-m--bot{box-shadow:0 0 0 1px var(--ring),0 8px 20px rgba(0,0,0,.18)}
   </style>
 </head>
 
@@ -2004,6 +2054,9 @@
   </div>
 
   <script type="module">
+    const AI_LOGO = 'data:image/webp;base64,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';
+    const AI_IMG = '<img class="ai-pic" src="' + AI_LOGO + '" alt="">';
+
     /* ==========================================================
        Firebase
        ========================================================== */
@@ -4795,11 +4848,11 @@ const deleteUser = u => previewing ? (pvBlock(), Promise.reject(new Error('previ
         ${isAdminStaff() ? '<div class="chips">' + GRADES.map((x, i) => `<button type="button" class="cb" data-a="grade" data-id="${i}" aria-pressed="${i === g}">${x.name}</button>`).join('') + '</div>' : ''}
         <h3 class="wa-sec">المجموعات</h3>
         <div class="wa-list">${ROOMS.map(r => crow(r.ic, roomName(r, g), 'مجموعة ' + GRADES[g].name, 'room', 'g' + g + '_' + r.k, `data-t="${esc(roomName(r, g))}"`)).join('')}</div>
-        ${isOwner() ? `<h3 class="wa-sec">الإدارة</h3><div class="wa-list">${crow('👥', 'كل الناس وأكوادهم', 'كل الطلاب بأسمائهم وأكوادهم (للمالك بس)', 'people') + crow('🤖', 'الـ AI', 'الطلاب بأكوادهم وكل محادثاتهم وملفاتهم مع Learn Ai (للمالك بس)', 'aiadmin')}</div>` : ''}
+        ${isOwner() ? `<h3 class="wa-sec">الإدارة</h3><div class="wa-list">${crow('👥', 'كل الناس وأكوادهم', 'كل الطلاب بأسمائهم وأكوادهم (للمالك بس)', 'people') + crow(AI_IMG, 'الـ AI', 'الطلاب بأكوادهم وكل محادثاتهم وملفاتهم مع Learn Ai (للمالك بس)', 'aiadmin')}</div>` : ''}
         <h3 class="wa-sec">${isAdminStaff() ? 'رسايل الطلاب' : 'كلم الإدارة'}</h3>
         <div class="wa-list" ${isAdminStaff() ? 'id="cThreads"' : ''}>${isAdminStaff() ? '<p class="empty">مفيش رسايل.</p>'
           : crow('💻', 'كلم داما', 'المبرمج اللي عامل المنصة', 'thread', 'dev') + crow('👨‍🏫', 'كلم المستر', 'اسأله أي سؤال', 'thread', 'teacher')}</div>
-        ${'<h3 class="wa-sec">المساعد الذكي</h3><div class="wa-list">' + crow('🤖', 'Learn Ai', 'مساعد المذاكرة: تلخيص، شرح، اختبارات وأكتر', 'ai') + '</div>'}
+        ${'<h3 class="wa-sec">المساعد الذكي</h3><div class="wa-list">' + crow(AI_IMG, 'Learn Ai', 'مساعد المذاكرة: تلخيص، شرح، اختبارات وأكتر', 'ai') + '</div>'}
         <h3 class="wa-sec">لوحة الشرف</h3>
         <div class="wa-list">${crow('🏆', 'لوحة الشرف', 'أعلى درجات الأسبوع', 'board')}</div>
         <h3 class="wa-sec">تقييم المنصة</h3>
@@ -5403,11 +5456,11 @@ const deleteUser = u => previewing ? (pvBlock(), Promise.reject(new Error('previ
     const AI_MAX_CHARS = 30000;
 
     const AI_TOOLS = {
-      chat:      { n: '💬 اسأل', d: 'اسأل أي سؤال وهتلاقي مدرس صبور بيرد عليك بالعامية.', ph: 'اكتب سؤالك...', p: 'جاوب على السؤال ده زي مدرس شاطر وصبور، بالعامية المصرية، وبشكل مرتب.' },
+      chat:      { n: '💬 اسأل', d: 'اسأل أي سؤال، أو قول «اشرحلي جزء كذا» وهشرحهولك بأمثلة وأسألك وأدّيك أسئلة شبهه.', ph: 'اكتب سؤالك أو اطلب شرح جزء...', p: 'جاوب على السؤال ده زي مدرس شاطر وصبور، بالعامية المصرية، وبشكل مرتب.' },
       summarize: { n: '📝 تلخيص', d: 'ملخص مرتب وجاهز للمراجعة، تقدر تنزله PDF أو صورة.', ph: 'الصق الدرس أو النص اللي عايز تلخصه...',
-        p: 'لخّصلي المحتوى ده ملخص احترافي مرتب للمراجعة، بالعامية المصرية، وبالتقسيم ده بالظبط:\n## 📌 الفكرة العامة\n(جملتين بس)\n## 🔑 النقاط الأساسية\n(نقاط قصيرة ومرتبة، والكلمات المفتاحية **بولد**)\n## 📖 مصطلحات مهمة\n(جدول: | المصطلح | معناه |)\n## ⚠️ لازم تحفظها\n(قوانين / تواريخ / أرقام / تعريفات بالنص)\n> 💡 نصيحة للحفظ أو تنبيه على غلطة شائعة\n## ✅ خلاصة المراجعة\n(3 أو 4 سطور تتراجع في دقيقة)\nماتزودش حاجة مش موجودة في المحتوى. المحتوى:' },
+        p: 'لخّصلي المحتوى ده ورقة مراجعة احترافية للامتحان، بالعامية المصرية، وبالتقسيم ده بالظبط:\n## 📌 الفكرة العامة\n(جملتين بس)\n## 🔑 النقاط الأساسية\n(نقاط قصيرة مرتبة بترتيب الدرس، والكلمات المفتاحية **بولد**)\n## 📖 مصطلحات مهمة\n(جدول: | المصطلح | معناه |)\n## 📊 مقارنات وتصنيفات\n(جدول مقارنة لو المحتوى فيه حاجات متشابهة، ولو مفيش ماتحطش القسم)\n## ⚠️ لازم تحفظها\n(قوانين / تواريخ / أرقام / تعريفات بالنص)\n## 🧠 حيل حفظ\n(اختصارات أو تشبيهات للحاجات الصعبة، ولو مفيش ماتحطش القسم)\n## ❓ أسئلة متوقعة في الامتحان\n(5 أسئلة بصيغة الامتحان: علل / بم تفسر / ما المقصود بـ، مع إجابة مختصرة لكل سؤال)\n> 💡 نصيحة للحفظ أو تنبيه على غلطة شائعة\n## ✅ خلاصة المراجعة\n(3 أو 4 سطور تتراجع في دقيقة)\nماتزودش حاجة مش موجودة في المحتوى. المحتوى:' },
       explain:   { n: '💡 شرح', d: 'شرح بالعامية، خطوة خطوة، بأمثلة من حياتنا.', ph: 'الصق الدرس أو اكتب الموضوع اللي عايز تفهمه...',
-        p: 'اشرحلي الموضوع ده زي مدرس شاطر بيشرح لطالب قدامه، بالعامية المصرية:\n1) ابدأ بالفكرة الأساسية في جملة بسيطة.\n2) اشرح خطوة خطوة من الأساس، وكل خطوة تحت عنوان صغير.\n3) أي فكرة صعبة وضّحها بتشبيه أو مثال من حياتنا اليومية.\n4) نبّه على الأخطاء اللي الطلبة بتقع فيها (في بلوك > ⚠️).\n5) اختم بـ "خلاصة في سطرين" وسؤال واحد يخلّي الطالب يفكر.\nاستخدم إيموجي خفيف، وماتطوّلش من غير فايدة. الموضوع:' },
+        p: 'اشرحلي الموضوع ده شرح احترافي زي أحسن مدرس، بالعامية المصرية، ومن غير ما تزوّد حاجة مش في المنهج، وبالترتيب ده بالظبط:\n## 🎯 الفكرة في جملة\n(جملة واحدة بسيطة)\n## 🧩 الشرح خطوة بخطوة\n(كل خطوة تحت عنوان ### قصير، من الأساس للتفصيلة، والمصطلحات **بولد** وبعدها معناها بالعامية)\n## 🌍 مثال من حياتنا\n(تشبيه أو مثال واقعي يوضّح أصعب فكرة)\n## 📊 جدول سريع\n(لو فيه مقارنة أو تصنيف: جدول | العنصر | المعنى | مثال |، ولو مفيش ماتحطش القسم)\n> ⚠️ أخطاء شائعة: (2 لـ 3 أخطاء بتقع فيها الطلبة وإزاي تتجنبها)\n## 🔑 لازم تحفظ\n(القوانين والتعريفات والتواريخ بالنص الصح)\n## 🧠 حيلة حفظ\n(اختصار أو قافية أو تشبيه يسهّل الحفظ، ولو مفيش حاجة تستاهل ماتحطش القسم)\n## 🎯 إزاي بيجي في الامتحان\n(نوع الأسئلة اللي بتيجي على الجزء ده: علل / قارن / احسب / ما المقصود)\n## ✍️ اختبر نفسك\n(3 أسئلة متدرّجة، وبعدها سطر \"الإجابات:\" فيه إجابة كل سؤال في سطر)\n## ✅ الخلاصة\n(سطرين)\nاستخدم إيموجي خفيف ومثّل الأرقام والقوانين بوضوح. الموضوع:' },
       quiz:      { n: '❓ اختبار', d: 'أسئلة اختيار من متعدد وصح/خطأ مع التفسير.', ph: 'الصق الدرس اللي عايز تتختبر فيه...',
         p: 'اعملي اختبار من المحتوى ده: 8 أسئلة اختيار من متعدد (أ، ب، ج، د) + سؤالين صح/خطأ، متدرّجين من السهل للصعب. اعرض الأسئلة كلها الأول من غير إجابات، وبعدها قسم "## الإجابات" فيه الإجابة الصح مع تفسير قصير بالعامية لكل سؤال. المحتوى:' },
       cards:     { n: '🗂️ فلاش كاردز', d: 'بطاقات سؤال/جواب للحفظ السريع.', ph: 'الصق الدرس اللي عايز تحوله لبطاقات...',
@@ -5415,7 +5468,7 @@ const deleteUser = u => previewing ? (pvBlock(), Promise.reject(new Error('previ
       plan:      { n: '📅 خطة مذاكرة', d: 'جدول مذاكرة من المنهج والوقت المتاح.', ph: 'اكتب المواد/المنهج، والوقت المتاح يوميًا، وموعد الامتحان...',
         p: 'اعملي خطة مذاكرة واقعية في جدول منظم (| اليوم | المادة/الدرس | المدة | نوع المذاكرة |) بناءً على المعلومات دي. وزّع المراجعات والراحة، وآخر الجدول حط 3 نصايح مختصرة بالعامية. المعلومات:' },
       solve:     { n: '🧮 حل مسألة', d: 'حل خطوة بخطوة مع توضيح كل قانون.', ph: 'اكتب المسألة هنا...',
-        p: 'احلّي المسألة دي خطوة بخطوة بالعامية المصرية: اكتب المعطيات والمطلوب، وبعدين كل خطوة مع القانون المستخدم وليه استخدمناه، وبعدين راجع الناتج، وفي الآخر نبّه على أخطاء شائعة في النوع ده من المسائل. المسألة:' },
+        p: 'احلّي المسألة دي بأسلوب ورقة الامتحان، بالعامية المصرية:\n## 📋 المعطيات والمطلوب\n(اكتبهم في نقط مع الوحدات)\n## 📐 القانون\n(القانون المستخدم وليه هو المناسب)\n## 🧮 الحل خطوة بخطوة\n(كل خطوة في سطر: التعويض ثم الناتج بوحدته)\n## ✅ النتيجة النهائية\n(الناتج بوحدته في سطر واضح)\n## 🔍 مراجعة الحل\n(تأكد من الوحدات ومعقولية الناتج، أو اتحقق بطريقة تانية)\n> ⚠️ أخطاء شائعة في النوع ده من المسائل\nالمسألة:' },
       mind:      { n: '🧠 خريطة ذهنية', d: 'خريطة ذهنية احترافية بأكتر من شكل، تنزلها صورة أو PDF.', ph: 'الصق الدرس أو اكتب اسم الموضوع...',
         p: 'حوّل المحتوى ده لخريطة ذهنية احترافية. رجّع JSON صالح بس جوه كتلة ```json من غير أي كلام قبلها أو بعدها، بالشكل ده بالظبط:\n{"title":"عنوان قصير","layout":"radial","nodes":[{"t":"فرع رئيسي","c":[{"t":"فكرة فرعية","c":[{"t":"تفصيلة"}]}]}]}\nالقواعد:\n- title: عنوان الموضوع (أقصى 5 كلمات).\n- layout: اختار الأنسب لنوع المحتوى (لو الطالب حدد شكل التزم بيه): radial للموضوعات العامة | tree للتصنيفات والأقسام | top للهيكل والتدرّج | flow للخطوات والعمليات والتجارب | time للأحداث والتاريخ والمراحل | cols للمقارنة بين حاجات.\n- من 4 لـ 8 فروع رئيسية، وتحت كل فرع من 2 لـ 5 أفكار، ومستوى تالت للتفاصيل المهمة بس. لو layout هو flow أو time رتّب الفروع الرئيسية بالترتيب الصح.\n- كل t كلمات مفتاحية قصيرة (أقصى 6 كلمات) مش جمل طويلة، بالعامية المصرية والمصطلحات العلمية زي ما هي.\n- ممنوع أي حقل غير title و layout و nodes و t و c، وممنوع تعليقات.\nالمحتوى:' }
     };
@@ -5433,8 +5486,15 @@ const deleteUser = u => previewing ? (pvBlock(), Promise.reject(new Error('previ
   ? 'اكتب بإنجليزي بسيط وودود، كأنك مدرس بيشرح لطالب.'
   : 'اتكلم بالعامية المصرية الطبيعية زي مدرس شاطر ودمه خفيف وصبور. أمثلة على نبرتك: "تعالى نفهمها سوا"، "بص يا سيدي"، "ببساطة كده"، "خد بالك هنا"، "تمام؟ نكمل". استخدم: ده/دي/دول، إزاي، ليه، كده، يعني، عشان، لسه، دلوقتي. المصطلحات العلمية والقوانين والأسماء تفضل زي ما هي في المنهج، وبعدها فسّرها بالعامية. ماتستخدمش فصحى تقيلة ولا ردود آلية.'}
 - مستوى الطالب: ${level}. اظبط عمق الشرح عليه.
-${brief ? '- الرد لازم يبقى مختصر ومباشر: الإجابة بس من غير مقدمات ولا شرح ولا أمثلة ولا ترحيب ولا خاتمة ولا سؤال في الآخر (سطر لـ 3 سطور بالكتير). ماتشرحش ولا تفصّل.\n- لو الطالب طلب تلخيص أو اختبار أو فلاش كاردز أو خطة مذاكرة أو خريطة ذهنية أو شرح مطوّل، جاوبه بس: "مش هقدر أعمل ده، أنا بس بقدر أرد على أسئلتك".' : '- ابدأ بالمفيد على طول من غير مقدمات طويلة، واشرح من البسيط للمعقد، وادّي مثال واقعي لكل فكرة صعبة.'}
-${brief ? '- ماتستخدمش عناوين ولا جداول؛ **بولد** للكلمة المفتاحية بس لو لازم. ماتحطش صور ولا لينكات.' : '- نسّق بـ Markdown مرتب: عناوين ## ، نقاط قصيرة، جداول للمقارنات، **بولد** للكلمات المفتاحية، وبلوك اقتباس > للنصايح والتنبيهات. ماتحطش صور ولا لينكات.'}
+${brief ? '- وضع المدرس الخصوصي للطالب:\n• لو سأل سؤال بسيط أو عايز معلومة: جاوب مختصر ومباشر (سطر لـ 3 سطور).\n• لو طلب شرح جزء أو درس (اشرح / مش فاهم / وضّحلي): اشرحه بالتفصيل كنص جذاب: سطر فكرة بإيموجي، وبعدها الشرح في 3 أو 4 فقرات قصيرة والمصطلحات **بولد**، وبعدها مثالين من حياتنا أو من المنهج، ولو فيه قانون أو مقارنة اكتبهم في سطر واضح أو جدول صغير. واختم بسؤال واحد بس يختبر الفهم تحت عنوان "🧠 جرّب كده:" وبعدها وقّف وانتظر إجابة الطالب.\n• لما الطالب يجاوب على سؤالك: قيّم إجابته (✅ صح / 🟡 ناقصة / ❌ غلط)، وفسّر ليه في سطرين وصحّح لو فيه غلط، وبعدها اديه سؤال تاني شبه الأول بس بفكرة أو أرقام مختلفة تحت "🧠 جرّب كمان:" واستنى إجابته. لو جاوب 3 صح ورا بعض امدحه واعرض عليه ينتقل للجزء اللي بعده أو يطلب سؤال أصعب.\n• لو قال "مش فاهم" أو "بسّط": اشرح بطريقة أبسط ومثال جديد.\n• لو الطالب طلب تلخيص أو فلاش كاردز أو خطة مذاكرة أو خريطة ذهنية: جاوبه بس "مش هقدر أعمل ده، أنا بس بقدر أشرح وأجاوب على أسئلتك". ولو عايز اختبار يقولك "اختبرني" وهتبدأ الأسئلة.' : '- ابدأ بالمفيد على طول من غير مقدمات طويلة، واشرح من البسيط للمعقد، وادّي مثال واقعي لكل فكرة صعبة.'}
+${brief ? '- اكتب نص دردشة مرتب وجذاب: فقرات قصيرة، إيموجي خفيف في أول كل فكرة، **بولد** للمصطلحات والقوانين، وجدول صغير للمقارنة لو لازم، وبلوك > للتنبيه على غلطة شائعة. ماتستخدمش عناوين ## كبيرة ولا صور ولا لينكات.' : '- نسّق بـ Markdown مرتب: عناوين ## ، نقاط قصيرة، جداول للمقارنات، **بولد** للكلمات المفتاحية، وبلوك اقتباس > للنصايح والتنبيهات. ماتحطش صور ولا لينكات.'}
+قواعد الجودة (مهمة جدًا):
+- التزم بالمنهج المصري ومستوى الطالب، والمعلومة لازم تبقى صحيحة 100%: الأرقام والقوانين والتواريخ والتعريفات بالنص المعتمد في الكتاب.
+- لو المحتوى اللي بعته الطالب فيه معلومة غلط أو ناقصة، نبّه عليها بلطف وصحّحها.
+- المصطلح العلمي يتكتب بالعربي وبعده بين قوسين بالإنجليزي لو متعارف عليه.
+- القوانين والمعادلات تتكتب في سطر لوحدها مع معنى كل رمز ووحدته.
+- في المسائل راجع الناتج مرتين وراجع الوحدات قبل ما تكتبه.
+- لو فيه حاجة صعبة الحفظ ادّي حيلة حفظ أو تشبيه، وماتكررش نفس الفكرة، وكل جملة لازم تفيد.
 - كن دقيقاً، ولو معلومة مش متأكد منها قول كده بدل ما تخمّن. ركّز على المذاكرة والتعليم.`;
 
     const AI_R_NAME = `أنا **${AI_NAME}**، مساعد المذاكرة بتاعك في منصة Learn With Me 🚀 اسألني في أي درس وأنا أشرحه لك.`;
@@ -5457,7 +5517,7 @@ ${brief ? '- ماتستخدمش عناوين ولا جداول؛ **بولد** ل
 
     /* الطالب: أي طلب أداة (تلخيص/اختبار/كروت/خطة/خريطة/شرح) يترفض فوراً */
     const AI_R_NO = 'مش هقدر أعمل ده 🙏 أنا بس بقدر أرد على أسئلتك. اسألني أي سؤال وأجاوبك.';
-    const AI_RE_TOOL = /لخص|تلخيص|ملخص|اختبرني|امتحني|quiz me|summar|(?:اعمل|اعملي|اعمللي|هات|هاتلي|عايز|عاوز|اديني|ادني)\s+(?:\S+\s+){0,3}?(?:اختبار|كويز|quiz)|فلاش|كاردز|flash ?cards?|بطاقات مراجعه|(?:خطه|جدول)\s+(?:مذاكره|دراسيه|دراسه)|study plan|خريطه ذهنيه|mind ?map|(?:^|\s)(?:اشرح|اشرحلي|اشرحي|شرح|explain)(?:\s|$)/;
+    const AI_RE_TOOL = /لخص|تلخيص|ملخص|اختبرني|امتحني|quiz me|summar|(?:اعمل|اعملي|اعمللي|هات|هاتلي|عايز|عاوز|اديني|ادني)\s+(?:\S+\s+){0,3}?(?:اختبار|كويز|quiz)|فلاش|كاردز|flash ?cards?|بطاقات مراجعه|(?:خطه|جدول)\s+(?:مذاكره|دراسيه|دراسه)|study plan|خريطه ذهنيه|mind ?map/;
     function aiStudentBlock(raw) { return AI_RE_TOOL.test(aiNorm(raw).slice(0, 3000)) ? AI_R_NO : ''; }
 
     /* ---- ماركداون آمن (كل نص بيتعمله esc قبل أي وسم) ---- */
@@ -5523,14 +5583,14 @@ ${brief ? '- ماتستخدمش عناوين ولا جداول؛ **بولد** ل
       const isMind = !!(prev && prev.tool === 'mind');
       const mp = (isMind || /"(nodes|children)"\s*:/.test(m.text || '')) ? mmParse(m.text, isMind) : null;
       if (mp) return mmCardHtml(m, i, who, prev, mp);
-      if (isMind) return `<div class="ai-m ai-m--bot"><b class="ai-who">🤖 ${AI_NAME}</b><p>الخريطة ماطلعتش صح المرة دي، جرّب تبعت تاني.</p><details class="ai-fl"><summary>الرد الأصلي</summary><div>${esc(m.text)}</div></details></div>`;
-      const ex = who ? '' : `<div class="ai-ex"><button type="button" class="ai-cp" data-ai="copy" data-i="${i}">نسخ</button>${true ? `<button type="button" class="ai-cp" data-ai="spdf" data-i="${i}">📄 PDF</button><button type="button" class="ai-cp" data-ai="spng" data-i="${i}">🖼️ صورة</button>` : ''}</div>`;
+      if (isMind) return `<div class="ai-m ai-m--bot"><b class="ai-who">${AI_IMG} ${AI_NAME}</b><p>الخريطة ماطلعتش صح المرة دي، جرّب تبعت تاني.</p><details class="ai-fl"><summary>الرد الأصلي</summary><div>${esc(m.text)}</div></details></div>`;
+      const ex = who ? '' : `<div class="ai-ex"><button type="button" class="ai-cp" data-ai="copy" data-i="${i}">نسخ</button>${isAdminStaff() ? `<button type="button" class="ai-cp" data-ai="spdf" data-i="${i}">📄 PDF</button><button type="button" class="ai-cp" data-ai="spng" data-i="${i}">🖼️ صورة</button>` : ''}</div>`;
       const rt = who
         ? (m.rate ? `<span class="ai-rb${m.rate < 0 ? ' bad' : ''}">${m.rate > 0 ? '👍 الطالب قيّم الرد: كويس' : '👎 الطالب قيّم الرد: ضعيف'}</span>` : '')
         : '';
       const rbtn = (!who && m.role === 'assistant') ? `<span class="ai-rate"><button type="button" data-ai="rate" data-i="${i}" data-v="1" aria-pressed="${m.rate === 1}" aria-label="الرد كويس">👍</button><button type="button" data-ai="rate" data-i="${i}" data-v="-1" aria-pressed="${m.rate === -1}" aria-label="الرد ضعيف">👎</button></span>` : '';
       const ex2 = ex ? ex.replace(/<\/div>$/, rbtn + '</div>') : '';
-      return `<div class="ai-m ai-m--bot${who && m.rate < 0 ? ' ai-m--bad' : ''}"><b class="ai-who">🤖 ${AI_NAME}</b>${aiPaper(m.text)}${ex2}${rt}${m.ts && who ? `<small class="ai-ts">${esc(fFull(m.ts))}</small>` : ''}</div>`;
+      return `<div class="ai-m ai-m--bot${who && m.rate < 0 ? ' ai-m--bad' : ''}"><b class="ai-who">${AI_IMG} ${AI_NAME}</b>${aiPaper(m.text)}${ex2}${rt}${m.ts && who ? `<small class="ai-ts">${esc(fFull(m.ts))}</small>` : ''}</div>`;
     }
 
     /* تقييم رد المساعد: 👍/👎 (الضغط تاني بيشيل التقييم) */
@@ -5558,11 +5618,10 @@ ${brief ? '- ماتستخدمش عناوين ولا جداول؛ **بولد** ل
       cBody.innerHTML = `<div class="ai">
         <header class="ai-h">
           <button class="ai-hb" type="button" data-a="cback" aria-label="رجوع"><svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true"><path fill="currentColor" d="M4 11h12.2l-5.6-5.6L12 4l8 8-8 8-1.4-1.4 5.6-5.6H4z"/></svg></button>
-          <span class="ai-logo">🤖</span>
+          <span class="ai-logo">${AI_IMG}</span>
           <span class="ai-ht"><b>${AI_NAME}</b><small id="aiSub"></small></span>
           <button class="ai-hb" type="button" data-ai="hist" aria-label="المحادثات السابقة">🕘</button>
           <button class="ai-hb" type="button" data-ai="new" aria-label="محادثة جديدة">＋</button>
-          <button class="ai-hb" type="button" data-ai="qz" aria-label="اختبار تفاعلي">❓</button>
         </header>
         <div class="ai-tools" id="aiTools"></div>
         <div class="ai-msgs" id="aiMsgs"></div>
@@ -5635,10 +5694,10 @@ ${brief ? '- ماتستخدمش عناوين ولا جداول؛ **بولد** ل
       const box = $ai('aiMsgs'); if (!box) return;
       const t = AI_TOOLS[AI.tool];
       let h = AI.msgs.map((m, i) => aiMsgHtml(m, i, null, AI.msgs[i - 1])).join('');
-      if (!AI.msgs.length && !AI.busy) h = `<div class="ai-wel"><div class="big">🚀</div><h3>${esc(t.n)}</h3><p>${esc(t.d)}</p><button type="button" class="qz-go" data-ai="qz">❓ اختبرني بأسئلة تفاعلية</button><small>🔒 محادثاتك مع ${AI_NAME}محادثاتك محدش بيشوفها غيرك.</small></div>`;
+      if (!AI.msgs.length && !AI.busy) h = `<div class="ai-wel"><div class="big">${AI_IMG}</div><h3>${esc(t.n)}</h3><p>${esc(t.d)}</p><small>🔒 محادثاتك مع ${AI_NAME}محادثاتك محدش بيشوفها غيرك.</small></div>`;
       if (AI.busy) {
         const lm = AI.msgs[AI.msgs.length - 1], mindNow = lm && lm.tool === 'mind';
-        h += `<div class="ai-m ai-m--bot"><b class="ai-who">🤖 ${AI_NAME}</b>${mindNow ? '<p>🧠 برسملك الخريطة الذهنية...</p><span class="ai-typing"><i></i><i></i><i></i></span>' : AI.live ? aiMd(AI.live) : '<span class="ai-typing"><i></i><i></i><i></i></span>'}</div>`;
+        h += `<div class="ai-m ai-m--bot"><b class="ai-who">${AI_IMG} ${AI_NAME}</b>${mindNow ? '<p>🧠 برسملك الخريطة الذهنية...</p><span class="ai-typing"><i></i><i></i><i></i></span>' : AI.live ? aiMd(AI.live) : '<span class="ai-typing"><i></i><i></i><i></i></span>'}</div>`;
       }
       box.innerHTML = h;
       box.scrollTop = box.scrollHeight;
@@ -5734,7 +5793,7 @@ ${brief ? '- ماتستخدمش عناوين ولا جداول؛ **بولد** ل
         if (loc) reply = loc;
         else {
           const hist = AI.msgs.slice(-20).map(m => ({ role: m.role, content: aiPrompt(m) }));
-          const opts = { temp: tool === 'mind' ? 0.3 : 0.6 };
+          const opts = { temp: (tool === 'mind' || tool === 'summarize' || tool === 'solve') ? 0.3 : tool === 'explain' ? 0.4 : !isAdminStaff() ? 0.45 : 0.6 };
           reply = await aiStream(aiSystem(lang, lvl, !isAdminStaff()), hist, full => {
             if (AI_LEAK.test(full)) return true;
             AI.live = full; if ($ai('aiMsgs')) aiDrawMsgs();
@@ -5787,18 +5846,19 @@ ${brief ? '- ماتستخدمش عناوين ولا جداول؛ **بولد** ل
     /* ==========================================================
        اختبار تفاعلي: سؤال سؤال (اختيار / صح وغلط / علل / بم تفسر / جدول)
        ========================================================== */
-    const QZ_TYPES = { mcq: ['🔘', 'اختار الإجابة الصح'], tf: ['✅', 'صح وغلط'], why: ['❓', 'علل'], how: ['💭', 'بم تفسر'], table: ['🗂️', 'جدول'], mix: ['🎲', 'كل الأنواع'] };
-    const QZ_TL = { mcq: 'اختر الإجابة الصحيحة', tf: 'ضع (✓) أو (✗)', why: 'علل', how: 'بم تفسر', table: 'أكمل الجدول' };
+    const QZ_TYPES = { mcq: ['🔘', 'اختار الإجابة الصح'], tf: ['✅', 'صح وغلط'], why: ['❓', 'علل'], how: ['💭', 'بم تفسر'], table: ['🗂️', 'جدول'], calc: ['🧮', 'مسألة حسابية'], mix: ['🎲', 'كل الأنواع'] };
+    const QZ_TL = { mcq: 'اختر الإجابة الصحيحة', tf: 'ضع (✓) أو (✗)', why: 'علل', how: 'بم تفسر', table: 'أكمل الجدول', calc: 'حل المسألة' };
     const QZ_L = ['أ', 'ب', 'ج', 'د'];
     const AI_RE_QZ = /اختبرني|امتحني|quiz me|(?:اعمل|اعملي|اعمللي|هات|هاتلي|عايز|عاوز|اديني|ادني)\s+(?:\S+\s+){0,3}?(?:اختبار|امتحان|كويز|quiz|اسئله)/;
-    const qz = { el: null, type: 'mix', n: 10, topic: '', qs: [], i: 0, res: [], busy: false };
-    const aiPaper = t => (t.length > 260 || /^##\s/m.test(t)) ? '<div class="ai-paper">' + aiMd(t) + '</div>' : aiMd(t);
+    const qz = { el: null, type: 'mix', n: 10, topic: '', lvl: 'متدرّج', qs: [], i: 0, res: [], busy: false, t0: 0, whyMd: '' };
+    const qzNum = v => parseFloat(String(v).replace(/[٠-٩]/g, d => '٠١٢٣٤٥٦٧٨٩'.indexOf(d)).replace(/٫/g, '.').replace(/[^\d.\-]/g, ''));
+    const aiPaper = t => (isAdminStaff() && t.length > 260 || /^##\s/m.test(t)) ? '<div class="ai-paper ex">' + aiMd(t) + '</div>' : aiMd(t);
     const qzFmt = x => String(Math.round(x * 10) / 10);
     const qzSame = (a, b) => { a = aiNorm(a); b = aiNorm(b); return !!a && (a === b || (a.length > 2 && b.length > 2 && (a.includes(b) || b.includes(a)))); };
 
     function qzOpen(topic) {
       qzClose();
-      const d = document.createElement('div'); d.className = 'qz'; qz.el = d; document.body.appendChild(d);
+      const d = document.createElement('div'); d.className = 'qzov'; qz.el = d; document.body.appendChild(d);
       d.addEventListener('click', qzClick);
       qz.topic = String(topic || '').slice(0, 6000);
       qzSetup();
@@ -5811,20 +5871,25 @@ ${brief ? '- ماتستخدمش عناوين ولا جداول؛ **بولد** ل
       qz.el.innerHTML = `<div class="qz-w"><div class="qz-top"><button class="qz-x" type="button" data-q="close" aria-label="إغلاق">✕</button><b>❓ اختبار تفاعلي</b></div>
         <div class="qz-card"><h3>نوع الأسئلة</h3><div class="qz-chips">${Object.entries(QZ_TYPES).map(([k, [i, n]]) => chip(k, i + ' ' + n, k === qz.type, 'type')).join('')}</div>
         <h3>عدد الأسئلة</h3><div class="qz-chips">${[5, 10, 15].map(n => chip(n, n + ' أسئلة', n === qz.n, 'n')).join('')}</div>
+        <h3>مستوى الصعوبة</h3><div class="qz-chips">${['سهل', 'متوسط', 'صعب', 'متدرّج'].map(l => chip(l, l, l === qz.lvl, 'lvl')).join('')}</div>
         <h3>الدرس أو الموضوع</h3><textarea id="qzTopic" class="qz-tx" rows="5" maxlength="6000" placeholder="اكتب اسم الدرس أو الصق المحتوى...">${esc(qz.topic)}</textarea>
         <div class="qz-err" id="qzErr" hidden></div><button class="qz-main" type="button" data-q="start">ابدأ الاختبار 🚀</button></div></div>`;
     }
 
     const qzPrompt = () => {
       const spec = {
-        mcq: '{"type":"mcq","q":"نص السؤال","opts":["..","..","..",".."],"a":0,"why":"تفسير قصير للإجابة"}   (a = رقم الإجابة الصح من 0 لـ 3)',
-        tf: '{"type":"tf","q":"عبارة","a":true,"why":"تفسير قصير"}',
-        why: '{"type":"why","q":"علل: ...","a":"الإجابة النموذجية كاملة","why":""}',
-        how: '{"type":"how","q":"بم تفسر: ...","a":"الإجابة النموذجية كاملة","why":""}',
-        table: '{"type":"table","q":"أكمل الجدول التالي:","head":["..",".."],"rows":[["معطى",""],["معطى",""]],"ans":[["معطى","الإجابة"],["معطى","الإجابة"]]}   (الخلية "" هي اللي الطالب يكملها، و ans هو الجدول كامل)'
+        mcq: '{"type":"mcq","q":"نص السؤال","opts":["..","..","..",".."],"a":0,"hint":"تلميح","why":"تفسير"}   (a = رقم الإجابة الصح من 0 لـ 3)',
+        tf: '{"type":"tf","q":"عبارة","a":true,"hint":"تلميح","why":"تفسير"}',
+        why: '{"type":"why","q":"علل: ...","a":"الإجابة النموذجية كاملة","hint":"تلميح","why":"الفكرة الأساسية"}',
+        how: '{"type":"how","q":"بم تفسر: ...","a":"الإجابة النموذجية كاملة","hint":"تلميح","why":"الفكرة الأساسية"}',
+        table: '{"type":"table","q":"أكمل الجدول التالي:","head":["..",".."],"rows":[["معطى",""],["معطى",""]],"ans":[["معطى","الإجابة"],["معطى","الإجابة"]],"hint":"تلميح","why":"تفسير"}   (الخلية "" هي اللي الطالب يكملها، و ans هو الجدول كامل)',
+        calc: '{"type":"calc","q":"مسألة فيها أرقام","a":3,"unit":"A","hint":"القانون المستخدم","why":"الحل خطوة بخطوة: المعطيات، القانون، التعويض، الناتج"}   (a رقم فقط)'
       };
-      const kinds = qz.type === 'mix' ? Object.keys(spec) : [qz.type];
-      return 'اعمل ' + qz.n + ' أسئلة امتحان من المحتوى ده بمستوى المنهج المصري، ' + (qz.type === 'mix' ? 'موزّعة على الأنواع دي بالتساوي' : 'كلها من النوع ده') + '. رجّع JSON صالح بس: مصفوفة جوه كتلة ```json من غير أي كلام تاني. صيغة كل نوع:\n' + kinds.map(k => spec[k]).join('\n') + '\nالقواعد: متدرّجة من السهل للصعب، صياغة واضحة زي الامتحانات الرسمية، ماتكررش سؤال، الجدول 2-4 أعمدة و3-5 صفوف.\nالمحتوى:\n---\n' + qz.topic;
+      const numeric = /\d|[٠-٩]|قانون|مسأل|احسب/.test(qz.topic);
+      const kinds = qz.type === 'mix' ? Object.keys(spec).filter(k => k !== 'calc' || numeric) : [qz.type];
+      const lv = { 'سهل': 'كل الأسئلة مباشرة على الحفظ والفهم', 'متوسط': 'فهم وتطبيق', 'صعب': 'تطبيق وتحليل واستنتاج بأسلوب أسئلة التفوق', 'متدرّج': 'متدرّجة من السهل للصعب' }[qz.lvl] || '';
+      return 'أنت واضع امتحانات خبير في المنهج المصري (الإعدادي وأولى بكالوريا). اعمل ' + qz.n + ' سؤال من المحتوى ده فقط، ' + (kinds.length > 1 ? 'موزّعة على الأنواع دي بالتساوي' : 'كلها من النوع ده') + '.\nالمستوى: ' + lv + '.\nرجّع JSON صالح فقط: مصفوفة جوه كتلة ```json من غير أي كلام قبلها أو بعدها. صيغة الأنواع:\n' + kinds.map(k => spec[k]).join('\n') +
+        '\nقواعد الجودة:\n- الصياغة فصحى مبسطة زي ورقة الامتحان الرسمية وبدون أخطاء إملائية.\n- كل سؤال يقيس فكرة مختلفة وماتتكررش، وغطّي أجزاء المحتوى كلها.\n- الاختيار من متعدد: 4 اختيارات متقاربة الطول، و3 مشتتات منطقية مبنية على أخطاء الطلبة الشائعة، ماتستخدمش "كل ما سبق"، وموّع مكان الإجابة الصح بين أ وب وج ود.\n- صح وغلط: عبارات واضحة من غير نفي مزدوج، وحوالي نصها غلط بتعديل كلمة مهمة.\n- علل وبم تفسر: لازم لها تعليل علمي محدد، والإجابة النموذجية جملتين لتلاتة فيهم الأفكار الأساسية.\n- المسائل: أرقام بسيطة وناتج دقيق، والحل كامل في why.\n- لكل سؤال: hint تلميح من جملة من غير ما يكشف الإجابة، و why تفسير بالعامية المصرية.\n- ماتختلقش معلومة مش موجودة في المحتوى.\nالمحتوى:\n---\n' + qz.topic;
     };
 
     function qzParse(raw) {
@@ -5834,14 +5899,15 @@ ${brief ? '- ماتستخدمش عناوين ولا جداول؛ **بولد** ل
       const s = x => String(x ?? '').trim();
       return j.map(q => {
         if (!q) return null;
-        const o = { type: s(q.type), q: s(q.q), why: s(q.why) }; if (!o.q) return null;
+        const o = { type: s(q.type), q: s(q.q), why: s(q.why), hint: s(q.hint) }; if (!o.q) return null;
         if (o.type === 'mcq') { o.opts = (q.opts || []).map(s).slice(0, 4); o.a = +q.a; if (o.opts.length < 2 || !(o.a >= 0 && o.a < o.opts.length)) return null; }
         else if (o.type === 'tf') o.a = q.a === true || q.a === 'true' || q.a === 'صح';
         else if (o.type === 'why' || o.type === 'how') { o.a = s(q.a); if (!o.a) return null; }
         else if (o.type === 'table') {
           o.head = (q.head || []).map(s); o.rows = (q.rows || []).map(r => (r || []).map(s)); o.ans = (q.ans || []).map(r => (r || []).map(s));
           if (!o.head.length || !o.rows.length || o.ans.length !== o.rows.length || !o.rows.some(r => r.some(c => !c))) return null;
-        } else return null;
+        } else if (o.type === 'calc') { o.a = qzNum(q.a); o.unit = s(q.unit); if (!isFinite(o.a)) return null; }
+        else return null;
         return o;
       }).filter(Boolean).slice(0, qz.n);
     }
@@ -5852,9 +5918,16 @@ ${brief ? '- ماتستخدمش عناوين ولا جداول؛ **بولد** ل
       if (qz.topic.length < 6) return qzErr('اكتب اسم الدرس أو الصق المحتوى الأول.');
       qz.busy = true; qz.el.querySelector('.qz-card').innerHTML = '<div class="qz-load"><span class="ai-typing"><i></i><i></i><i></i></span><p>بجهّزلك الأسئلة...</p></div>';
       try {
-        const raw = await aiStream(aiSystem('العربية المصرية', 'متوسط', false), [{ role: 'user', content: qzPrompt() }], () => false, { temp: 0.4 });
-        const qs = qzParse(raw); if (!qs.length) throw new Error('bad');
-        Object.assign(qz, { qs, i: 0, res: [], busy: false }); qzShow();
+        let qs = [];
+        for (let t = 0; t < 2 && qs.length < Math.ceil(qz.n / 2); t++) qs = qzParse(await aiStream(aiSystem('العربية المصرية', 'متوسط', false), [{ role: 'user', content: qzPrompt() }], () => false, { temp: 0.4 }));
+        if (!qs.length) throw new Error('bad');
+        try {
+          const lp = qz.el && qz.el.querySelector('.qz-load p'); if (lp) lp.textContent = 'براجع صحة الأسئلة...';
+          const v = qzParse(await aiStream(aiSystem('العربية المصرية', 'متوسط', false), [{ role: 'user', content: 'راجع الأسئلة دي كمدقق امتحانات: اتأكد إن كل إجابة صحيحة علميًا وبحسب المحتوى، وإن لكل سؤال إجابة واحدة بس واضحة، وإن المشتتات غلط فعلًا، وإن مفيش غموض أو أخطاء إملائية أو أرقام مش دقيقة. صحّح أي مشكلة بنفس الشكل بالظبط، واحذف أي سؤال مش مناسب. رجّع نفس صيغة JSON فقط جوه كتلة ```json.\nالمحتوى الأصلي:\n' + qz.topic.slice(0, 3500) + '\nالأسئلة:\n' + JSON.stringify(qs) }], () => false, { temp: 0.1 }));
+          if (v.length >= Math.ceil(qs.length * 0.7)) qs = v;
+        } catch (e) { if (e.name === 'AbortError') return; }
+        if (!qz.el) return;
+        Object.assign(qz, { qs, i: 0, res: [], busy: false, t0: 0, whyMd: '' }); qzShow();
       } catch (e) { if (!qz.el || e.name === 'AbortError') return; qz.busy = false; qzSetup(); qzErr('مقدرتش أجهّز الأسئلة. جرّب تاني أو غيّر الموضوع.'); }
     }
 
@@ -5863,13 +5936,14 @@ ${brief ? '- ماتستخدمش عناوين ولا جداول؛ **بولد** ل
       if (q.type === 'mcq') body = q.opts.map((o, k) => `<button type="button" class="qz-opt" data-q="pick" data-k="${k}"><b>${QZ_L[k]}</b><span>${esc(o)}</span></button>`).join('');
       else if (q.type === 'tf') body = '<div class="qz-two"><button type="button" class="qz-opt" data-q="pick" data-k="1">✓ صح</button><button type="button" class="qz-opt" data-q="pick" data-k="0">✗ غلط</button></div>';
       else if (q.type === 'table') body = `<div class="qz-tw"><table class="qz-t"><thead><tr>${q.head.map(h => `<th>${esc(h)}</th>`).join('')}</tr></thead><tbody>${q.rows.map((r, i) => `<tr>${r.map((c, j) => c ? `<td>${esc(c)}</td>` : `<td><textarea rows="2" data-r="${i}" data-c="${j}"></textarea></td>`).join('')}</tr>`).join('')}</tbody></table></div><button class="qz-main" type="button" data-q="submit">تأكيد الإجابة</button>`;
+      else if (q.type === 'calc') body = `<div class="qz-calc"><input id="qzNum" class="qz-tx" inputmode="decimal" placeholder="اكتب الناتج (رقم)" autocomplete="off"><b>${esc(q.unit)}</b></div><button class="qz-main" type="button" data-q="submit">تأكيد الإجابة</button>`;
       else body = '<textarea id="qzTx" class="qz-tx" rows="7" placeholder="اكتب إجابتك هنا (مسموح بإجابة طويلة)..."></textarea><button class="qz-main" type="button" data-q="submit">تأكيد الإجابة</button>';
       qz.el.innerHTML = `<div class="qz-w"><div class="qz-top"><button class="qz-x" type="button" data-q="close" aria-label="إغلاق">✕</button><b>سؤال ${qz.i + 1} من ${n}</b></div><div class="qz-bar"><i style="width:${qz.i / n * 100}%"></i></div>
-        <div class="qz-card"><div class="qz-qh"><span class="qz-num">${qz.i + 1}</span><span class="qz-ty">${QZ_TL[q.type]}</span></div><h3 class="qz-q">${esc(q.q)}</h3>${body}<div id="qzFb"></div></div></div>`;
-      qz.el.scrollTop = 0;
+        <div class="qz-card"><div class="qz-qh"><span class="qz-num">${qz.i + 1}</span><span class="qz-ty">${QZ_TL[q.type]}</span></div><h3 class="qz-q">${esc(q.q)}</h3>${q.hint ? '<button type="button" class="qz-hint" data-q="hint">💡 تلميح</button><div id="qzHint" class="qz-hintbox" hidden>' + esc(q.hint) + '</div>' : ''}${body}<div id="qzFb"></div></div></div>`;
+      qz.el.scrollTop = 0; if (!qz.t0) qz.t0 = Date.now();
     }
 
-    const qzRight = q => q.type === 'mcq' ? QZ_L[q.a] + ') ' + q.opts[q.a] : q.type === 'tf' ? (q.a ? 'صح' : 'غلط') : q.type === 'table' ? q.ans.map(r => r.join(' ، ')).join(' / ') : q.a;
+    const qzRight = q => q.type === 'calc' ? q.a + (q.unit ? ' ' + q.unit : '') : q.type === 'mcq' ? QZ_L[q.a] + ') ' + q.opts[q.a] : q.type === 'tf' ? (q.a ? 'صح' : 'غلط') : q.type === 'table' ? q.ans.map(r => r.join(' ، ')).join(' / ') : q.a;
     function qzDone(res) {
       const q = qz.qs[qz.i], last = qz.i === qz.qs.length - 1; res.right = qzRight(q); qz.res[qz.i] = res;
       const cls = res.ok >= 0.99 ? 'ok' : res.ok > 0 ? 'mid' : 'bad';
@@ -5894,11 +5968,16 @@ ${brief ? '- ماتستخدمش عناوين ولا جداول؛ **بولد** ل
         });
         sb.remove(); return qzDone({ ok: tot ? ok / tot : 0, mine: mine.join(' ، ') });
       }
+      if (q.type === 'calc') {
+        const raw = qz.el.querySelector('#qzNum').value.trim(), v = qzNum(raw); if (!isFinite(v)) return toast('اكتب الناتج كرقم.');
+        qz.el.querySelector('#qzNum').disabled = true; sb.remove();
+        return qzDone({ ok: Math.abs(v - q.a) <= Math.max(0.01, Math.abs(q.a) * 0.01) ? 1 : 0, mine: raw + (q.unit ? ' ' + q.unit : '') });
+      }
       const v = qz.el.querySelector('#qzTx').value.trim(); if (v.length < 2) return toast('اكتب إجابتك الأول.');
       qz.busy = true; sb.disabled = true; sb.textContent = 'بصحّح إجابتك...';
       let ok = 0, fb = '';
       try {
-        const raw = await aiStream(aiSystem('العربية المصرية', 'متوسط', false), [{ role: 'user', content: 'السؤال: ' + q.q + '\nالإجابة النموذجية: ' + q.a + '\nإجابة الطالب: ' + v + '\n\nصحّح إجابة الطالب زي مدرس: الفكرة الصحيحة مهمة حتى لو الصياغة مختلفة. رجّع JSON بس: {"score":0 أو 0.5 أو 1,"fb":"ملاحظة قصيرة بالعامية: إيه الصح وإيه الناقص"}' }], () => false, { temp: 0.2 });
+        const raw = await aiStream(aiSystem('العربية المصرية', 'متوسط', false), [{ role: 'user', content: 'السؤال: ' + q.q + '\nالإجابة النموذجية: ' + q.a + '\nإجابة الطالب: ' + v + '\n\nصحّح إجابة الطالب زي مدرس منصف: استخرج الأفكار الأساسية في الإجابة النموذجية، وادّي درجة بحسب عدد الأفكار اللي غطّاها الطالب (الفكرة الصحيحة تتحسب حتى لو الصياغة مختلفة). رجّع JSON بس: {"score":0 أو 0.25 أو 0.5 أو 0.75 أو 1,"fb":"بالعامية: إيه اللي كان صح، وإيه الفكرة الناقصة بالتحديد"}' }], () => false, { temp: 0.2 });
         const j = JSON.parse(raw.match(/\{[\s\S]*\}/)[0]); ok = Math.max(0, Math.min(1, +j.score || 0)); fb = String(j.fb || '').slice(0, 600);
       } catch (e) { if (!qz.el) return; fb = 'مقدرتش أصحح تلقائي، قارن إجابتك بالنموذجية.'; }
       qz.busy = false; if (!qz.el) return;
@@ -5907,16 +5986,37 @@ ${brief ? '- ماتستخدمش عناوين ولا جداول؛ **بولد** ل
 
     function qzMd() {
       const n = qz.qs.length, tot = qz.res.reduce((a, r) => a + r.ok, 0), p = Math.round(tot / n * 100), c = x => String(x || '—').replace(/\|/g, '/').replace(/\n+/g, ' ');
-      let s = `## 🎯 النتيجة: ${qzFmt(tot)} من ${n}\n> ${p}% — ${p >= 85 ? 'ممتاز، كمّل كده 🌟' : p >= 60 ? 'كويس، راجع الأسئلة اللي غلطت فيها 👍' : 'محتاج مراجعة تانية للدرس، وإنت قدها 💪'}\n\n## 📋 مراجعة الأسئلة\n| # | السؤال | إجابتك | الإجابة الصح | النتيجة |\n|---|---|---|---|---|\n`;
-      qz.qs.forEach((q, i) => { const r = qz.res[i]; s += `| ${i + 1} | ${c(q.q)} | ${c(r.mine)} | ${c(r.right)} | ${r.ok >= 0.99 ? '✅' : r.ok > 0 ? '🟡' : '❌'} |\n`; });
+      const mins = Math.max(1, Math.round((Date.now() - (qz.t0 || Date.now())) / 60000)), ord = ['الأول', 'الثاني', 'الثالث', 'الرابع', 'الخامس', 'السادس'];
+      let s = `## 🎯 النتيجة النهائية\n| الدرجة | النسبة | التقدير | الوقت |\n|---|---|---|---|\n| ${qzFmt(tot)} من ${n} | ${p}% | ${p >= 90 ? 'امتياز' : p >= 75 ? 'جيد جدًا' : p >= 60 ? 'جيد' : p >= 50 ? 'مقبول' : 'محتاج مراجعة'} | ${mins} دقيقة |\n\n> ${p >= 85 ? 'ممتاز، كمّل كده 🌟' : p >= 60 ? 'كويس، راجع الأسئلة اللي غلطت فيها 👍' : 'محتاج مراجعة تانية للدرس، وإنت قدها 💪'}\n`;
+      let g = 0;
+      ['mcq', 'tf', 'why', 'how', 'table', 'calc'].forEach(t => {
+        const ix = qz.qs.map((q, i) => i).filter(i => qz.qs[i].type === t); if (!ix.length) return;
+        s += `\n## السؤال ${ord[g++] || g}: ${QZ_TL[t]}\n| # | السؤال | إجابتك | الإجابة الصح | |\n|---|---|---|---|---|\n`;
+        ix.forEach(i => { const r = qz.res[i]; s += `| ${i + 1} | ${c(qz.qs[i].q)} | ${c(r.mine)} | ${c(r.right)} | ${r.ok >= 0.99 ? '✅' : r.ok > 0 ? '🟡' : '❌'} |\n`; });
+      });
       s += '\n## 💡 التفسير\n' + qz.qs.map((q, i) => q.why || qz.res[i].fb ? `- **س${i + 1}:** ${(q.why || qz.res[i].fb).replace(/\n+/g, ' ')}` : '').filter(Boolean).join('\n');
-      return s;
+      return s + (qz.whyMd ? '\n\n' + qz.whyMd : '');
+    }
+    async function qzWhy(btn) {
+      const wr = qz.qs.map((q, i) => ({ q, r: qz.res[i] })).filter(x => x.r.ok < 0.99); if (qz.busy || !wr.length) return;
+      qz.busy = true; btn.disabled = true; btn.textContent = 'بحلل أخطاءك...';
+      const box = qz.el.querySelector('#qzWhy'); box.innerHTML = '<span class="ai-typing"><i></i><i></i><i></i></span>';
+      try {
+        const txt = await aiStream(aiSystem('العربية المصرية', 'متوسط', false), [{ role: 'user', content: 'الطالب غلط في الأسئلة دي. لكل سؤال اشرح بالعامية المصرية: الفكرة الغلط اللي وقع فيها، والإجابة الصح خطوة بخطوة، وقاعدة بسيطة تفكّره. وفي الآخر "## 🎯 نقط ضعفك" بنقطتين أو تلاتة وخطة مراجعة قصيرة.\n\n' + wr.map((x, k) => (k + 1) + ') ' + x.q.q + '\nإجابته: ' + x.r.mine + '\nالصح: ' + x.r.right).join('\n\n') }], () => false, { temp: 0.4 });
+        if (!qz.el) return; qz.whyMd = '## 🧠 تحليل أخطائك\n' + txt; box.innerHTML = '<div class="ai-paper">' + aiMd(qz.whyMd) + '</div>'; btn.remove();
+      } catch (e) { if (!qz.el) return; box.textContent = 'معرفتش أحلل دلوقتي، جرّب تاني.'; btn.disabled = false; btn.textContent = '🧠 اشرحلي أخطائي'; }
+      qz.busy = false;
     }
     async function qzResult() {
-      const n = qz.qs.length, tot = qz.res.reduce((a, r) => a + r.ok, 0), p = Math.round(tot / n * 100);
+      const n = qz.qs.length, tot = qz.res.reduce((a, r) => a + r.ok, 0), p = Math.round(tot / n * 100), by = {};
+      qz.qs.forEach((q, i) => { by[q.type] = by[q.type] || [0, 0]; by[q.type][0] += qz.res[i].ok; by[q.type][1]++; });
+      const wrong = qz.res.filter(r => r.ok < 0.99).length;
       qz.el.innerHTML = `<div class="qz-w"><div class="qz-top"><button class="qz-x" type="button" data-q="close" aria-label="إغلاق">✕</button><b>🏁 النتيجة</b></div><div class="qz-card qz-res"><div class="qz-score" style="--p:${p}"><b>${qzFmt(tot)}</b><small>من ${n}</small></div><h3>${p}%</h3>
-        <div class="qz-acts"><button class="qz-main" type="button" data-q="pdf">📄 PDF</button><button class="qz-main" type="button" data-q="png">🖼️ صورة</button><button class="qz-main alt" type="button" data-q="again">🔁 اختبار جديد</button></div></div>
-        <div class="qz-card ai-paper">${aiMd(qzMd())}</div></div>`;
+        ${Object.entries(by).map(([t, [a, b]]) => `<div class="qz-br"><span>${QZ_TL[t]}</span><i><u style="width:${a / b * 100}%"></u></i><b>${qzFmt(a)}/${b}</b></div>`).join('')}
+        <div class="qz-acts">${isAdminStaff() ? '<button class="qz-main" type="button" data-q="pdf">📄 PDF</button><button class="qz-main" type="button" data-q="png">🖼️ صورة</button>' : ''}
+        ${wrong ? '<button class="qz-main wide" type="button" data-q="why">🧠 اشرحلي أخطائي</button><button class="qz-main alt wide" type="button" data-q="retry">🔁 أعد الأسئلة اللي غلطت فيها (' + wrong + ')</button>' : ''}
+        <button class="qz-main alt wide" type="button" data-q="again">✨ اختبار جديد</button></div></div>
+        <div id="qzWhy"></div><div class="qz-card ai-paper">${aiMd(qzMd())}</div></div>`;
       try { const keep = AI.cid; AI.cid = null; await aiSave({ role: 'user', text: 'اختبار تفاعلي: ' + qz.topic.slice(0, 60) + ' — النتيجة ' + qzFmt(tot) + '/' + n, tool: 'quiz', ts: Date.now() }, qzMd()); AI.cid = keep; } catch (e) {}
     }
     async function qzExport(kind) {
@@ -5927,8 +6027,12 @@ ${brief ? '- ماتستخدمش عناوين ولا جداول؛ **بولد** ل
       const b = e.target.closest('[data-q]'); if (!b) return; const a = b.dataset.q, k = b.dataset.k;
       if (a === 'close') qzClose();
       else if (a === 'type') { qz.topic = qz.el.querySelector('#qzTopic').value; qz.type = k; qzSetup(); }
+      else if (a === 'lvl') { qz.topic = qz.el.querySelector('#qzTopic').value; qz.lvl = k; qzSetup(); }
       else if (a === 'n') { qz.topic = qz.el.querySelector('#qzTopic').value; qz.n = +k; qzSetup(); }
       else if (a === 'start') qzStart();
+      else if (a === 'hint') { const h = qz.el.querySelector('#qzHint'); if (h) { h.hidden = false; b.remove(); } }
+      else if (a === 'retry') { const w = qz.qs.filter((q, i) => qz.res[i].ok < 0.99); Object.assign(qz, { qs: w, i: 0, res: [], whyMd: '', t0: 0 }); qzShow(); }
+      else if (a === 'why') qzWhy(b);
       else if (a === 'pick') qzPick(+k);
       else if (a === 'submit') qzSubmit();
       else if (a === 'next') { qz.i++; qz.i >= qz.qs.length ? qzResult() : qzShow(); }
@@ -6294,14 +6398,14 @@ ${brief ? '- ماتستخدمش عناوين ولا جداول؛ **بولد** ل
       const s = mmState(i, who, prev, mp);
       let r;
       try { r = mmBuild(mp, s.layout, s.theme); }
-      catch (e) { console.warn('mindmap', e); return `<div class="ai-m ai-m--bot"><b class="ai-who">🤖 ${AI_NAME}</b><p>الخريطة ماطلعتش صح، جرّب تاني.</p></div>`; }
+      catch (e) { console.warn('mindmap', e); return `<div class="ai-m ai-m--bot"><b class="ai-who">${AI_IMG} ${AI_NAME}</b><p>الخريطة ماطلعتش صح، جرّب تاني.</p></div>`; }
       const chip = (a, k, n, on, extra) => `<button type="button" class="mm-chip" data-ai="${a}" data-i="${i}" ${extra}="${k}" aria-pressed="${on}">${n}</button>`;
       const bar1 = who ? '' : `<div class="mm-bar">${MM_LAYOUTS.map(([k, n]) => chip('mmlay', k, n, k === s.layout, 'data-l')).join('')}</div>`;
       const bar2 = who ? '' : `<div class="mm-bar">${Object.entries(MM_THEMES).map(([k, t]) => chip('mmth', k, t.n, k === s.theme, 'data-t')).join('')}<span class="mm-sp"></span>`
         + `<button type="button" class="mm-act" data-ai="mmzoom" data-i="${i}">🔍 تكبير</button>`
         + `<button type="button" class="mm-act" data-ai="mmpng" data-i="${i}">🖼️ صورة</button>`
         + `<button type="button" class="mm-act" data-ai="mmpdf" data-i="${i}">📄 PDF</button></div>`;
-      return `<div class="ai-m ai-m--bot ai-m--map" data-mm="${i}"><b class="ai-who">🤖 ${AI_NAME} · 🧠 ${esc(mp.root.t)}</b>${bar1}<div class="mm-view"${who ? '' : ` data-ai="mmzoom" data-i="${i}"`}>${r.svg}</div>${bar2}</div>`;
+      return `<div class="ai-m ai-m--bot ai-m--map" data-mm="${i}"><b class="ai-who">${AI_IMG} ${AI_NAME} · 🧠 ${esc(mp.root.t)}</b>${bar1}<div class="mm-view"${who ? '' : ` data-ai="mmzoom" data-i="${i}"`}>${r.svg}</div>${bar2}</div>`;
     }
     function mmGet(i) {
       const m = AI.msgs[i], prev = AI.msgs[i - 1], mp = m && m.role === 'assistant' && mmParse(m.text, prev && prev.tool === 'mind');
@@ -6373,7 +6477,7 @@ ${brief ? '- ماتستخدمش عناوين ولا جداول؛ **بولد** ل
 .sx pre{background:#14123b;color:#fff;padding:12px;border-radius:10px;direction:ltr;text-align:left;white-space:pre-wrap}
 .sx pre code{background:none;color:#fff}
 .sx hr{border:0;border-top:2px dashed #cfd2ee;margin:14px 0}
-.sx .sf{padding:10px 30px 18px;color:#8b8fb5;font-size:12px;text-align:left;direction:ltr}.sx .sb h2,.sx .sb h3{background:linear-gradient(90deg,#ff6fa5,#b77be8);color:#fff;border-radius:14px;padding:4px 16px;display:inline-block;font-size:18px;margin:16px 0 6px}.sx .sxt{border-collapse:collapse;width:100%}.sx .sxt th{background:#fbe4f0}.sx .sxt td,.sx .sxt th{border:1.5px solid #e8c4dc;padding:6px 10px}.sx .sb blockquote{border-right:4px solid #b77be8;background:#f6efff;margin:8px 0;padding:6px 12px;border-radius:10px}`;
+.sx .sf{padding:10px 30px 18px;color:#8b8fb5;font-size:12px;text-align:left;direction:ltr}.sx .sb h2,.sx .sb h3{background:linear-gradient(90deg,#ff6fa5,#b77be8);color:#fff;border-radius:14px;padding:4px 16px;display:inline-block;font-size:18px;margin:16px 0 6px}.sx .sxt{border-collapse:collapse;width:100%}.sx .sxt th{background:#fbe4f0}.sx .sb b,.sx .sb strong{background:linear-gradient(transparent 60%,#ffe58a 60%);padding:0 2px}.sx .sb h2:nth-of-type(4n+2),.sx .sb h3:nth-of-type(4n+2){background:linear-gradient(90deg,#7a5cff,#5aa0ff)}.sx .sb h2:nth-of-type(4n+3),.sx .sb h3:nth-of-type(4n+3){background:linear-gradient(90deg,#1fb98a,#52d6a8)}.sx .sb h2:nth-of-type(4n),.sx .sb h3:nth-of-type(4n){background:linear-gradient(90deg,#f5a623,#ff8a3d)}.sx .sxt tr:nth-child(even) td{background:#faf5ff}.sx .sb blockquote{background:#fff6dc;border-right:5px solid #f5a623}.sx .sxt td,.sx .sxt th{border:1.5px solid #e8c4dc;padding:6px 10px}.sx .sb blockquote{border-right:4px solid #b77be8;background:#f6efff;margin:8px 0;padding:6px 12px;border-radius:10px}`;
     function aiSheetHtml(text, tag) {
       return `<div class="sx"><div class="sh"><b>🚀 ${AI_NAME}</b><span>${esc(tag)} · ${esc(new Date().toLocaleDateString('ar-EG'))}</span></div><div class="sb">${aiMd(text).replace(/class="ai-tb"/g, 'class="sxt"')}</div><div class="sf">Learn With Me · ${AI_NAME}</div></div>`;
     }
