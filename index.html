@@ -6017,21 +6017,10 @@ ${brief ? '- اكتب نص بسيط: سطور قصيرة، إيموجي خفيف
       setTimeout(close, 2600);
     }
     const aiSecKey = t => aiNorm(t).replace(/[\u200b-\u200f\u202a-\u202e\u2066-\u2069\ufeff\s]/g, '');
-    let aiSecretTimer = 0;
-    document.addEventListener('input', e => {
-      const t = e.target;
-      if (!t || !/^(INPUT|TEXTAREA)$/.test(t.tagName) || t.type === 'password') return;
-      clearTimeout(aiSecretTimer);
-      aiSecretTimer = setTimeout(() => {
-        const sk = aiSecKey(t.value), sm = sk && Object.entries(AI_SECRETS).find(([k]) => aiSecKey(k) === sk);
-        if (sm) { t.value = ''; t.dispatchEvent(new Event('input', { bubbles: true })); aiSecretShow(sm[1]); }
-      }, 700);
-    }, true);
     async function aiSend() {
       if (AI.busy) return;
       const inp = $ai('aiIn'); if (!inp) return;
       const text = inp.value.trim(); if (!text) return;
-      { const sk = aiSecKey(text), sm = Object.entries(AI_SECRETS).find(([k]) => aiSecKey(k) === sk); if (sm) { inp.value = ''; inp.style.height = 'auto'; aiSecretShow(sm[1]); return; } }
       if (!isAdminStaff() && myAiBlocked) { AI.err = 'الإدارة وقّفت استخدامك لـ ' + AI_NAME + '.'; return aiDrawMsgs(); }
       if (Date.now() - AI.lastSend < 1500) return;
       AI.lastSend = Date.now();
@@ -6043,7 +6032,9 @@ ${brief ? '- اكتب نص بسيط: سطور قصيرة، إيموجي خفيف
       if (isAdminStaff() && tool === 'chat' && !file && /(اعمل|اعملي|اعمللي|ارسم|ارسمي|عايز|عاوز|هات|وريني)[^\n]{0,30}(شرح مصور|شرح برسومات|شرح بالرسم)/.test(aiNorm(text))) tool = 'visual';
       const um = { role: 'user', text, tool, ts: Date.now(), ...(file ? { file: file.name } : {}) };
       if (tool === 'mind' && $ai('aiMm').value) AI.lay[um.ts] = $ai('aiMm').value;
-      const loc = (!file && tool === 'chat') ? (aiLocal(text) || (isAdminStaff() ? '' : aiStudentBlock(text))) : '';
+      const sec = Object.entries(AI_SECRETS).find(([k]) => aiSecKey(k) === aiSecKey(text));   // كلمة سرية: الرسالة تظهر على الشاشة والـ AI يرد بنفس الجملة
+      const loc = sec ? sec[1] : (!file && tool === 'chat') ? (aiLocal(text) || (isAdminStaff() ? '' : aiStudentBlock(text))) : '';
+      if (sec) aiSecretShow(sec[1]);
       AI.err = ''; AI.busy = true; AI.live = '';
       inp.value = ''; inp.style.height = 'auto'; AI.file = null;
       AI.msgs.push(um); aiDraw();
