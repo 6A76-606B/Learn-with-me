@@ -5596,7 +5596,7 @@ const deleteUser = u => previewing ? (pvBlock(), Promise.reject(new Error('previ
     /* تنبيه أمان: المفتاح ظاهر لأي حد يفتح كود الصفحة. الأفضل تنقل الاتصال لسيرفر/Cloud Function وتشيله من هنا. */
     /* المفتاح محفوظ في الوسيط (Cloudflare Worker) مش في الصفحة */
     const AI_URL = 'https://dawn-pond-dc1a.markogorge18.workers.dev/';   // Gemini (واجهة متوافقة مع OpenAI)
-    const AI_MODELS = ['gemini-3.8-flash', 'gemini-3.5-flash-lite', 'gemini-2.5-flash'];
+    const AI_MODELS = ['gemini-3.8-flash', 'gemini-3.5-flash-lite'];   // gemini-2.5-flash اتشال: جوجل رجّعت 404 (مش متاح للمفاتيح الجديدة)
     const AI_MAX_CHARS = 30000;
 
     const AI_TOOLS = {
@@ -5915,16 +5915,23 @@ ${brief ? '- اكتب نص بسيط: سطور قصيرة، إيموجي خفيف
       let saved = ''; try { saved = localStorage.getItem('ai_model_g') || ''; } catch (e) {}
       const list = saved ? [saved, ...AI_MODELS.filter(m => m !== saved)] : AI_MODELS;
       let res = null, lastErr = '', allErr = [];
-      for (const model of list) {
-        const reqBody = JSON.stringify({ model, max_tokens: 4096, temperature: (opts && opts.temp) ?? 0.6, stream: true, reasoning_effort: /2\.5/.test(model) ? 'none' : undefined, messages: [{ role: 'system', content: system }, ...hist] });
-        const send = (auth) => fetch(AI_URL, { method: 'POST', signal: ctrl.signal, headers: Object.assign({ 'content-type': 'application/json' }, auth), body: reqBody });
-        const r = await send({});
-        if (r.ok) { res = r; try { localStorage.setItem('ai_model_g', model); } catch (e) {} break; }
-        const j = await r.json().catch(() => ({})), je = (Array.isArray(j) ? j[0] : j)?.error || {};
-        lastErr = je.message || String(r.status);
-        allErr.push(model + ' (' + r.status + '): ' + lastErr.slice(0, 120));
-        /* موديل مش موجود أو الكوتا خلصت أو السيرفر مشغول: جرّب اللي بعده. غير كده (مفتاح غلط مثلاً) وقّف */
-        if (!([404, 429, 500, 503].includes(r.status) || /model/i.test(lastErr))) throw new Error(lastErr);
+      /* لو كل الموديلات مشغولة (503/429) نستنى ثانية ونعيد المحاولة لحد 3 مرات قبل ما نظهر خطأ */
+      for (let pass = 0; pass < 3 && !res; pass++) {
+        if (pass) await new Promise(ok => setTimeout(ok, 1200 * pass));
+        let busy = false;
+        for (const model of list) {
+          const reqBody = JSON.stringify({ model, max_tokens: 4096, temperature: (opts && opts.temp) ?? 0.6, stream: true, reasoning_effort: /2\.5/.test(model) ? 'none' : undefined, messages: [{ role: 'system', content: system }, ...hist] });
+          const send = (auth) => fetch(AI_URL, { method: 'POST', signal: ctrl.signal, headers: Object.assign({ 'content-type': 'application/json' }, auth), body: reqBody });
+          const r = await send({});
+          if (r.ok) { res = r; try { localStorage.setItem('ai_model_g', model); } catch (e) {} break; }
+          const j = await r.json().catch(() => ({})), je = (Array.isArray(j) ? j[0] : j)?.error || {};
+          lastErr = je.message || String(r.status);
+          allErr.push(model + ' (' + r.status + '): ' + lastErr.slice(0, 120));
+          if ([429, 500, 503].includes(r.status)) busy = true;
+          /* موديل مش موجود أو الكوتا خلصت أو السيرفر مشغول: جرّب اللي بعده. غير كده (مفتاح غلط مثلاً) وقّف */
+          if (!([404, 429, 500, 503].includes(r.status) || /model/i.test(lastErr))) throw new Error(lastErr);
+        }
+        if (!busy) break;
       }
       if (!res) throw new Error(allErr.join(' | ') || lastErr || 'no-model');
       const reader = res.body.getReader(), dec = new TextDecoder();
@@ -5991,10 +5998,40 @@ ${brief ? '- اكتب نص بسيط: سطور قصيرة، إيموجي خفيف
       if (/اشرح|شرحلي|فهمني|وضحلي|وضح/.test(t)) return 'explain';
       return 'chat';
     }
+    /* كلمات سرية: لو الرسالة كلها كلمة من القايمة دي تظهر الرسالة فوق كل حاجة (من غير ما تتبعت للـ AI).
+       عشان تضيف كلمة: زوّد سطر 'الكلمة': 'الرسالة' */
+    const AI_SECRETS = {
+      'داما': 'ايوة داما فوق الكل 👑'
+    };
+    function aiSecretShow(msg) {
+      const old = document.getElementById('aiSecret'); if (old) old.remove();
+      const d = document.createElement('div'); d.id = 'aiSecret';
+      d.setAttribute('popover', 'manual');   // طبقة top-layer: فوق أي نافذة أو dialog
+      d.style.cssText = 'position:fixed;inset:0;width:100%;height:100%;max-width:none;max-height:none;margin:0;padding:0;border:0;overflow:visible;z-index:2147483647;display:flex;align-items:center;justify-content:center;background:rgba(5,4,25,.78);opacity:0;transition:opacity .25s;direction:rtl';
+      d.innerHTML = `<div style="transform:scale(.8);transition:transform .3s cubic-bezier(.2,1.4,.4,1);max-width:86vw;padding:26px 34px;border-radius:26px;background:linear-gradient(135deg,#3b5bdb,#9c36b5);color:#fff;font-size:30px;font-weight:800;text-align:center;box-shadow:0 20px 60px rgba(0,0,0,.5);border:3px solid #ffd43b">${esc(msg)}</div>`;
+      const close = () => { d.style.opacity = '0'; setTimeout(() => d.remove(), 250); };
+      d.addEventListener('click', close);
+      document.body.appendChild(d);
+      try { d.showPopover(); } catch (e) {}
+      requestAnimationFrame(() => { d.style.opacity = '1'; d.firstChild.style.transform = 'scale(1)'; });
+      setTimeout(close, 2600);
+    }
+    const aiSecKey = t => aiNorm(t).replace(/[\u200b-\u200f\u202a-\u202e\u2066-\u2069\ufeff\s]/g, '');
+    let aiSecretTimer = 0;
+    document.addEventListener('input', e => {
+      const t = e.target;
+      if (!t || !/^(INPUT|TEXTAREA)$/.test(t.tagName) || t.type === 'password') return;
+      clearTimeout(aiSecretTimer);
+      aiSecretTimer = setTimeout(() => {
+        const sk = aiSecKey(t.value), sm = sk && Object.entries(AI_SECRETS).find(([k]) => aiSecKey(k) === sk);
+        if (sm) { t.value = ''; t.dispatchEvent(new Event('input', { bubbles: true })); aiSecretShow(sm[1]); }
+      }, 700);
+    }, true);
     async function aiSend() {
       if (AI.busy) return;
       const inp = $ai('aiIn'); if (!inp) return;
       const text = inp.value.trim(); if (!text) return;
+      { const sk = aiSecKey(text), sm = Object.entries(AI_SECRETS).find(([k]) => aiSecKey(k) === sk); if (sm) { inp.value = ''; inp.style.height = 'auto'; aiSecretShow(sm[1]); return; } }
       if (!isAdminStaff() && myAiBlocked) { AI.err = 'الإدارة وقّفت استخدامك لـ ' + AI_NAME + '.'; return aiDrawMsgs(); }
       if (Date.now() - AI.lastSend < 1500) return;
       AI.lastSend = Date.now();
@@ -6037,7 +6074,7 @@ ${brief ? '- اكتب نص بسيط: سطور قصيرة، إيموجي خفيف
         console.warn('Learn Ai:', err);
         AI.msgs.pop(); AI.busy = false; AI.live = '';
         inp.value = text; AI.file = file;
-        AI.err = err.message === 'empty' ? 'الرد رجع فاضي، جرّب تاني.' : 'المساعد مش شغال دلوقتي. جرّب تاني بعد شوية.' + ' [' + String(err.message || err).slice(0, 500) + ']';
+        AI.err = err.message === 'empty' ? 'الرد رجع فاضي، جرّب تاني.' : 'المساعد مشغول شوية دلوقتي 🙏 جرّب تبعت تاني بعد ثواني.' + (isAdminStaff() ? ' [' + String(err.message || err).slice(0, 160) + ']' : '');
         aiDraw(); return;
       }
       if (!$ai('aiMsgs')) return;
