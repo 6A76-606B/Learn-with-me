@@ -1556,7 +1556,7 @@
     .ai-paper.ex{border:0;padding:0 0 12px;overflow:hidden;box-shadow:0 10px 28px rgba(122,92,255,.22)}
     .ai-paper.ex::before{content:'📘 ورقة شرح';display:block;background:linear-gradient(90deg,#7a5cff,#ff6fa5);color:#fff!important;font-weight:700;padding:9px 16px;margin-bottom:8px}
     .ai-paper.ex>*{margin-right:14px;margin-left:14px}.ai-paper.ex>h2,.ai-paper.ex>h3,.ai-paper.ex>h4{margin-right:14px}
-    .ai-paper b,.ai-paper strong{background:linear-gradient(transparent 60%,#ffe58a 60%);padding:0 2px}
+    .ai-paper b,.ai-paper strong{background:linear-gradient(transparent 68%,rgba(255,212,59,.34) 68%);padding:0 2px;-webkit-box-decoration-break:clone;box-decoration-break:clone}
     .ai-paper h2:nth-of-type(4n+2),.ai-paper h3:nth-of-type(4n+2){background:linear-gradient(90deg,#7a5cff,#5aa0ff)}
     .ai-paper h2:nth-of-type(4n+3),.ai-paper h3:nth-of-type(4n+3){background:linear-gradient(90deg,#1fb98a,#52d6a8)}
     .ai-paper h2:nth-of-type(4n),.ai-paper h3:nth-of-type(4n){background:linear-gradient(90deg,#f5a623,#ff8a3d)}
@@ -5616,7 +5616,7 @@ const deleteUser = u => previewing ? (pvBlock(), Promise.reject(new Error('previ
       solve:     { n: '🧮 حل مسألة', d: 'حل خطوة بخطوة مع توضيح كل قانون.', ph: 'اكتب المسألة هنا...',
         p: 'احلّي المسألة دي بأسلوب ورقة الامتحان، بالعامية المصرية:\n## 📋 المعطيات والمطلوب\n(اكتبهم في نقط مع الوحدات)\n## 📐 القانون\n(القانون المستخدم وليه هو المناسب)\n## 🧮 الحل خطوة بخطوة\n(كل خطوة في سطر: التعويض ثم الناتج بوحدته)\n## ✅ النتيجة النهائية\n(الناتج بوحدته في سطر واضح)\n## 🔍 مراجعة الحل\n(تأكد من الوحدات ومعقولية الناتج، أو اتحقق بطريقة تانية)\n> ⚠️ أخطاء شائعة في النوع ده من المسائل\nالمسألة:' },
       visual:    { n: '🎨 شرح مصوّر', d: 'شرح برسومات وأقسام ملونة وقوانين وجداول ودوائر كهربية، شكل ورقة مراجعة احترافية تنزلها صورة أو PDF.', ph: 'الصق الدرس أو اكتب اسم الموضوع...',
-        p: 'حوّل المحتوى ده لشرح مصوّر احترافي زي ورقة مراجعة ملونة بالرسومات، بالعامية المصرية ومن غير حاجة برا المنهج. رجّع JSON صالح بس جوه كتلة ```json من غير أي كلام قبلها أو بعدها، بالشكل ده:\n{"title":"عنوان قصير","sub":"المادة · الصف","sections":[{"k":"steps","i":"🎯","h":"عنوان القسم","items":["نقطة قصيرة"]}]}\nأنواع الأقسام (k):\n- steps: items = من 3 لـ 6 نقط قصيرة (المصطلح وبعده معناه).\n- formula: eq = القانون زي "R = V / I"، vars = رموزه ووحداته، note = ملحوظة.\n- table: cols = من 2 لـ 4 عناوين، rows = صفوف نصوص.\n- compare: a و b، كل واحد {"h":"عنوان","items":["..."]}.\n- flow: items = من 3 لـ 5 خطوات متتابعة.\n- circuit: type = "series" أو "parallel"، parts = [{"k":"battery|resistor|bulb|ammeter|voltmeter|switch","l":"1.5 V"}] (أقصى 6)، note. استخدمه بس لو الموضوع كهرباء.\n- note: text = نصيحة أو فكرة مهمة للامتحان.\nالقواعد: من 4 لـ 7 أقسام، ابدأ بالفكرة العامة وانتهِ بقسم note، و i إيموجي واحد مناسب لكل قسم، والجمل قصيرة. المحتوى:' },
+        p: 'حوّل المحتوى ده لشرح مصوّر احترافي زي ورقة مراجعة ملونة بالرسومات، بالعامية المصرية ومن غير حاجة برا المنهج. رجّع JSON صالح بس جوه كتلة ```json من غير أي كلام قبلها أو بعدها، بالشكل ده:\n{"title":"عنوان قصير","sub":"المادة · الصف","sections":[{"k":"steps","i":"🎯","h":"عنوان القسم","items":["نقطة قصيرة"]}]}\nأنواع الأقسام (k):\n- steps: items = من 3 لـ 6 نقط قصيرة (المصطلح وبعده معناه).\n- formula: eq = القانون زي "R = V / I"، vars = رموزه ووحداته، note = ملحوظة.\n- table: cols = من 2 لـ 4 عناوين، rows = صفوف نصوص.\n- compare: a و b، كل واحد {"h":"عنوان","items":["..."]}.\n- flow: items = من 3 لـ 5 خطوات متتابعة.\n- circuit: type = "series" أو "parallel"، parts = [{"k":"battery|resistor|bulb|ammeter|voltmeter|switch","l":"1.5 V"}] (أقصى 6)، note. استخدمه بس لو الموضوع كهرباء.\n- punnett: مربع بانيت للوراثة. g1 و g2 = أمشاج الأبوين، مثال ["A","a"] أو لصفتين ["AB","Ab","aB","ab"]، و note. الحرف الكبير سائد والصغير متنحي، والمربع والنسب بيتحسبوا لوحدهم. استخدمه بدل وصف المربع بالكلام.\n- note: text = نصيحة أو فكرة مهمة للامتحان.\nالقواعد: من 4 لـ 7 أقسام، ابدأ بالفكرة العامة وانتهِ بقسم note، و i إيموجي واحد مناسب لكل قسم، والجمل قصيرة. المحتوى:' },
       mind:      { n: '🧠 خريطة ذهنية', d: 'خريطة ذهنية احترافية بأكتر من شكل، تنزلها صورة أو PDF.', ph: 'الصق الدرس أو اكتب اسم الموضوع...',
         p: 'حوّل المحتوى ده لخريطة ذهنية احترافية. رجّع JSON صالح بس جوه كتلة ```json من غير أي كلام قبلها أو بعدها، بالشكل ده بالظبط:\n{"title":"عنوان قصير","layout":"radial","nodes":[{"t":"فرع رئيسي","c":[{"t":"فكرة فرعية","c":[{"t":"تفصيلة"}]}]}]}\nالقواعد:\n- title: عنوان الموضوع (أقصى 5 كلمات).\n- layout: اختار الأنسب لنوع المحتوى (لو الطالب حدد شكل التزم بيه): radial للموضوعات العامة | tree للتصنيفات والأقسام | top للهيكل والتدرّج | flow للخطوات والعمليات والتجارب | time للأحداث والتاريخ والمراحل | cols للمقارنة بين حاجات.\n- من 4 لـ 8 فروع رئيسية، وتحت كل فرع من 2 لـ 5 أفكار، ومستوى تالت للتفاصيل المهمة بس. لو layout هو flow أو time رتّب الفروع الرئيسية بالترتيب الصح.\n- كل t كلمات مفتاحية قصيرة (أقصى 6 كلمات) مش جمل طويلة، بالعامية المصرية والمصطلحات العلمية زي ما هي.\n- ممنوع أي حقل غير title و layout و nodes و t و c، وممنوع تعليقات.\nالمحتوى:' }
     };
@@ -5643,6 +5643,15 @@ ${brief ? '- اكتب نص بسيط: سطور قصيرة، إيموجي خفيف
 - القوانين والمعادلات تتكتب في سطر لوحدها مع معنى كل رمز ووحدته.
 - في المسائل راجع الناتج مرتين وراجع الوحدات قبل ما تكتبه.
 - لو فيه حاجة صعبة الحفظ ادّي حيلة حفظ أو تشبيه، وماتكررش نفس الفكرة، وكل جملة لازم تفيد.
+- لو سؤال الطالب غلط أو فيه فخ أو مقارنة مالهاش معنى علمي (زي مقارنة موضوعين مالهمش علاقة)، قول بوضوح من أول سطر إن السؤال غلط أو مفيش مقارنة، وسبب ذلك باختصار وصحّح الفكرة. ماتجاملش ومتعملش جدول أو إجابة تجاري بيها السؤال الغلط.
+- ماتستخدمش LaTeX ولا علامة الدولار حوالين الرموز. اكتب الرموز عادي: × ÷ → ← ≤ ≥ ° وأرقام صغيرة زي H₂O و m².
+- في الوراثة: ثبّت طريقة كتابة واحدة في الرد كله: الأليلات حروف متتالية (AaBb، Tt)، والتزاوج بعلامة × والنواتج بسهم →، وكروموسومات الجنس XX و XY. ماتغيّرش الرموز في نفس الشرح.
+- الإملاء والمصطلحات: اكتب "جزيء" (مش جزئ)، و"الصفات الكمية"، و DNA و RNA بالشكل ده بس من غير أي إضافات أو حروف زيادة.
+- الدقة العلمية في الوراثة: الجين هو اللي بيتحمل على الكروموسوم (مش الصفة)، والسيادة معناها الصفة اللي بتظهر مش الأقوى جسدياً، والجين المتنحي بيفضل موجود في التركيب الجيني حتى لو ماظهرش. ماتستخدمش تشبيهات (عملاق وقزم) بتوحي بعكس كده.
+- لو المنهج مبسّط معلومة (زي عدد أزواج جينات صفة معينة) قول "حسب منهجك" وبعدها التبسيط، وماتقدمهاش كحقيقة مطلقة.
+- ماتستخدمش مصطلحات أعلى من مستوى الطالب ولا من خارج المنهج المصري. الشرح طويل بلا لزوم ممنوع: اكتفِ بالنقطة اللي تحل اللبس.
+- اللغة: التعريفات والقوانين والمصطلحات بالفصحى المعتمدة في الكتاب، والشرح حواليها بالعامية المصرية، وماتخلطش الاتنين في نفس الجملة. إيموجي قليل جداً (واحد في الفقرة بحد أقصى).
+- لو كتبت "أسئلة متوقعة" اكتب تحت كل سؤال إجابته النموذجية في سطر. وماتخترعش أرقام صفحات أو مصادر؛ اختم بـ "راجع الدرس في كتاب المدرسة" لو الموضوع محتاج.
 - كن دقيقاً، ولو معلومة مش متأكد منها قول كده بدل ما تخمّن. ركّز على المذاكرة والتعليم.`;
 
     const AI_R_NAME = `أنا **${AI_NAME}**، مساعد المذاكرة بتاعك في منصة Learn With Me 🚀 اسألني في أي درس وأنا أشرحه لك.`;
@@ -5684,12 +5693,28 @@ ${brief ? '- اكتب نص بسيط: سطور قصيرة، إيموجي خفيف
     }
 
     /* ---- ماركداون آمن (كل نص بيتعمله esc قبل أي وسم) ---- */
+    /* LaTeX بسيط ← رموز عادية (× → ≤ ₂ ²) عشان ما تظهرش $times$ و $rightarrow$ للطالب */
+    const AI_TEX = { times: '×', rightarrow: '→', longrightarrow: '→', to: '→', leftarrow: '←', leftrightarrow: '↔', Rightarrow: '⇒', Leftarrow: '⇐', cdot: '·', pm: '±', div: '÷', leq: '≤', le: '≤', geq: '≥', ge: '≥', neq: '≠', approx: '≈', degree: '°', circ: '°', infty: '∞', Delta: 'Δ', delta: 'δ', alpha: 'α', beta: 'β', gamma: 'γ', mu: 'μ', pi: 'π', Omega: 'Ω', omega: 'ω', lambda: 'λ', theta: 'θ', sigma: 'σ', rho: 'ρ' };
+    const AI_SUB = '₀₁₂₃₄₅₆₇₈₉', AI_SUP = '⁰¹²³⁴⁵⁶⁷⁸⁹';
+    function aiTex(s) {
+      return String(s).replace(/\$\$?([^$\n]{1,120}?)\$\$?/g, (m, t) => {
+        if (!/[\\^_{}]|\b(?:times|rightarrow|leftarrow|leftrightarrow|longrightarrow|Rightarrow|cdot|pm|leq|geq|neq|approx)\b/.test(t)) return m;
+        return t.replace(/\\(?:text|mathrm|mathbf|textbf|mathit)\{([^}]*)\}/g, '$1')
+          .replace(/\\frac\{([^}]*)\}\{([^}]*)\}/g, '($1)/($2)')
+          .replace(/\\([A-Za-z]+)/g, (w, n) => AI_TEX[n] || '')
+          .replace(/\b(times|rightarrow|longrightarrow|leftarrow|leftrightarrow|Rightarrow|cdot|pm|leq|geq|neq|approx)\b/g, (w, n) => AI_TEX[n])
+          .replace(/_\{(\d+)\}|_(\d)/g, (w, a, b) => [...(a || b)].map(d => AI_SUB[d]).join(''))
+          .replace(/\^\{(\d+)\}|\^(\d)/g, (w, a, b) => [...(a || b)].map(d => AI_SUP[d]).join(''))
+          .replace(/\\[,;: ]/g, ' ').replace(/[{}]/g, '').replace(/\s{2,}/g, ' ').trim();
+      });
+    }
     function aiMd(src) {
       const blocks = [];
       let s = String(src || '').replace(/\r/g, '');
       const keep = h => { blocks.push(h); return '\u0000' + (blocks.length - 1) + '\u0000'; };
       s = s.replace(/```[^\n`]*\n([\s\S]*?)```/g, (m, c) => keep('<pre><code>' + esc(c.replace(/\n$/, '')) + '</code></pre>'));
       s = s.replace(/```[^\n`]*\n([\s\S]*)$/, (m, c) => keep('<pre><code>' + esc(c) + '</code></pre>'));
+      s = aiTex(s);
       const inl = t => esc(t).replace(/`([^`\n]+)`/g, '<code>$1</code>').replace(/\*\*([^*\n]+)\*\*/g, '<strong>$1</strong>').replace(/(^|[^*\w])\*([^*\n]+)\*(?!\*)/g, '$1<em>$2</em>');
       const L = s.split('\n'), out = []; let list = '', i = 0, m;
       const close = () => { if (list) { out.push('</' + list + '>'); list = ''; } };
@@ -5958,6 +5983,7 @@ ${brief ? '- اكتب نص بسيط: سطور قصيرة، إيموجي خفيف
     /* جدول الأوامر: ضغطة على أي صف بتكتب بدايته في خانة الكتابة */
     const AI_CMDS = [
       ['🎨 شرح مصوّر', 'اعمل شرح مصور عن ', 'اعمل شرح مصور · ارسملي شرح'],
+      ['🧬 مربع بانيت', 'اعمل شرح مصور بمربع بانيت لـ ', 'مربع بانيت · وراثة'],
       ['🧠 خريطة ذهنية', 'اعمل خريطة ذهنية عن ', 'خريطة ذهنية'],
       ['📋 امتحان كامل', 'اعمل امتحان كامل على ', 'اعمل امتحان · امتحان كامل'],
       ['❓ اختبار تفاعلي', 'اعمل اختبار على ', 'اعمل اختبار · اختبرني'],
@@ -5987,7 +6013,7 @@ ${brief ? '- اكتب نص بسيط: سطور قصيرة، إيموجي خفيف
     /* الأدمن مش بيختار أداة: الأداة بتتحدد من كلامه (اعمل شرح مصور، لخص، امتحان...) */
     function aiAutoTool(raw) {
       const t = aiNorm(raw).slice(0, 600);
-      if (/شرح\s*(?:ب)?\s*(?:مصور|برسوم|رسم|الرسم)|(?:ارسم|ارسمي|ارسملي)\s.*شرح|شرح\s.*(?:ب)?رسومات/.test(t)) return 'visual';
+      if (/بانيت|punnett|شرح\s*(?:ب)?\s*(?:مصور|برسوم|رسم|الرسم)|(?:ارسم|ارسمي|ارسملي)\s.*شرح|شرح\s.*(?:ب)?رسومات/.test(t)) return 'visual';
       if (/خريطه ذهنيه|mind ?map/.test(t)) return 'mind';
       if (/امتحان كامل|ورقه امتحان|نموذج امتحان|(?:اعمل|اعملي|اعمللي|هات|هاتلي|عايز|عاوز)\s+(?:\S+\s+){0,2}?امتحان/.test(t)) return 'exam';
       if (/فلاش|كاردز|flash ?cards?|بطاقات مراجعه/.test(t)) return 'cards';
@@ -6708,7 +6734,7 @@ ${brief ? '- اكتب نص بسيط: سطور قصيرة، إيموجي خفيف
 
     /* ---------- شرح مصوّر: JSON ← ورقة SVG بعناوين ملونة ورسومات (تتنزل صورة / PDF) ---------- */
     const VS_COL = ['#3b5bdb', '#2f9e44', '#f08c00', '#9c36b5', '#e03131', '#0c8599'];
-    const VS_KINDS = ['steps', 'formula', 'table', 'compare', 'flow', 'circuit', 'note'];
+    const VS_KINDS = ['steps', 'formula', 'table', 'compare', 'flow', 'circuit', 'punnett', 'note'];
     function vsParse(text) {
       const s = String(text || '');
       const fence = s.match(/```(?:json)?\s*([\s\S]*?)```/i);
@@ -6726,8 +6752,13 @@ ${brief ? '- اكتب نص بسيط: سطور قصيرة، إيموجي خفيف
         else if (k === 'table') { o.cols = L(x.cols, 4, 30); o.rows = (Array.isArray(x.rows) ? x.rows : []).slice(0, 8).map(r => L(r, o.cols.length || 4, 70)); }
         else if (k === 'compare') { const c = v => ({ h: T(v && v.h, 30) || '—', items: L(v && v.items, 5, 100) }); o.a = c(x.a); o.b = c(x.b); }
         else if (k === 'circuit') { o.type = x.type === 'parallel' ? 'parallel' : 'series'; o.parts = (Array.isArray(x.parts) ? x.parts : []).slice(0, 6).map(q => ({ k: ['battery', 'resistor', 'bulb', 'ammeter', 'voltmeter', 'switch'].includes(q && q.k) ? q.k : 'resistor', l: T(q && q.l, 12) })); o.note = T(x.note, 140); }
+        else if (k === 'punnett') {
+          const G = a => (Array.isArray(a) ? a : []).slice(0, 4).map(g => String(g || '').replace(/[^A-Za-z]/g, '').slice(0, 3)).filter(Boolean);
+          o.g1 = G(x.g1); o.g2 = G(x.g2); o.note = T(x.note, 140);
+          if (new Set([...o.g1, ...o.g2].map(g => g.length)).size !== 1) { o.g1 = []; o.g2 = []; }
+        }
         else o.text = T(x.text, 220);
-        const ok = o.items ? o.items.length : k === 'formula' ? !!o.eq : k === 'table' ? o.cols.length && o.rows.length : k === 'compare' ? (o.a.items.length || o.b.items.length) : k === 'circuit' ? o.parts.length : !!o.text;
+        const ok = o.items ? o.items.length : k === 'formula' ? !!o.eq : k === 'table' ? o.cols.length && o.rows.length : k === 'compare' ? (o.a.items.length || o.b.items.length) : k === 'circuit' ? o.parts.length : k === 'punnett' ? !!(o.g1.length && o.g2.length) : !!o.text;
         return ok ? o : null;
       }).filter(Boolean);
       return secs.length ? { title: T(j.title, 50) || 'شرح مصوّر', sub: T(j.sub, 60), secs } : null;
@@ -6792,6 +6823,21 @@ ${brief ? '- اكتب نص بسيط: سطور قصيرة، إيموجي خفيف
             s.parts.forEach((q, j) => { const yy = ty + gap * j; g += `<path d="M${x1} ${yy}H${x2}" ${ST}/>` + vsSym(q.k, W / 2, yy) + (q.l ? T(q.l, W / 2, yy - 24, 14, 700, c, 'middle', ' direction="ltr"') : ''); });
           }
           if (s.note) { const t = lines(s.note, R - 4, cy0 + h + 4, CW - 10, 15, 600, '#5b5a7a', 'end', 24); g += t.svg; h += t.h + 8; }
+        } else if (s.k === 'punnett') {
+          const n1 = s.g1.length, n2 = s.g2.length, cs = Math.min(104, (CW - 110) / n1), hh = 38, rh = 58, gx = (W - (hh + cs * n1)) / 2;
+          const geno = (a, b) => [...a].map((_, i) => [a[i], b[i]].sort((p, q) => (p === p.toUpperCase() ? 0 : 1) - (q === q.toUpperCase() ? 0 : 1)).join('')).join('');
+          const phen = g => (g.match(/../g) || []).map(pr => (/[A-Z]/.test(pr) ? 'D' : 'r')).join('');
+          const cells = s.g2.map(b => s.g1.map(a => geno(a, b))), gc = new Map(), pc = new Map();
+          cells.flat().forEach(g => { gc.set(g, (gc.get(g) || 0) + 1); const f = phen(g); pc.set(f, (pc.get(f) || 0) + 1); });
+          const pk = [...pc.keys()].sort(), tint = ['#d3f9d8', '#fff3bf', '#ffe3e3', '#e5dbff'];
+          g += `<rect x="${mmR(gx)}" y="${cy0}" width="${hh}" height="${hh}" fill="#fff" stroke="${c}" stroke-width="2"/>` + T('×', gx + hh / 2, cy0 + 26, 22, 800, c, 'middle');
+          s.g1.forEach((a, j) => { g += `<rect x="${mmR(gx + hh + cs * j)}" y="${cy0}" width="${mmR(cs)}" height="${hh}" fill="${c}" stroke="#fff" stroke-width="2"/>` + T(a, gx + hh + cs * (j + .5), cy0 + 26, 19, 800, '#fff', 'middle', ' direction="ltr"'); });
+          s.g2.forEach((b, i) => { g += `<rect x="${mmR(gx)}" y="${cy0 + hh + rh * i}" width="${hh}" height="${rh}" fill="${c}" stroke="#fff" stroke-width="2"/>` + T(b, gx + hh / 2, cy0 + hh + rh * (i + .5) + 7, 19, 800, '#fff', 'middle', ' direction="ltr"'); });
+          cells.forEach((row, i) => row.forEach((gt, j) => { g += `<rect x="${mmR(gx + hh + cs * j)}" y="${cy0 + hh + rh * i}" width="${mmR(cs)}" height="${rh}" fill="${tint[pk.indexOf(phen(gt)) % 4]}" stroke="${c}" stroke-width="1.5"/>` + T(gt, gx + hh + cs * (j + .5), cy0 + hh + rh * (i + .5) + 7, gt.length > 2 ? 18 : 22, 800, '#1b1a3a', 'middle', ' direction="ltr"'); }));
+          h = hh + rh * n2 + 16;
+          const gr = [...gc.entries()], pr = [...pc.values()].sort((a, b) => b - a);
+          [...(gr.length <= 4 ? [['النسبة الوراثية: ' + gr.map(e => e[0]).join(' : ') + ' = ' + gr.map(e => e[1]).join(' : ')]] : []), ['النسبة المظهرية: ' + pr.join(' : ')]].forEach(([ln]) => { const t = lines(ln, W / 2, cy0 + h, CW - 20, 16, 700, '#1b1a3a', 'middle', 25); g += t.svg; h += t.h + 4; });
+          if (s.note) { const t = lines(s.note, R - 4, cy0 + h + 2, CW - 10, 15, 600, '#5b5a7a', 'end', 24); g += t.svg; h += t.h + 6; }
         } else {
           const t = lines(s.text, R - 52, cy0 + 14, CW - 90, 17, 600, '#4a3500', 'end', 27); h = t.h + 28;
           g += `<rect x="${x0 + 6}" y="${cy0}" width="${CW - 12}" height="${h}" rx="14" fill="#fff8db" stroke="#f08c00" stroke-width="2"/>` + T('💡', R - 22, cy0 + 40, 30, 400, '#000', 'middle') + t.svg;
@@ -6853,7 +6899,7 @@ ${brief ? '- اكتب نص بسيط: سطور قصيرة، إيموجي خفيف
 .sx pre{background:#14123b;color:#fff;padding:12px;border-radius:10px;direction:ltr;text-align:left;white-space:pre-wrap}
 .sx pre code{background:none;color:#fff}
 .sx hr{border:0;border-top:2px dashed #cfd2ee;margin:14px 0}
-.sx .sf{padding:10px 30px 18px;color:#8b8fb5;font-size:12px;text-align:left;direction:ltr}.sx .sb h2,.sx .sb h3{background:linear-gradient(90deg,#ff6fa5,#b77be8);color:#fff;border-radius:14px;padding:4px 16px;display:inline-block;font-size:18px;margin:16px 0 6px}.sx .sxt{border-collapse:collapse;width:100%}.sx .sxt th{background:#fbe4f0}.sx .sb b,.sx .sb strong{background:linear-gradient(transparent 60%,#ffe58a 60%);padding:0 2px}.sx .sb h2:nth-of-type(4n+2),.sx .sb h3:nth-of-type(4n+2){background:linear-gradient(90deg,#7a5cff,#5aa0ff)}.sx .sb h2:nth-of-type(4n+3),.sx .sb h3:nth-of-type(4n+3){background:linear-gradient(90deg,#1fb98a,#52d6a8)}.sx .sb h2:nth-of-type(4n),.sx .sb h3:nth-of-type(4n){background:linear-gradient(90deg,#f5a623,#ff8a3d)}.sx .sxt tr:nth-child(even) td{background:#faf5ff}.sx .sb blockquote{background:#fff6dc;border-right:5px solid #f5a623}.sx .sxt td,.sx .sxt th{border:1.5px solid #e8c4dc;padding:6px 10px}.sx .sb blockquote{border-right:4px solid #b77be8;background:#f6efff;margin:8px 0;padding:6px 12px;border-radius:10px}`;
+.sx .sf{padding:10px 30px 18px;color:#8b8fb5;font-size:12px;text-align:left;direction:ltr}.sx .sb h2,.sx .sb h3{background:linear-gradient(90deg,#ff6fa5,#b77be8);color:#fff;border-radius:14px;padding:4px 16px;display:inline-block;font-size:18px;margin:16px 0 6px}.sx .sxt{border-collapse:collapse;width:100%}.sx .sxt th{background:#fbe4f0}.sx .sb b,.sx .sb strong{background:linear-gradient(transparent 68%,rgba(255,214,64,.55) 68%);padding:0 2px;-webkit-box-decoration-break:clone;box-decoration-break:clone}.sx .sb h2:nth-of-type(4n+2),.sx .sb h3:nth-of-type(4n+2){background:linear-gradient(90deg,#7a5cff,#5aa0ff)}.sx .sb h2:nth-of-type(4n+3),.sx .sb h3:nth-of-type(4n+3){background:linear-gradient(90deg,#1fb98a,#52d6a8)}.sx .sb h2:nth-of-type(4n),.sx .sb h3:nth-of-type(4n){background:linear-gradient(90deg,#f5a623,#ff8a3d)}.sx .sxt tr:nth-child(even) td{background:#faf5ff}.sx .sb blockquote{background:#fff6dc;border-right:5px solid #f5a623}.sx .sxt td,.sx .sxt th{border:1.5px solid #e8c4dc;padding:6px 10px}.sx .sb blockquote{border-right:4px solid #b77be8;background:#f6efff;margin:8px 0;padding:6px 12px;border-radius:10px}`;
     function aiSheetHtml(text, tag) {
       return `<div class="sx"><div class="sh"><b>🚀 ${AI_NAME}</b><span>${esc(tag)} · ${esc(new Date().toLocaleDateString('ar-EG'))}</span></div><div class="sb">${aiMd(text).replace(/class="ai-tb"/g, 'class="sxt"')}</div><div class="sf">Learn With Me · ${AI_NAME}</div></div>`;
     }
