@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="ar" dir="rtl">
+<html lang="ar" dir="rtl" class="noscroll">
 
 <head>
   <meta charset="utf-8">
@@ -1603,6 +1603,118 @@
     #pwaBar small{display:block;color:#a9a8d8;font-size:12px}
     #pwaBar .x{border:0;background:none;color:#fff;font-size:16px;cursor:pointer;padding:4px}
     @keyframes pwa-up{from{opacity:0;transform:translateY(30px)}}
+
+    /* ==========================================================
+       الصفحات الثابتة (الرئيسية + المواد): من غير سكرول ولا سحب ولا حركة خلفية
+       ========================================================== */
+    html.noscroll, html.noscroll body { height: 100%; overflow: hidden; overscroll-behavior: none; }
+    html.noscroll #screenHome {
+      height: 100vh; height: 100dvh; min-height: 0; overflow: hidden;
+      padding-bottom: calc(84px + env(safe-area-inset-bottom, 0px));
+    }
+    html.noscroll #screenSubjects {
+      height: 100vh; height: 100dvh; min-height: 0; overflow: hidden;
+      padding-bottom: calc(92px + env(safe-area-inset-bottom, 0px));
+    }
+    html.noscroll .hero::before, html.noscroll .hero::after { animation: none; }
+    @media (max-height: 720px) {
+      html.noscroll #screenHome { padding-top: 18px; }
+      html.noscroll .hero h1 { font-size: clamp(36px, 10vw, 60px); }
+      html.noscroll .hero p { margin: 8px 0 14px; font-size: 16px; }
+      html.noscroll .gcard { min-height: 100px; padding: 12px 16px; }
+      html.noscroll .gcard b { font-size: 36px; }
+      html.noscroll .gcard__num { font-size: 100px; }
+      html.noscroll .subj { min-height: 84px; margin-bottom: 10px; padding: 12px 18px; }
+    }
+
+    /* ==========================================================
+       شكل الأزرار الجديد: عمق واضح، ضغطة حقيقية، ومقاسات موحّدة
+       ========================================================== */
+    html body .btn {
+      min-height: 48px; padding: 12px 28px; border: 0; border-radius: 99px;
+      font-weight: 700; font-size: 16px; letter-spacing: .2px; color: #14123b;
+      background-image: linear-gradient(180deg, #e2ff85 0%, #c6ff3d 55%, #aee62b 100%);
+      box-shadow: 0 5px 0 #86b516, 0 12px 24px rgba(198, 255, 61, .22), inset 0 2px 0 rgba(255, 255, 255, .65);
+      transition: transform .2s cubic-bezier(.3, 1.6, .5, 1), box-shadow .2s, filter .2s;
+    }
+    html body .btn--small { min-height: 42px; padding: 8px 18px; font-size: 14px; box-shadow: 0 4px 0 #86b516, 0 8px 16px rgba(198, 255, 61, .18), inset 0 2px 0 rgba(255, 255, 255, .6); }
+    @media (hover: hover) { html body .btn:hover { transform: translateY(-2px); filter: brightness(1.04); } }
+    html body .btn:active { transform: translateY(4px); filter: none; box-shadow: 0 1px 0 #86b516, inset 0 2px 0 rgba(255, 255, 255, .4); }
+    html body .btn:disabled { opacity: .55; filter: grayscale(.4); box-shadow: 0 2px 0 #86b516; cursor: not-allowed; transform: none; }
+    html body #paneAdmin .btn, html body .addbox .btn, html body .gate__card .btn.btn--help { background-image: none; }
+    html body #paneAdmin .btn, html body .addbox .btn { background: linear-gradient(180deg, #6a6aff, #3b3bff); color: #fff; box-shadow: 0 5px 0 #2424b8, 0 12px 24px rgba(59, 59, 255, .3), inset 0 2px 0 rgba(255, 255, 255, .3); }
+    html body #paneAdmin .btn:active, html body .addbox .btn:active { box-shadow: 0 1px 0 #2424b8, inset 0 2px 0 rgba(255, 255, 255, .25); }
+    html body .gate__card .btn:first-of-type { background-image: linear-gradient(180deg, #4fe58a, #25d366 60%, #1db857); }
+
+    html body .tool, html body .back, html body .cb, html body .close, html body .row__acts button, html body .lact button {
+      transition: transform .2s cubic-bezier(.3, 1.6, .5, 1), box-shadow .2s, background-color .2s, color .2s, border-color .2s;
+    }
+    html body .tool {
+      min-height: 42px; padding: 8px 18px; border-radius: 99px; font-weight: 700;
+      background-image: linear-gradient(180deg, #e2ff85, #c6ff3d 60%, #aee62b);
+      box-shadow: 0 3px 0 #86b516, inset 0 1px 0 rgba(255, 255, 255, .6);
+    }
+    html body .tool:active { transform: translateY(3px); box-shadow: 0 0 0 #86b516; }
+    html body .tool.danger { background-image: none; background: linear-gradient(180deg, #ff7aa0, #ff5c8a); color: #fff; box-shadow: 0 3px 0 #c93d65; }
+    html body .tool.danger:active { box-shadow: 0 0 0 #c93d65; }
+
+    html body .back {
+      min-height: 42px; padding: 8px 18px; border-radius: 99px; background: var(--card);
+      box-shadow: inset 0 0 0 1.5px rgba(255, 255, 255, .12), 0 3px 0 rgba(0, 0, 0, .3);
+    }
+    html body .back:active { transform: translateY(3px); box-shadow: inset 0 0 0 1.5px rgba(255, 255, 255, .12); }
+
+    html body .cb { min-height: 42px; padding: 8px 18px; border-width: 1.5px; border-radius: 99px; }
+    html body .cb[aria-pressed="true"] { box-shadow: 0 3px 0 #86b516; }
+
+    html body .row__acts button {
+      min-height: 38px; padding: 8px 16px; border-radius: 99px;
+      background: color-mix(in srgb, var(--txt) 9%, var(--bg));
+      box-shadow: inset 0 0 0 1px rgba(255, 255, 255, .1), 0 2px 0 rgba(0, 0, 0, .25);
+    }
+    html body .row__acts .danger { background: var(--pink); box-shadow: 0 2px 0 #c93d65; }
+
+    html body .close {
+      width: 42px; height: 42px; border-radius: 14px;
+      box-shadow: inset 0 0 0 1.5px rgba(255, 255, 255, .14);
+    }
+
+    /* قايمة التلت شرط في الشريط العلوي */
+    .nav__btns { position: relative; gap: 10px; align-items: center; }
+    .nav__menuwrap { position: relative; }
+    .nav__menuwrap[hidden], .nav__menu[hidden] { display: none; }
+    .burger {
+      position: relative; display: grid; align-content: center; justify-items: center; gap: 5px;
+      width: 46px; height: 46px; padding: 0; border: 0; border-radius: 16px; cursor: pointer;
+      background: rgba(255, 255, 255, .1);
+      box-shadow: inset 0 0 0 1.5px rgba(255, 255, 255, .2), 0 4px 0 rgba(0, 0, 0, .3);
+      transition: transform .2s cubic-bezier(.3, 1.6, .5, 1), box-shadow .2s, background-color .2s;
+    }
+    .burger:active { transform: translateY(3px); box-shadow: inset 0 0 0 1.5px rgba(255, 255, 255, .2); }
+    .burger[aria-expanded="true"] { background: var(--lime); box-shadow: 0 4px 0 #86b516; }
+    .burger i { display: block; width: 22px; height: 3px; border-radius: 3px; background: #fff; transition: transform .3s cubic-bezier(.3, 1.6, .5, 1), opacity .2s, background-color .2s; }
+    .burger[aria-expanded="true"] i { background: var(--ink); }
+    .burger[aria-expanded="true"] i:nth-child(1) { transform: translateY(8px) rotate(45deg); }
+    .burger[aria-expanded="true"] i:nth-child(2) { opacity: 0; }
+    .burger[aria-expanded="true"] i:nth-child(3) { transform: translateY(-8px) rotate(-45deg); }
+    .burger__dot { position: absolute; top: -6px; left: -6px; width: 14px; height: 14px; border-radius: 50%; background: var(--pink); box-shadow: 0 0 0 3px var(--ink); }
+    .burger__dot[hidden] { display: none; }
+    .nav__menu {
+      position: absolute; top: calc(100% + 12px); left: 0; z-index: 30; display: grid; gap: 8px;
+      min-width: 230px; padding: 10px; border-radius: 22px; background: #1a1850;
+      border: 1px solid rgba(255, 255, 255, .14); box-shadow: 0 24px 48px rgba(0, 0, 0, .55);
+      animation: rise .2s ease both;
+    }
+    .nav__menu [hidden] { display: none !important; }
+    html body .nav__menu .btn {
+      display: flex; align-items: center; justify-content: space-between; gap: 10px; width: 100%;
+      min-height: 46px; background-image: none; background: rgba(255, 255, 255, .08); color: #fff;
+      border: 1px solid rgba(255, 255, 255, .12); box-shadow: none; text-align: right;
+    }
+    html body .nav__menu .btn:active { transform: scale(.97); }
+    html body .nav__menu #panelBtn { background: var(--lime); color: var(--ink); border-color: transparent; box-shadow: 0 4px 0 #86b516; }
+    html body .nav__menu #panelBtn:active { box-shadow: 0 1px 0 #86b516; transform: translateY(3px); }
+    .nav__menu .dot { position: static; }
   </style>
 </head>
 
@@ -1631,11 +1743,17 @@
     <nav class="nav">
       <div class="logo"><i>L</i><span dir="ltr">Learn With Me</span></div>
       <div class="nav__btns">
-        <button class="btn btn--small" id="pwaNav" type="button" hidden>📲 حمّل التطبيق</button>
         <span class="pwrap" id="mePwrap"><img class="avatar" id="meAvatar" alt="" hidden><span class="avatar avatar--letter" id="meLetter" hidden></span><i class="crown" id="meCrown" hidden>👑</i></span>
-        <button class="btn btn--small" id="previewBtn" hidden>👁️ اعرض مثل الطالب</button>
-    <button class="btn btn--small bell" id="panelBtn" hidden>لوحة التحكم<span class="dot" id="panelDot" hidden>0</span></button>
         <button class="btn btn--small" id="loginBtn">دخول</button>
+        <!-- قايمة التلت شرط: بتتجمّع فيها الأزرار الكتير (التحميل / المعاينة / لوحة التحكم) -->
+        <div class="nav__menuwrap" id="navMenuWrap" hidden>
+          <button class="burger" id="burger" type="button" aria-label="القائمة" aria-expanded="false" aria-controls="navMenu"><i></i><i></i><i></i><span class="burger__dot" id="burgerDot" hidden></span></button>
+          <div class="nav__menu" id="navMenu" hidden>
+            <button class="btn btn--small bell" id="panelBtn" hidden>🛠️ لوحة التحكم<span class="dot" id="panelDot" hidden>0</span></button>
+            <button class="btn btn--small" id="previewBtn" hidden>👁️ اعرض مثل الطالب</button>
+            <button class="btn btn--small" id="pwaNav" type="button" hidden>📲 حمّل التطبيق</button>
+          </div>
+        </div>
       </div>
     </nav>
 
@@ -2278,6 +2396,7 @@ const deleteUser = u => previewing ? (pvBlock(), Promise.reject(new Error('previ
       if (payOn() && waiting) { waiting = false; closeLogin(); }   // كان واقف على شاشة الموافقة القديمة
       const locked = payOn() && !currentRole && !!auth.currentUser && myLoaded && !(myPaidUntil > Date.now());
       payGate.hidden = !locked;
+      if (locked && modal.classList.contains('is-open')) { modal.classList.remove('is-open'); modal.setAttribute('aria-hidden', 'true'); }   // نافذة الدخول ماتفضلش مفتوحة ورا البوابة
       if (!locked) { stopMyPay(); if (document.body.style.overflow === 'hidden' && !document.querySelector('.panel.is-open') && !modal.classList.contains('is-open') && joinGate.hidden) document.body.style.overflow = ''; return; }
       document.body.style.overflow = 'hidden';
       watchMyPay(auth.currentUser.uid);
@@ -2877,8 +2996,18 @@ const deleteUser = u => previewing ? (pvBlock(), Promise.reject(new Error('previ
       if (currentRole === 'owner') watchPending(); else stopPendingWatch();   // طلبات التسجيل الجديدة
       if (!currentRole) closePanel();
       commNav();
-      if (!user) { if (view.screen !== 'home') show('home'); }
-      else if (view.screen === 'lessons') subscribeLessons();   // الدور اتحدد: حدّث القائمة
+      if (!user) {
+        /* بعد تسجيل الخروج: ارجع لأول صفحة (الصفوف) وصفّي أي نافذة أو صف كان مستني */
+        if (applyUser.wasIn) {
+          wantedGrade = null; selected.clear();
+          try { closeAvMenu(); } catch (e) {}
+          if (modal.classList.contains('is-open')) { modal.classList.remove('is-open'); modal.setAttribute('aria-hidden', 'true'); }
+          document.body.style.overflow = '';
+          show('home'); window.scrollTo(0, 0);
+        } else if (view.screen !== 'home') show('home');
+      }
+      else if (view.screen === 'lessons') subscribeLessons();
+      applyUser.wasIn = !!user;   // الدور اتحدد: حدّث القائمة
     }
 
     /* ---- اعرض مثل الطالب (للأدمن): الموقع بيظهر كأنك طالب مسجّل في الصف اللي تختاره، ومفيش حاجة بتتحفظ ---- */
@@ -3783,6 +3912,8 @@ const deleteUser = u => previewing ? (pvBlock(), Promise.reject(new Error('previ
         if (key === name) { el.classList.remove('screen-in'); void el.offsetWidth; el.classList.add('screen-in'); }
       });
       if (name !== 'lessons') stopLessons();
+      /* الصفحات اللي مش محتاجة سكرول (الرئيسية والمواد) بتتثبّت تمامًا */
+      document.documentElement.classList.toggle('noscroll', name === 'home' || name === 'subjects');
       window.scrollTo(0, 0);
       commNav();
     }
@@ -3883,10 +4014,12 @@ const deleteUser = u => previewing ? (pvBlock(), Promise.reject(new Error('previ
         }, () => {});
       }
       lessonsUnsub = onSnapshot(query(collection(db, 'content'), ...filters), snap => {
+        /* ما نعرضش دروس متخزنة على الجهاز لو الطالب مش متفعّل أو مش مسجّل دخول */
+        if (snap.metadata.fromCache && !currentRole && payOn() && !(auth.currentUser && myPaidUntil > Date.now())) return;
         lessons = snap.docs.map(d => ({ id: d.id, ...d.data() }))
           .sort((a, b) => ((a.order ?? 1e9) - (b.order ?? 1e9)) || ((a.createdAt?.seconds ?? Infinity) - (b.createdAt?.seconds ?? Infinity)) || 0);
         renderLessons();
-      }, dbError);
+      }, err => { lessons = []; lessonList.innerHTML = ''; renderLessons(); dbError(err); });
     }
 
     /* ---- تقدم الطالب + المفضلة + بحث + ترتيب + عدّ الفتح ---- */
@@ -5468,10 +5601,12 @@ const deleteUser = u => previewing ? (pvBlock(), Promise.reject(new Error('previ
 
     const AI_TOOLS = {
       chat:      { n: '💬 اسأل', d: 'اسأل أي سؤال، أو قول «اشرحلي جزء كذا» وهشرحهولك بأمثلة وأسألك وأدّيك أسئلة شبهه.', ph: 'اكتب سؤالك أو اطلب شرح جزء...', p: 'جاوب على السؤال ده زي مدرس شاطر وصبور، بالعامية المصرية، وبشكل مرتب.' },
+      lesson:    { n: '📚 شرح كامل', d: 'شرح الدرس على أجزاء مفصّلة من غير حد للصفحات: أمثلة وقوانين وجداول وأسئلة بعد كل جزء.', ph: 'اكتب اسم الدرس أو الصق نصه كامل...', p: 'اشرحلي الدرس/الموضوع ده شرح كامل ومفصّل على أجزاء:' },
+      exam:      { n: '📋 امتحان كامل', d: 'امتحان شامل زي ورقة الامتحان الحقيقية (اختيار وصح/خطأ وعلل ومسائل) بنموذج إجابة، تحله هنا أو تطبعه.', ph: 'اكتب اسم الدرس/الوحدة أو الصق المحتوى...', p: 'اعملي امتحان كامل على:' },
       summarize: { n: '📝 تلخيص', d: 'ملخص مرتب وجاهز للمراجعة، تقدر تنزله PDF أو صورة.', ph: 'الصق الدرس أو النص اللي عايز تلخصه...',
         p: 'لخّصلي المحتوى ده ورقة مراجعة احترافية للامتحان، بالعامية المصرية، وبالتقسيم ده بالظبط:\n## 📌 الفكرة العامة\n(جملتين بس)\n## 🔑 النقاط الأساسية\n(نقاط قصيرة مرتبة بترتيب الدرس، والكلمات المفتاحية **بولد**)\n## 📖 مصطلحات مهمة\n(جدول: | المصطلح | معناه |)\n## 📊 مقارنات وتصنيفات\n(جدول مقارنة لو المحتوى فيه حاجات متشابهة، ولو مفيش ماتحطش القسم)\n## ⚠️ لازم تحفظها\n(قوانين / تواريخ / أرقام / تعريفات بالنص)\n## 🧠 حيل حفظ\n(اختصارات أو تشبيهات للحاجات الصعبة، ولو مفيش ماتحطش القسم)\n## ❓ أسئلة متوقعة في الامتحان\n(5 أسئلة بصيغة الامتحان: علل / بم تفسر / ما المقصود بـ، مع إجابة مختصرة لكل سؤال)\n> 💡 نصيحة للحفظ أو تنبيه على غلطة شائعة\n## ✅ خلاصة المراجعة\n(3 أو 4 سطور تتراجع في دقيقة)\nماتزودش حاجة مش موجودة في المحتوى. المحتوى:' },
       explain:   { n: '💡 شرح', d: 'شرح بالعامية، خطوة خطوة، بأمثلة من حياتنا.', ph: 'الصق الدرس أو اكتب الموضوع اللي عايز تفهمه...',
-        p: 'اشرحلي الموضوع ده شرح احترافي زي أحسن مدرس، بالعامية المصرية، ومن غير ما تزوّد حاجة مش في المنهج، وبالترتيب ده بالظبط:\n## 🎯 الفكرة في جملة\n(جملة واحدة بسيطة)\n## 🧩 الشرح خطوة بخطوة\n(كل خطوة تحت عنوان ### قصير، من الأساس للتفصيلة، والمصطلحات **بولد** وبعدها معناها بالعامية)\n## 🌍 مثال من حياتنا\n(تشبيه أو مثال واقعي يوضّح أصعب فكرة)\n## 📊 جدول سريع\n(لو فيه مقارنة أو تصنيف: جدول | العنصر | المعنى | مثال |، ولو مفيش ماتحطش القسم)\n> ⚠️ أخطاء شائعة: (2 لـ 3 أخطاء بتقع فيها الطلبة وإزاي تتجنبها)\n## 🔑 لازم تحفظ\n(القوانين والتعريفات والتواريخ بالنص الصح)\n## 🧠 حيلة حفظ\n(اختصار أو قافية أو تشبيه يسهّل الحفظ، ولو مفيش حاجة تستاهل ماتحطش القسم)\n## 🎯 إزاي بيجي في الامتحان\n(نوع الأسئلة اللي بتيجي على الجزء ده: علل / قارن / احسب / ما المقصود)\n## ✍️ اختبر نفسك\n(3 أسئلة متدرّجة، وبعدها سطر \"الإجابات:\" فيه إجابة كل سؤال في سطر)\n## ✅ الخلاصة\n(سطرين)\nاستخدم إيموجي خفيف ومثّل الأرقام والقوانين بوضوح. الموضوع:' },
+        p: 'اشرحلي الموضوع ده شرح احترافي زي أحسن مدرس، بالعامية المصرية، ومن غير ما تزوّد حاجة مش في المنهج، وبالترتيب ده بالظبط:\n## 🎯 الفكرة في جملة\n(جملة واحدة بسيطة)\n## 🧩 الشرح خطوة بخطوة\n(كل خطوة تحت عنوان ### قصير، من الأساس للتفصيلة، والمصطلحات **بولد** وبعدها معناها بالعامية)\n## 🌍 مثال من حياتنا\n(سطر بيبدأ بـ > 🌍 تشبيه أو مثال واقعي يوضّح أصعب فكرة)\n## 📊 جدول سريع\n(لو فيه مقارنة أو تصنيف: جدول | العنصر | المعنى | مثال |، ولو مفيش ماتحطش القسم)\n> ⚠️ أخطاء شائعة: (2 لـ 3 أخطاء بتقع فيها الطلبة وإزاي تتجنبها)\n## 🔑 لازم تحفظ\n(القوانين والتعريفات والتواريخ بالنص الصح)\n## 🧠 حيلة حفظ\n(اختصار أو قافية أو تشبيه يسهّل الحفظ، ولو مفيش حاجة تستاهل ماتحطش القسم)\n## 🎯 إزاي بيجي في الامتحان\n(نوع الأسئلة اللي بتيجي على الجزء ده: علل / قارن / احسب / ما المقصود)\n## ✍️ اختبر نفسك\n(3 أسئلة متدرّجة، وبعدها سطر \"الإجابات:\" فيه إجابة كل سؤال في سطر)\n## ✅ الخلاصة\n(سطرين)\nالقانون يتكتب في سطر لوحده جوه backticks زي `س = ع × ز` وبعده معنى كل رمز. الأمثلة المحلولة في بلوك > بيبدأ بـ "💡 مثال:"، والحاجة اللي تتحفظ في بلوك > بيبدأ بـ "🔑 احفظ:". استخدم إيموجي خفيف. الموضوع:' },
       quiz:      { n: '❓ اختبار', d: 'أسئلة اختيار من متعدد وصح/خطأ مع التفسير.', ph: 'الصق الدرس اللي عايز تتختبر فيه...',
         p: 'اعملي اختبار من المحتوى ده: 8 أسئلة اختيار من متعدد (أ، ب، ج، د) + سؤالين صح/خطأ، متدرّجين من السهل للصعب. اعرض الأسئلة كلها الأول من غير إجابات، وبعدها قسم "## الإجابات" فيه الإجابة الصح مع تفسير قصير بالعامية لكل سؤال. المحتوى:' },
       cards:     { n: '🗂️ فلاش كاردز', d: 'بطاقات سؤال/جواب للحفظ السريع.', ph: 'الصق الدرس اللي عايز تحوله لبطاقات...',
@@ -5480,6 +5615,8 @@ const deleteUser = u => previewing ? (pvBlock(), Promise.reject(new Error('previ
         p: 'اعملي خطة مذاكرة واقعية في جدول منظم (| اليوم | المادة/الدرس | المدة | نوع المذاكرة |) بناءً على المعلومات دي. وزّع المراجعات والراحة، وآخر الجدول حط 3 نصايح مختصرة بالعامية. المعلومات:' },
       solve:     { n: '🧮 حل مسألة', d: 'حل خطوة بخطوة مع توضيح كل قانون.', ph: 'اكتب المسألة هنا...',
         p: 'احلّي المسألة دي بأسلوب ورقة الامتحان، بالعامية المصرية:\n## 📋 المعطيات والمطلوب\n(اكتبهم في نقط مع الوحدات)\n## 📐 القانون\n(القانون المستخدم وليه هو المناسب)\n## 🧮 الحل خطوة بخطوة\n(كل خطوة في سطر: التعويض ثم الناتج بوحدته)\n## ✅ النتيجة النهائية\n(الناتج بوحدته في سطر واضح)\n## 🔍 مراجعة الحل\n(تأكد من الوحدات ومعقولية الناتج، أو اتحقق بطريقة تانية)\n> ⚠️ أخطاء شائعة في النوع ده من المسائل\nالمسألة:' },
+      visual:    { n: '🎨 شرح مصوّر', d: 'شرح برسومات وأقسام ملونة وقوانين وجداول ودوائر كهربية، شكل ورقة مراجعة احترافية تنزلها صورة أو PDF.', ph: 'الصق الدرس أو اكتب اسم الموضوع...',
+        p: 'حوّل المحتوى ده لشرح مصوّر احترافي زي ورقة مراجعة ملونة بالرسومات، بالعامية المصرية ومن غير حاجة برا المنهج. رجّع JSON صالح بس جوه كتلة ```json من غير أي كلام قبلها أو بعدها، بالشكل ده:\n{"title":"عنوان قصير","sub":"المادة · الصف","sections":[{"k":"steps","i":"🎯","h":"عنوان القسم","items":["نقطة قصيرة"]}]}\nأنواع الأقسام (k):\n- steps: items = من 3 لـ 6 نقط قصيرة (المصطلح وبعده معناه).\n- formula: eq = القانون زي "R = V / I"، vars = رموزه ووحداته، note = ملحوظة.\n- table: cols = من 2 لـ 4 عناوين، rows = صفوف نصوص.\n- compare: a و b، كل واحد {"h":"عنوان","items":["..."]}.\n- flow: items = من 3 لـ 5 خطوات متتابعة.\n- circuit: type = "series" أو "parallel"، parts = [{"k":"battery|resistor|bulb|ammeter|voltmeter|switch","l":"1.5 V"}] (أقصى 6)، note. استخدمه بس لو الموضوع كهرباء.\n- note: text = نصيحة أو فكرة مهمة للامتحان.\nالقواعد: من 4 لـ 7 أقسام، ابدأ بالفكرة العامة وانتهِ بقسم note، و i إيموجي واحد مناسب لكل قسم، والجمل قصيرة. المحتوى:' },
       mind:      { n: '🧠 خريطة ذهنية', d: 'خريطة ذهنية احترافية بأكتر من شكل، تنزلها صورة أو PDF.', ph: 'الصق الدرس أو اكتب اسم الموضوع...',
         p: 'حوّل المحتوى ده لخريطة ذهنية احترافية. رجّع JSON صالح بس جوه كتلة ```json من غير أي كلام قبلها أو بعدها، بالشكل ده بالظبط:\n{"title":"عنوان قصير","layout":"radial","nodes":[{"t":"فرع رئيسي","c":[{"t":"فكرة فرعية","c":[{"t":"تفصيلة"}]}]}]}\nالقواعد:\n- title: عنوان الموضوع (أقصى 5 كلمات).\n- layout: اختار الأنسب لنوع المحتوى (لو الطالب حدد شكل التزم بيه): radial للموضوعات العامة | tree للتصنيفات والأقسام | top للهيكل والتدرّج | flow للخطوات والعمليات والتجارب | time للأحداث والتاريخ والمراحل | cols للمقارنة بين حاجات.\n- من 4 لـ 8 فروع رئيسية، وتحت كل فرع من 2 لـ 5 أفكار، ومستوى تالت للتفاصيل المهمة بس. لو layout هو flow أو time رتّب الفروع الرئيسية بالترتيب الصح.\n- كل t كلمات مفتاحية قصيرة (أقصى 6 كلمات) مش جمل طويلة، بالعامية المصرية والمصطلحات العلمية زي ما هي.\n- ممنوع أي حقل غير title و layout و nodes و t و c، وممنوع تعليقات.\nالمحتوى:' }
     };
@@ -5531,6 +5668,21 @@ ${brief ? '- اكتب نص دردشة مرتب وجذاب: فقرات قصيرة
     const AI_RE_TOOL = /لخص|تلخيص|ملخص|اختبرني|امتحني|quiz me|summar|(?:اعمل|اعملي|اعمللي|هات|هاتلي|عايز|عاوز|اديني|ادني)\s+(?:\S+\s+){0,3}?(?:اختبار|كويز|quiz)|فلاش|كاردز|flash ?cards?|بطاقات مراجعه|(?:خطه|جدول)\s+(?:مذاكره|دراسيه|دراسه)|study plan|خريطه ذهنيه|mind ?map/;
     function aiStudentBlock(raw) { return AI_RE_TOOL.test(aiNorm(raw).slice(0, 3000)) ? AI_R_NO : ''; }
 
+    /* بلوكات الشرح الملوّنة: السطر اللي بيبدأ بـ > وإيموجي معيّن بياخد لون وشكل خاص */
+    const AI_CALL = [
+      [/^(💡|مثال)/, 'cl-ex'], [/^(⚠️?|❗|خد بالك|خطأ شائع|أخطاء شائعة)/, 'cl-warn'],
+      [/^(🔑|احفظ|لازم تحفظ)/, 'cl-key'], [/^(🧠|حيلة)/, 'cl-mem'], [/^🌍/, 'cl-life'],
+      [/^(✍️?|📝)/, 'cl-try'], [/^(🎯|📌)/, 'cl-aim']
+    ];
+    /* علامات الأجزاء في الشرح الطويل: أول سطر في الرسالة (بتتشال قبل العرض) */
+    const AI_MK = /^§§(INDEX|PART)\|([^§]*)§§\n?/;
+    const aiStrip = t => String(t || '').replace(AI_MK, '');
+    function aiMk(t) {
+      const m = String(t || '').match(AI_MK); if (!m) return null;
+      const a = m[2].split('|'), body = String(t).slice(m[0].length);
+      return m[1] === 'INDEX' ? { k: 'INDEX', title: a[0] || '', n: +a[1] || 0, body } : { k: 'PART', i: +a[0] || 0, n: +a[1] || 0, title: a.slice(2).join('|'), body };
+    }
+
     /* ---- ماركداون آمن (كل نص بيتعمله esc قبل أي وسم) ---- */
     function aiMd(src) {
       const blocks = [];
@@ -5559,7 +5711,14 @@ ${brief ? '- اكتب نص دردشة مرتب وجذاب: فقرات قصيرة
         if (/^\s*([-*_])\1{2,}\s*$/.test(ln)) { close(); out.push('<hr>'); i++; continue; }
         if ((m = ln.match(/^\s*[-*•]\s+(.*)$/))) { if (list !== 'ul') { close(); out.push('<ul>'); list = 'ul'; } out.push('<li>' + inl(m[1]) + '</li>'); i++; continue; }
         if ((m = ln.match(/^\s*\d+[.)]\s+(.*)$/))) { if (list !== 'ol') { close(); out.push('<ol>'); list = 'ol'; } out.push('<li>' + inl(m[1]) + '</li>'); i++; continue; }
-        if ((m = ln.match(/^\s*>\s?(.*)$/))) { close(); out.push('<blockquote>' + inl(m[1]) + '</blockquote>'); i++; continue; }
+        if (/^\s*>/.test(ln)) {
+          close(); const q = [];
+          while (i < L.length && /^\s*>/.test(L[i])) { q.push(L[i].replace(/^\s*>\s?/, '')); i++; }
+          const first = q.join(' ').trim(), kind = AI_CALL.find(c => c[0].test(first));
+          out.push('<blockquote' + (kind ? ' class="cl ' + kind[1] + '"' : '') + '>' + q.filter(x => x.trim()).map(x => inl(x)).join('<br>') + '</blockquote>');
+          continue;
+        }
+        if ((m = ln.match(/^\s*`([^`\n]+)`\s*$/))) { close(); out.push('<div class="fx"><code>' + esc(m[1]) + '</code></div>'); i++; continue; }
         close(); out.push('<p>' + inl(ln) + '</p>'); i++;
       }
       close();
@@ -5575,6 +5734,7 @@ ${brief ? '- اكتب نص دردشة مرتب وجذاب: فقرات قصيرة
       const d = $ai('aiDrawer'); if (d) d.remove();
     }
     const aiPrompt = m => {
+      if (m.role === 'assistant') return aiStrip(m.text).slice(0, 3500);
       if (!(m.role === 'user' && m.tool && m.tool !== 'chat' && AI_TOOLS[m.tool])) return m.text;
       let p = AI_TOOLS[m.tool].p;
       const lay = m.tool === 'mind' && AI.lay[m.ts];
@@ -5590,6 +5750,11 @@ ${brief ? '- اكتب نص دردشة مرتب وجذاب: فقرات قصيرة
           ? `<details class="ai-fl"><summary>📎 ${esc(m.file)}</summary><div>${esc(m.text)}</div></details>`
           : `<div class="ai-ut">${esc(m.text)}</div>`;
         return `<div class="ai-m ai-m--me">${who ? `<b class="ai-who">👤 ${esc(who)}</b>` : ''}${tag}${body}${m.ts && who ? `<small class="ai-ts">${esc(fFull(m.ts))}</small>` : ''}</div>`;
+      }
+      if (prev && prev.tool === 'visual') {
+        const vp = vsParse(m.text);
+        if (vp) return vsCardHtml(m, i, who, vp);
+        return `<div class="ai-m ai-m--bot"><b class="ai-who">${AI_IMG} ${AI_NAME}</b><p>الشرح ماطلعش صح المرة دي، جرّب تبعت تاني.</p><details class="ai-fl"><summary>الرد الأصلي</summary><div>${esc(m.text)}</div></details></div>`;
       }
       const isMind = !!(prev && prev.tool === 'mind');
       const mp = (isMind || /"(nodes|children)"\s*:/.test(m.text || '')) ? mmParse(m.text, isMind) : null;
@@ -5668,7 +5833,7 @@ ${brief ? '- اكتب نص دردشة مرتب وجذاب: فقرات قصيرة
         else if (a === 'qz') qzOpen('');
         else if (a === 'new') { if (AI.busy) return; AI.cid = null; AI.msgs = []; AI.mm = {}; AI.err = ''; aiDraw(); inp.focus(); }
         else if (a === 'hist') aiHist();
-        else if (a === 'tool') { AI.tool = b.dataset.k; aiDraw(); inp.focus(); }
+        else if (a === 'cmds') aiCmds();
         else if (a === 'unfile') { AI.file = null; inp.value = ''; aiDrawFile(); grow(); }
         else if (a === 'copy') { const m = AI.msgs[+b.dataset.i]; if (m) { copyText(m.text, 'اتنسخ'); } }
         else if (a === 'rate') aiRate(+b.dataset.i, +b.dataset.v);
@@ -5677,6 +5842,8 @@ ${brief ? '- اكتب نص دردشة مرتب وجذاب: فقرات قصيرة
         else if (a === 'mmzoom') mmFull(+b.dataset.i);
         else if (a === 'mmpng') mmExport(+b.dataset.i, 'png');
         else if (a === 'mmpdf') mmExport(+b.dataset.i, 'pdf');
+        else if (a === 'vspng') vsExport(+b.dataset.i, 'png');
+        else if (a === 'vspdf') vsExport(+b.dataset.i, 'pdf');
         else if (a === 'spdf') aiPrintSheet(+b.dataset.i);
         else if (a === 'spng') aiSheetPng(+b.dataset.i);
       });
@@ -5695,10 +5862,10 @@ ${brief ? '- اكتب نص دردشة مرتب وجذاب: فقرات قصيرة
     function aiDraw() {
       const t = AI_TOOLS[AI.tool];
       $ai('aiSub').textContent = t.n + ' · ' + t.d;
-      $ai('aiIn').placeholder = t.ph;
-      $ai('aiMm').hidden = AI.tool !== 'mind';
+      $ai('aiIn').placeholder = isAdminStaff() ? 'اكتب اللي عايزه: اشرح، لخّص، اعمل امتحان، شرح مصوّر، خريطة ذهنية...' : t.ph;
+      $ai('aiMm').hidden = true;
       $ai('aiTools').hidden = !isAdminStaff();
-      $ai('aiTools').innerHTML = !isAdminStaff() ? '' : Object.entries(AI_TOOLS).map(([k, v]) => `<button type="button" class="cb" data-ai="tool" data-k="${k}" aria-pressed="${k === AI.tool}">${esc(v.n)}</button>`).join('');
+      $ai('aiTools').innerHTML = isAdminStaff() ? '<button type="button" class="cb" data-ai="cmds">📋 الأوامر</button>' : '';
       aiDrawFile(); aiDrawMsgs();
     }
     function aiDrawMsgs() {
@@ -5781,6 +5948,49 @@ ${brief ? '- اكتب نص دردشة مرتب وجذاب: فقرات قصيرة
       return full;
     }
 
+    /* جدول الأوامر: ضغطة على أي صف بتكتب بدايته في خانة الكتابة */
+    const AI_CMDS = [
+      ['🎨 شرح مصوّر', 'اعمل شرح مصور عن ', 'اعمل شرح مصور · ارسملي شرح'],
+      ['🧠 خريطة ذهنية', 'اعمل خريطة ذهنية عن ', 'خريطة ذهنية'],
+      ['📋 امتحان كامل', 'اعمل امتحان كامل على ', 'اعمل امتحان · امتحان كامل'],
+      ['❓ اختبار تفاعلي', 'اعمل اختبار على ', 'اعمل اختبار · اختبرني'],
+      ['📝 تلخيص', 'لخصلي ', 'لخّص · ملخص'],
+      ['🧮 حل مسألة', 'احلي المسألة دي: ', 'حل المسألة · احسب'],
+      ['🗂️ فلاش كاردز', 'اعملي فلاش كاردز عن ', 'فلاش كاردز · بطاقات مراجعة'],
+      ['📅 خطة مذاكرة', 'اعمل خطة مذاكرة لـ ', 'خطة مذاكرة · جدول مذاكرة'],
+      ['📚 شرح كامل', 'اشرحلي درس ', 'شرح كامل · اشرح الدرس'],
+      ['💡 شرح مبسّط', 'اشرحلي ', 'اشرح · وضّح · فهمني']
+    ];
+    function aiCmds() {
+      const d = document.createElement('div');
+      d.style.cssText = 'position:fixed;inset:0;z-index:2147483000;background:rgba(5,4,25,.72);display:flex;align-items:flex-end;justify-content:center';
+      d.innerHTML = `<div style="direction:rtl;width:100%;max-width:520px;max-height:82vh;overflow:auto;background:#17153f;color:#fff;border-radius:22px 22px 0 0;padding:16px 14px 22px;font-family:inherit">`
+        + `<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px"><b style="font-size:17px">📋 اكتب كده وأنا أنفّذ</b><button type="button" data-x style="border:0;background:#2a2860;color:#fff;border-radius:50%;width:32px;height:32px;font-size:16px">✕</button></div>`
+        + `<table style="width:100%;border-collapse:collapse;font-size:14px"><thead><tr><th style="text-align:right;padding:8px;background:#3b5bdb;border-radius:0 10px 0 0">لو كتبت</th><th style="text-align:right;padding:8px;background:#3b5bdb;border-radius:10px 0 0 0">بيعمل</th></tr></thead><tbody>`
+        + AI_CMDS.map(([n, pre, kw], i) => `<tr data-i="${i}" style="cursor:pointer;background:${i % 2 ? '#1f1d52' : '#242260'}"><td style="padding:9px 8px;color:#ffd43b">${esc(kw)}</td><td style="padding:9px 8px;font-weight:700">${esc(n)}</td></tr>`).join('')
+        + `</tbody></table><p style="margin:10px 2px 0;font-size:12.5px;opacity:.75">اضغط على أي صف وهيكتب بدايته في خانة الكتابة، وكمّل بالموضوع.</p></div>`;
+      d.addEventListener('click', e => {
+        if (e.target === d || e.target.closest('[data-x]')) return d.remove();
+        const tr = e.target.closest('tr[data-i]'); if (!tr) return;
+        const inp = $ai('aiIn'); if (inp) { inp.value = AI_CMDS[+tr.dataset.i][1]; inp.focus(); }
+        d.remove();
+      });
+      document.body.appendChild(d);
+    }
+    /* الأدمن مش بيختار أداة: الأداة بتتحدد من كلامه (اعمل شرح مصور، لخص، امتحان...) */
+    function aiAutoTool(raw) {
+      const t = aiNorm(raw).slice(0, 600);
+      if (/شرح\s*(?:ب)?\s*(?:مصور|برسوم|رسم|الرسم)|(?:ارسم|ارسمي|ارسملي)\s.*شرح|شرح\s.*(?:ب)?رسومات/.test(t)) return 'visual';
+      if (/خريطه ذهنيه|mind ?map/.test(t)) return 'mind';
+      if (/امتحان كامل|ورقه امتحان|نموذج امتحان|(?:اعمل|اعملي|اعمللي|هات|هاتلي|عايز|عاوز)\s+(?:\S+\s+){0,2}?امتحان/.test(t)) return 'exam';
+      if (/فلاش|كاردز|flash ?cards?|بطاقات مراجعه/.test(t)) return 'cards';
+      if (/(?:خطه|جدول)\s+(?:مذاكره|دراسيه|دراسه)|study plan/.test(t)) return 'plan';
+      if (/لخص|تلخيص|ملخص|summar/.test(t)) return 'summarize';
+      if (/(?:احل|احلي|حل|حلي)(?:لي)?\s+(?:ال)?(?:مساله|مسائل|سؤال|تمرين|مسأله)|احسب/.test(t)) return 'solve';
+      if (/شرح\s+(?:كامل|مفصل)|(?:اشرح|اشرحلي|اشرحي)\s+(?:ال)?(?:درس|وحده|باب)/.test(t)) return 'lesson';
+      if (/اشرح|شرحلي|فهمني|وضحلي|وضح/.test(t)) return 'explain';
+      return 'chat';
+    }
     async function aiSend() {
       if (AI.busy) return;
       const inp = $ai('aiIn'); if (!inp) return;
@@ -5791,8 +6001,9 @@ ${brief ? '- اكتب نص دردشة مرتب وجذاب: فقرات قصيرة
       { const nt = aiNorm(text).slice(0, 3000); if (!AI.file && (AI_RE_QZ.test(nt) || (isAdminStaff() && AI.tool === 'quiz'))) { inp.value = ''; inp.style.height = 'auto'; qzOpen(nt.length < 25 ? '' : text); return; } }
       const file = isAdminStaff() ? AI.file : null, lvl = $ai('aiLvl').value, lang = $ai('aiLang').value;
       /* لو الطالب كتب في "اسأل" إنه عايز خريطة ذهنية، نحوّلها لأداة الخريطة لوحدنا */
-      let tool = isAdminStaff() ? AI.tool : 'chat';
+      let tool = isAdminStaff() ? aiAutoTool(text) : 'chat';
       if (isAdminStaff() && tool === 'chat' && !file && /(اعمل|اعملي|اعمللي|ارسم|ارسمي|عايز|عاوز|هات|حول|ابني|وريني)[^\n]{0,30}خريطه ذهنيه/.test(aiNorm(text))) tool = 'mind';
+      if (isAdminStaff() && tool === 'chat' && !file && /(اعمل|اعملي|اعمللي|ارسم|ارسمي|عايز|عاوز|هات|وريني)[^\n]{0,30}(شرح مصور|شرح برسومات|شرح بالرسم)/.test(aiNorm(text))) tool = 'visual';
       const um = { role: 'user', text, tool, ts: Date.now(), ...(file ? { file: file.name } : {}) };
       if (tool === 'mind' && $ai('aiMm').value) AI.lay[um.ts] = $ai('aiMm').value;
       const loc = (!file && tool === 'chat') ? (aiLocal(text) || (isAdminStaff() ? '' : aiStudentBlock(text))) : '';
@@ -5804,7 +6015,7 @@ ${brief ? '- اكتب نص دردشة مرتب وجذاب: فقرات قصيرة
         if (loc) reply = loc;
         else {
           const hist = AI.msgs.slice(-20).map(m => ({ role: m.role, content: aiPrompt(m) }));
-          const opts = { temp: (tool === 'mind' || tool === 'summarize' || tool === 'solve') ? 0.3 : tool === 'explain' ? 0.4 : !isAdminStaff() ? 0.45 : 0.6 };
+          const opts = { temp: (tool === 'mind' || tool === 'visual' || tool === 'summarize' || tool === 'solve') ? 0.3 : tool === 'explain' ? 0.4 : !isAdminStaff() ? 0.45 : 0.6 };
           reply = await aiStream(aiSystem(lang, lvl, !isAdminStaff()), hist, full => {
             if (AI_LEAK.test(full)) return true;
             AI.live = full; if ($ai('aiMsgs')) aiDrawMsgs();
@@ -5812,10 +6023,10 @@ ${brief ? '- اكتب نص دردشة مرتب وجذاب: فقرات قصيرة
           }, opts);
           if (AI_LEAK.test(reply)) reply = AI_R_NAME + '\n\n' + AI_R_DEV;
           /* لو الخريطة رجعت JSON مش سليم، نطلب من الموديل يصلحه مرة واحدة */
-          if (tool === 'mind' && !mmParse(reply, true) && !AI_LEAK.test(reply)) {
+          if ((tool === 'mind' ? !mmParse(reply, true) : tool === 'visual' && !vsParse(reply)) && !AI_LEAK.test(reply)) {
             try {
               const fix = await aiStream(aiSystem(lang, lvl, !isAdminStaff()), hist.concat([{ role: 'assistant', content: reply }, { role: 'user', content: 'الرد ده مش JSON صالح. رجّع JSON صالح بس جوه كتلة ```json بالشكل المطلوب بالظبط، من غير أي كلام تاني.' }]), () => false, { temp: 0.2 });
-              if (mmParse(fix, true)) reply = fix;
+              if (tool === 'mind' ? mmParse(fix, true) : vsParse(fix)) reply = fix;
             } catch (e) {}
           }
         }
@@ -6466,6 +6677,130 @@ ${brief ? '- اكتب نص دردشة مرتب وجذاب: فقرات قصيرة
       apply(); document.body.appendChild(d);
     }
 
+    /* ---------- شرح مصوّر: JSON ← ورقة SVG بعناوين ملونة ورسومات (تتنزل صورة / PDF) ---------- */
+    const VS_COL = ['#3b5bdb', '#2f9e44', '#f08c00', '#9c36b5', '#e03131', '#0c8599'];
+    const VS_KINDS = ['steps', 'formula', 'table', 'compare', 'flow', 'circuit', 'note'];
+    function vsParse(text) {
+      const s = String(text || '');
+      const fence = s.match(/```(?:json)?\s*([\s\S]*?)```/i);
+      const raw = fence ? fence[1] : s.slice(s.indexOf('{'), s.lastIndexOf('}') + 1);
+      let j; try { j = JSON.parse(raw); } catch (e) { return null; }
+      if (!j || !Array.isArray(j.sections)) return null;
+      const T = (v, n) => String(v ?? '').replace(/\s+/g, ' ').trim().slice(0, n || 150);
+      const L = (a, n, k) => (Array.isArray(a) ? a : []).slice(0, n).map(x => T(x && typeof x === 'object' ? (x.t ?? x.text ?? '') : x, k || 150)).filter(Boolean);
+      const secs = j.sections.slice(0, 8).map(x => {
+        if (!x || typeof x !== 'object') return null;
+        const k = VS_KINDS.includes(x.k) ? x.k : 'steps', o = { k, h: T(x.h, 40) || 'نقطة مهمة', i: T(x.i, 4) };
+        if (k === 'steps') o.items = L(x.items, 8);
+        else if (k === 'flow') o.items = L(x.items || x.steps, 6, 90);
+        else if (k === 'formula') { o.eq = T(x.eq, 60); o.vars = L(x.vars, 5, 110); o.note = T(x.note, 140); }
+        else if (k === 'table') { o.cols = L(x.cols, 4, 30); o.rows = (Array.isArray(x.rows) ? x.rows : []).slice(0, 8).map(r => L(r, o.cols.length || 4, 70)); }
+        else if (k === 'compare') { const c = v => ({ h: T(v && v.h, 30) || '—', items: L(v && v.items, 5, 100) }); o.a = c(x.a); o.b = c(x.b); }
+        else if (k === 'circuit') { o.type = x.type === 'parallel' ? 'parallel' : 'series'; o.parts = (Array.isArray(x.parts) ? x.parts : []).slice(0, 6).map(q => ({ k: ['battery', 'resistor', 'bulb', 'ammeter', 'voltmeter', 'switch'].includes(q && q.k) ? q.k : 'resistor', l: T(q && q.l, 12) })); o.note = T(x.note, 140); }
+        else o.text = T(x.text, 220);
+        const ok = o.items ? o.items.length : k === 'formula' ? !!o.eq : k === 'table' ? o.cols.length && o.rows.length : k === 'compare' ? (o.a.items.length || o.b.items.length) : k === 'circuit' ? o.parts.length : !!o.text;
+        return ok ? o : null;
+      }).filter(Boolean);
+      return secs.length ? { title: T(j.title, 50) || 'شرح مصوّر', sub: T(j.sub, 60), secs } : null;
+    }
+    function vsSym(k, cx, cy) {   // رموز الدايرة الكهربية (على سلك أفقي)
+      const S = 'stroke="#1b1a3a" stroke-width="2.6" fill="none" stroke-linecap="round"';
+      if (k === 'battery') return `<rect x="${cx - 14}" y="${cy - 20}" width="28" height="40" fill="#fff"/><path d="M${cx - 6} ${cy - 17}V${cy + 17}" ${S}/><path d="M${cx + 6} ${cy - 9}V${cy + 9}" stroke="#1b1a3a" stroke-width="6" stroke-linecap="round"/><text x="${cx - 16}" y="${cy - 10}" font-size="15" font-weight="700" fill="#e03131" text-anchor="middle">+</text>`;
+      if (k === 'bulb') return `<circle cx="${cx}" cy="${cy}" r="16" fill="#fff3a3" ${S.replace('fill="none"', '')}/><path d="M${cx - 10} ${cy - 10}L${cx + 10} ${cy + 10}M${cx + 10} ${cy - 10}L${cx - 10} ${cy + 10}" ${S}/>`;
+      if (k === 'ammeter' || k === 'voltmeter') return `<circle cx="${cx}" cy="${cy}" r="17" fill="#fff" ${S.replace('fill="none"', '')}/><text x="${cx}" y="${cy + 6}" font-size="17" font-weight="800" fill="#1b1a3a" text-anchor="middle">${k === 'ammeter' ? 'A' : 'V'}</text>`;
+      if (k === 'switch') return `<rect x="${cx - 22}" y="${cy - 20}" width="44" height="30" fill="#fff"/><circle cx="${cx - 18}" cy="${cy}" r="3.5" fill="#1b1a3a"/><circle cx="${cx + 18}" cy="${cy}" r="3.5" fill="#1b1a3a"/><path d="M${cx - 18} ${cy}L${cx + 14} ${cy - 17}" ${S}/>`;
+      return `<rect x="${cx - 24}" y="${cy - 10}" width="48" height="20" rx="3" fill="#fff" ${S.replace('fill="none"', '')}/>`;
+    }
+    function vsBuild(p) {
+      const W = 760, M = 22, IN = 20, R = W - M - IN, CW = W - 2 * M - 2 * IN, E = esc, HD = 118;
+      const T = (s, x, y, size, wt, fill, anc, extra) => `<text x="${mmR(x)}" y="${mmR(y)}" font-size="${size}" font-weight="${wt}" fill="${fill}" text-anchor="${anc === 'middle' ? 'middle' : 'start'}"${extra || ''}>${E(s)}</text>`;   // الصفحة RTL: start = الحرف الأيمن
+      const lines = (s, x, y, w, size, wt, fill, anc, lh) => { const ls = mmWrap(s, w, size, wt); return { h: ls.length * lh, svg: ls.map((l, n) => T(l, x, y + n * lh + size, size, wt, fill, anc)).join('') }; };
+      let y = HD, body = '';
+      p.secs.forEach((s, idx) => {
+        const c = VS_COL[idx % VS_COL.length], x0 = M + IN, top = y + 22, cy0 = top + 34;
+        let h = 0, g = '';
+        if (s.k === 'steps') {
+          s.items.forEach((it, n) => {
+            const t = lines(it, R - 38, cy0 + h, CW - 44, 17, 500, '#1b1a3a', 'end', 27), rh = Math.max(34, t.h + 8);
+            g += `<circle cx="${R - 14}" cy="${mmR(cy0 + h + 15)}" r="13" fill="${c}"/>` + T(String(n + 1), R - 14, cy0 + h + 21, 15, 800, '#fff', 'middle') + t.svg; h += rh;
+          });
+        } else if (s.k === 'formula') {
+          g += `<rect x="${x0 + 20}" y="${cy0}" width="${CW - 40}" height="58" rx="16" fill="#fff" stroke="${c}" stroke-width="2.5"/>` + T(s.eq, W / 2, cy0 + 39, 28, 800, c, 'middle', ' direction="ltr"'); h = 72;
+          s.vars.forEach(v => { const t = lines(v, R - 22, cy0 + h, CW - 30, 16, 500, '#1b1a3a', 'end', 25); g += `<circle cx="${R - 8}" cy="${mmR(cy0 + h + 14)}" r="4.5" fill="${c}"/>` + t.svg; h += t.h + 6; });
+          if (s.note) { const t = lines(s.note, R - 4, cy0 + h, CW - 10, 15, 600, '#5b5a7a', 'end', 24); g += t.svg; h += t.h + 4; }
+        } else if (s.k === 'table') {
+          const n = s.cols.length, cw = CW / n;
+          g += s.cols.map((q, j) => `<rect x="${mmR(R - cw * (j + 1))}" y="${cy0}" width="${mmR(cw)}" height="36" fill="${c}"/>` + T(q, R - cw * (j + .5), cy0 + 24, 16, 700, '#fff', 'middle')).join(''); h = 36;
+          s.rows.forEach((r, ri) => {
+            const cells = s.cols.map((_, j) => lines(r[j] || '', R - cw * (j + .5), cy0 + h + 8, cw - 14, 15, 500, '#1b1a3a', 'middle', 22)), rh = Math.max(...cells.map(q => q.h)) + 16;
+            g += `<rect x="${x0}" y="${cy0 + h}" width="${CW}" height="${rh}" fill="${ri % 2 ? '#ffffff' : c + '1c'}"/>` + cells.map(q => q.svg).join(''); h += rh;
+          });
+          g += `<rect x="${x0}" y="${cy0}" width="${CW}" height="${h}" fill="none" stroke="${c}" stroke-width="1.5"/>`;
+        } else if (s.k === 'compare') {
+          const cw = (CW - 24) / 2, cols = [[s.a, c, R - cw], [s.b, VS_COL[(idx + 2) % 6], x0]];
+          let mh = 0;
+          const parts = cols.map(([q, cc, xl]) => {
+            let hh = 44, gg = `<rect x="${mmR(xl)}" y="${cy0}" width="${mmR(cw)}" height="36" rx="12" fill="${cc}"/>` + T(q.h, xl + cw / 2, cy0 + 24, 17, 700, '#fff', 'middle');
+            q.items.forEach(it => { const t = lines(it, xl + cw - 22, cy0 + hh, cw - 36, 15, 500, '#1b1a3a', 'end', 23); gg += `<circle cx="${mmR(xl + cw - 9)}" cy="${mmR(cy0 + hh + 12)}" r="4" fill="${cc}"/>` + t.svg; hh += t.h + 8; });
+            mh = Math.max(mh, hh); return [gg, cc, xl];
+          });
+          g = parts.map(([gg, cc, xl]) => `<rect x="${mmR(xl)}" y="${cy0}" width="${mmR(cw)}" height="${mh}" rx="12" fill="#fff" stroke="${cc}" stroke-width="2"/>` + gg).join('') + `<circle cx="${W / 2}" cy="${mmR(cy0 + mh / 2)}" r="17" fill="#14123b"/>` + T('VS', W / 2, cy0 + mh / 2 + 5, 13, 800, '#ffd43b', 'middle'); h = mh;
+        } else if (s.k === 'flow') {
+          s.items.forEach((it, n) => {
+            const t = lines(it, W / 2, 0, CW - 90, 17, 600, '#fff', 'middle', 26), bh = t.h + 20;
+            g += `<rect x="${x0 + 24}" y="${cy0 + h}" width="${CW - 48}" height="${bh}" rx="16" fill="${c}"/>` + lines(it, W / 2, cy0 + h + 10, CW - 90, 17, 600, '#fff', 'middle', 26).svg; h += bh;
+            if (n < s.items.length - 1) { g += `<path d="M${W / 2 - 11} ${cy0 + h + 5}H${W / 2 + 11}L${W / 2} ${cy0 + h + 21}Z" fill="${c}"/>`; h += 26; }
+          });
+        } else if (s.k === 'circuit') {
+          const n = s.parts.length, x1 = x0 + 60, x2 = R - 60, W2 = x2 - x1, ST = 'stroke="#1b1a3a" stroke-width="2.6" fill="none" stroke-linejoin="round"';
+          if (s.type === 'series') {
+            const ty = cy0 + 50, by = cy0 + 150; h = 176;
+            g += `<rect x="${x0 + 10}" y="${cy0}" width="${CW - 20}" height="${h - 4}" rx="14" fill="#fff"/><path d="M${x1} ${ty}H${x2}V${by}H${x1}Z" ${ST}/>`;
+            s.parts.forEach((q, j) => { const cx = x2 - W2 * (j + 1) / (n + 1); g += vsSym(q.k, cx, ty) + (q.l ? T(q.l, cx, ty - 26, 14, 700, c, 'middle', ' direction="ltr"') : ''); });
+          } else {
+            const gap = 62, ty = cy0 + 34, by = ty + gap * (n - 1); h = gap * (n - 1) + 80;
+            g += `<rect x="${x0 + 10}" y="${cy0}" width="${CW - 20}" height="${h - 4}" rx="14" fill="#fff"/><path d="M${x1} ${ty}V${by}M${x2} ${ty}V${by}" ${ST}/>`;
+            s.parts.forEach((q, j) => { const yy = ty + gap * j; g += `<path d="M${x1} ${yy}H${x2}" ${ST}/>` + vsSym(q.k, W / 2, yy) + (q.l ? T(q.l, W / 2, yy - 24, 14, 700, c, 'middle', ' direction="ltr"') : ''); });
+          }
+          if (s.note) { const t = lines(s.note, R - 4, cy0 + h + 4, CW - 10, 15, 600, '#5b5a7a', 'end', 24); g += t.svg; h += t.h + 8; }
+        } else {
+          const t = lines(s.text, R - 52, cy0 + 14, CW - 90, 17, 600, '#4a3500', 'end', 27); h = t.h + 28;
+          g += `<rect x="${x0 + 6}" y="${cy0}" width="${CW - 12}" height="${h}" rx="14" fill="#fff8db" stroke="#f08c00" stroke-width="2"/>` + T('💡', R - 22, cy0 + 40, 30, 400, '#000', 'middle') + t.svg;
+        }
+        const bh = h + 34 + 18;
+        mmCtx.font = '700 20px ' + MM_FONT;
+        const label = (s.i ? s.i + ' ' : '') + s.h, bw = Math.min(CW - 40, mmCtx.measureText(label).width * 1.12 + 70);
+        body += `<rect x="${x0 - 8}" y="${top}" width="${CW + 16}" height="${bh}" rx="20" fill="${c}14" stroke="${c}" stroke-width="2" stroke-dasharray="7 6"/>` + g
+          + `<rect x="${mmR(W / 2 - bw / 2)}" y="${y}" width="${mmR(bw)}" height="42" rx="21" fill="${c}"/>` + T(label, W / 2, y + 28, 20, 700, '#fff', 'middle');
+        y += 22 + bh + 18;
+      });
+      const H = y + 74;
+      mmCtx.font = '800 30px ' + MM_FONT;
+      const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${W} ${H}" width="${W}" height="${H}" font-family='${MM_FONT}' direction="rtl"><rect width="${W}" height="${H}" fill="#fff"/><rect x="5" y="5" width="${W - 10}" height="${H - 10}" rx="26" fill="none" stroke="#1c3d9c" stroke-width="6"/>`
+        + `<rect x="${mmR(W / 2 - 290)}" y="22" width="580" height="${p.sub ? 76 : 60}" rx="30" fill="#14123b" stroke="#ffd43b" stroke-width="3"/>` + T(p.title, W / 2, p.sub ? 58 : 62, 30, 800, '#fff', 'middle') + (p.sub ? T(p.sub, W / 2, 84, 15, 600, '#ffd43b', 'middle') : '')
+        + body + `<rect x="${mmR(W / 2 - 170)}" y="${H - 62}" width="340" height="40" rx="20" fill="#14123b"/>` + T('إعداد: ' + AI_NAME + ' · Learn With Me', W / 2, H - 36, 16, 700, '#fff', 'middle') + '</svg>';
+      return { svg, w: W, h: H, th: { bg: '#ffffff' } };
+    }
+    function vsCardHtml(m, i, who, vp) {
+      let r;
+      try { r = vsBuild(vp); }
+      catch (e) { console.warn('visual', e); return `<div class="ai-m ai-m--bot"><b class="ai-who">${AI_IMG} ${AI_NAME}</b><p>الشرح ماطلعش صح، جرّب تاني.</p></div>`; }
+      const fit = r.svg.replace(/ width="\d+" height="\d+"/, ' style="width:100%;height:auto;display:block"');
+      const bar = who ? '' : `<div class="mm-bar"><span class="mm-sp"></span><button type="button" class="mm-act" data-ai="vspng" data-i="${i}">🖼️ صورة</button><button type="button" class="mm-act" data-ai="vspdf" data-i="${i}">📄 PDF</button></div>`;
+      return `<div class="ai-m ai-m--bot ai-m--map"><b class="ai-who">${AI_IMG} ${AI_NAME} · 🎨 ${esc(vp.title)}</b><div style="background:#fff;border-radius:14px;overflow:hidden">${fit}</div>${bar}</div>`;
+    }
+    async function vsExport(i, kind) {
+      const m = AI.msgs[i], vp = m && vsParse(m.text); if (!vp) return;
+      toast('بجهّز الملف...');
+      try {
+        const r = vsBuild(vp), cv = await mmRaster(r);
+        if (kind === 'pdf') {
+          const jb = await aiBlob(cv, 'image/jpeg', 0.92), jpg = new Uint8Array(await jb.arrayBuffer());
+          aiDownload(aiPdf(jpg, cv.width, cv.height, r.th.bg), aiFileName('شرح مصوّر - ' + vp.title, 'pdf'));
+        } else aiDownload(await aiBlob(cv, 'image/png'), aiFileName('شرح مصوّر - ' + vp.title, 'png'));
+      } catch (e) { console.warn(e); toast('ماقدرتش أجهّز الملف، جرّب تاني.'); }
+    }
+
     /* ---------- ملخص مصوّر / PDF لأي رد ---------- */
     const AI_SX_CSS = `.sx{direction:rtl;font-family:"IBM Plex Sans Arabic",Tahoma,Arial,sans-serif;color:#1b1a3a;background:#fff;width:760px;box-sizing:border-box;line-height:1.8;font-size:16px}
 .sx *{box-sizing:border-box}
@@ -6665,6 +7000,32 @@ ${brief ? '- اكتب نص دردشة مرتب وجذاب: فقرات قصيرة
   var nb = document.querySelector('.nav__btns'), fb = document.getElementById('fxBtn');
   if (!nb) return;
   if (fb) nb.prepend(fb);
+})();
+/* قايمة التلت شرط: بتظهر بس لما يكون فيها زرار ظاهر، وبتقفل لوحدها */
+(function () {
+  var $ = function (id) { return document.getElementById(id); };
+  var wrap = $('navMenuWrap'), burger = $('burger'), menu = $('navMenu'), dot = $('burgerDot');
+  var ids = ['pwaNav', 'previewBtn', 'panelBtn'];
+  function close() { menu.hidden = true; burger.setAttribute('aria-expanded', 'false'); }
+  function sync() {
+    var any = ids.some(function (id) { return !$(id).hidden; });
+    wrap.hidden = !any;
+    if (!any) close();
+    var pd = $('panelDot');
+    dot.hidden = !(any && !pd.hidden && !$('panelBtn').hidden);
+  }
+  burger.addEventListener('click', function (e) {
+    e.stopPropagation();
+    var open = menu.hidden;
+    menu.hidden = !open;
+    burger.setAttribute('aria-expanded', String(open));
+  });
+  menu.addEventListener('click', function (e) { if (e.target.closest('button')) close(); });
+  document.addEventListener('click', function (e) { if (!wrap.contains(e.target)) close(); });
+  document.addEventListener('keydown', function (e) { if (e.key === 'Escape') close(); });
+  var mo = new MutationObserver(sync);
+  ids.concat(['panelDot']).forEach(function (id) { mo.observe($(id), { attributes: true, attributeFilter: ['hidden'] }); });
+  sync();
 })();
 </script>
 </body>
