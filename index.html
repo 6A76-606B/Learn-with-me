@@ -2195,7 +2195,7 @@
       getAuth, GoogleAuthProvider, signInWithPopup,
       signInWithEmailAndPassword, createUserWithEmailAndPassword,
       sendPasswordResetEmail, updateProfile, signOut as _signOut, onAuthStateChanged,
-      deleteUser as _deleteUser, reauthenticateWithCredential, EmailAuthProvider
+      deleteUser as _deleteUser, reauthenticateWithCredential, EmailAuthProvider, sendEmailVerification
     } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js";
     import {
       getFirestore, initializeFirestore, getDocFromServer, persistentLocalCache, persistentMultipleTabManager, CACHE_SIZE_UNLIMITED, doc, getDoc, setDoc as _setDoc, updateDoc as _updateDoc, deleteDoc as _deleteDoc,
@@ -2750,9 +2750,11 @@ const deleteUser = u => previewing ? (pvBlock(), Promise.reject(new Error('previ
       const { user } = await signInWithEmailAndPassword(auth, email, password);
       const role = await getRole(user);
       if (!role) {
+        const unverified = !user.emailVerified;
+        if (unverified) { try { await sendEmailVerification(user); } catch (e) {} }
         await signOut(auth);
         const err = new Error('not-admin');
-        err.code = 'not-admin';
+        err.code = unverified ? 'unverified' : 'not-admin';
         throw err;
       }
       currentRole = role;
@@ -4855,7 +4857,9 @@ const deleteUser = u => previewing ? (pvBlock(), Promise.reject(new Error('previ
         closeLogin();
         if (!continueFlow()) openPanel();
       } catch (err) {
-        adminError.textContent = err.code === 'not-admin'
+        adminError.textContent = err.code === 'unverified'
+          ? 'إيميلك مش متأكَّد. بعتنالك رابط تأكيد على الإيميل (شوف Spam كمان). اضغط عليه وبعدين ادخل تاني.'
+          : err.code === 'not-admin'
           ? 'الحساب ده مش أدمن.'
           : authMessage(err);
         paneAdmin.classList.remove('shake');
