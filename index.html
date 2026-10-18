@@ -2952,7 +2952,7 @@ const deleteUser = u => previewing ? (pvBlock(), Promise.reject(new Error('previ
           }
         } catch (e) {}
         updateGate(); commNav();
-      }, () => {}));
+      }, err => { toast('مش قادر أقرأ ملفك: ' + (err && err.code ? err.code : 'خطأ') + ' — اتأكد من قواعد Firestore.'); }));
 
     }
 
