@@ -1722,6 +1722,22 @@
     html body .nav__menu #panelBtn { background: var(--lime); color: var(--ink); border-color: transparent; box-shadow: 0 4px 0 #86b516; }
     html body .nav__menu #panelBtn:active { box-shadow: 0 1px 0 #86b516; transform: translateY(3px); }
     .nav__menu .dot { position: static; }
+    /* ---- قسم «كل الامتحانات» في لوحة الأدمن ---- */
+    .xa { margin-bottom: 10px; border-radius: 20px; background: var(--card); overflow: hidden; }
+    .xa > summary { display: flex; flex-direction: column; gap: 4px; padding: 14px 16px; cursor: pointer; list-style: none; }
+    .xa > summary::-webkit-details-marker { display: none; }
+    .xa > summary b { font-size: 16px; }
+    .xa > summary small { color: var(--mut); font-size: 13px; }
+    .xa[open] > summary { border-bottom: 1px dashed var(--mut); }
+    .xa__qs { padding: 12px 16px 16px; }
+    .xq { margin-bottom: 14px; padding: 12px; border-radius: 16px; background: var(--bg); }
+    .xq__h { display: flex; align-items: center; gap: 8px; margin-bottom: 6px; font-size: 12px; color: var(--mut); }
+    .xq__n { display: inline-grid; place-items: center; width: 24px; height: 24px; border-radius: 50%; background: var(--blue); color: #fff; font-weight: 700; }
+    .xq__q { margin: 0 0 8px; font-weight: 600; line-height: 1.8; }
+    .xq__o { display: block; margin: 4px 0; padding: 6px 12px; border-radius: 12px; border: 1px solid rgba(169, 168, 216, .35); font-size: 14px; }
+    .xq__o.ok { border-color: var(--lime); background: rgba(198, 255, 61, .16); font-weight: 700; }
+    .xq__a { margin-top: 8px; padding: 8px 12px; border-radius: 12px; background: rgba(198, 255, 61, .16); border: 1px solid var(--lime); font-size: 14px; line-height: 1.8; }
+    .xq__w { margin-top: 6px; font-size: 13px; color: var(--mut); line-height: 1.7; }
   </style>
 </head>
 
@@ -2069,6 +2085,15 @@
           <button class="tool" id="exportBackup" type="button" style="margin-top:8px">نسخة احتياطية كاملة (JSON)</button>
           <div class="msg" id="exportMsg" role="alert"></div>
         </div>
+      </section>
+
+      <!-- كل الامتحانات بإجاباتها -->
+      <section id="tabExams" hidden>
+        <p class="note-s">كل الامتحانات المنشورة تحت الدروس في كل الصفوف والمواد، ومعاها الإجابات الصحيحة.</p>
+        <label class="field"><input class="rtl" id="xaSearch" placeholder="دوّر باسم الامتحان أو الدرس"></label>
+        <div class="chips" id="xaGrade"></div>
+        <div class="chips" id="xaSubj"></div>
+        <div id="xaList"></div>
       </section>
 
       <section id="tabContent" hidden>
@@ -3130,6 +3155,7 @@ const deleteUser = u => previewing ? (pvBlock(), Promise.reject(new Error('previ
       guests:   ['ضيف أدمن', 'tabGuests'],
       announce: ['الإعلان والصيانة', 'tabAnnounce'],
       stats:    ['تصدير ونسخة احتياطية', 'tabStats'],
+      exams:    ['كل الامتحانات', 'tabExams'],
       content:  ['المحتوى', 'tabContent']
     };
 
@@ -3164,7 +3190,7 @@ const deleteUser = u => previewing ? (pvBlock(), Promise.reject(new Error('previ
       if (currentRole === 'guest') {
         panelTabs = anyGrant('content') ? ['content'] : [];
         if (!panelTabs.length) return toast('مفيش صلاحيات متاحة لحسابك.');
-      } else panelTabs = currentRole === 'owner' ? ['students', 'billing', 'members', 'insights', 'announce', 'stats', 'admins', 'guests', 'log', 'content'] : ['content'];
+      } else panelTabs = currentRole === 'owner' ? ['students', 'billing', 'members', 'insights', 'announce', 'stats', 'admins', 'guests', 'log', 'exams', 'content'] : ['exams', 'content'];
       const allowed = panelTabs;
 
       if (currentRole === 'owner') {
@@ -3237,8 +3263,66 @@ const deleteUser = u => previewing ? (pvBlock(), Promise.reject(new Error('previ
       if (key === 'billing') renderBilling();
       if (key === 'insights') loadInsights();
       if (key === 'stats') showBackupInfo();
+      if (key === 'exams') loadAdminExams();
       document.getElementById('exportBox').hidden = !isOwner();
     }
+
+    /* ---- كل الامتحانات بإجاباتها (للأدمن) ---- */
+    let xaRows = [], xaGrade = 'all', xaSubj = 'all', xaBusy = false;
+    async function loadAdminExams() {
+      if (xaBusy) return;
+      xaBusy = true;
+      const list = document.getElementById('xaList');
+      list.innerHTML = '<p class="empty">بجيب الامتحانات...</p>';
+      try {
+        const pairs = GRADES.flatMap((_, g) => SUBJECTS.map(s => [g, s.key]));
+        const snaps = await Promise.all(pairs.map(([g, s]) =>
+          getDocs(query(collection(db, 'content'), where('grade', '==', g), where('subject', '==', s))).catch(() => null)));
+        xaRows = snaps.flatMap(sn => sn ? sn.docs.map(d => ({ id: d.id, ...d.data() })) : [])
+          .filter(l => l.exam && Array.isArray(l.exam.qs) && l.exam.qs.length)
+          .sort((a, b) => (b.exam.at || 0) - (a.exam.at || 0));
+      } catch (err) { xaRows = []; dbError(err); }
+      xaBusy = false;
+      renderAdminExams();
+    }
+    function xaAnswer(q) {
+      const L = typeof EX_L !== 'undefined' ? EX_L : ['أ', 'ب', 'ج', 'د'];
+      let h = '';
+      if (q.type === 'mcq' && Array.isArray(q.opts)) {
+        h = q.opts.map((o, i) => `<span class="xq__o${i === q.a ? ' ok' : ''}">${i === q.a ? '✅ ' : ''}${L[i] || ''}) ${esc(o)}</span>`).join('');
+      } else if (q.type === 'tf') {
+        h = `<div class="xq__a">✅ الإجابة: ${q.a ? '✓ صح' : '✗ خطأ'}</div>`;
+      } else if (q.type === 'calc') {
+        h = `<div class="xq__a">✅ الناتج: ${esc(q.a)}${q.unit ? ' ' + esc(q.unit) : ''}</div>${q.sol ? `<div class="xq__w">الحل: ${esc(q.sol)}</div>` : ''}`;
+      } else {
+        h = `<div class="xq__a">✅ ${esc(q.a)}</div>`;
+      }
+      if (q.why && q.type !== 'calc') h += `<div class="xq__w">💡 ${esc(q.why)}</div>`;
+      return h;
+    }
+    function renderAdminExams() {
+      const T = typeof EX_TYPES !== 'undefined' ? EX_TYPES : {};
+      const q = document.getElementById('xaSearch').value.trim().toLowerCase();
+      document.getElementById('xaGrade').innerHTML = [['all', 'كل الصفوف'], ...GRADES.map((g, i) => [String(i), g.name])]
+        .map(([k, n]) => `<button type="button" class="cb" data-g="${k}" aria-pressed="${xaGrade === k}">${esc(n)}</button>`).join('');
+      document.getElementById('xaSubj').innerHTML = [['all', 'كل المواد'], ...SUBJECTS.map(s => [s.key, s.name])]
+        .map(([k, n]) => `<button type="button" class="cb" data-s="${k}" aria-pressed="${xaSubj === k}">${esc(n)}</button>`).join('');
+      const list = xaRows.filter(l => (xaGrade === 'all' || String(l.grade) === xaGrade) && (xaSubj === 'all' || l.subject === xaSubj)
+        && (!q || String(l.exam.title || '').toLowerCase().includes(q) || String(l.title || '').toLowerCase().includes(q)));
+      document.getElementById('xaList').innerHTML = list.length ? list.map(l => {
+        const sub = SUBJECTS.find(s => s.key === l.subject), g = GRADES[l.grade];
+        const d = l.exam.at ? new Date(l.exam.at).toLocaleDateString('ar-EG', { day: 'numeric', month: 'long', year: 'numeric' }) : 'من غير تاريخ';
+        const qs = l.exam.qs.filter(x => x && x.q);
+        return `<details class="xa"><summary><b>📝 ${esc(l.exam.title || l.title)}</b>
+          <small>${esc(sub ? subjectName(l.grade, sub) : l.subject)} — ${esc(g ? g.name : '')} · ${qs.length} سؤال · ${esc(d)}</small>
+          <small>تحت درس: ${esc(l.title)}${l.visible === false ? ' · 🙈 مخفي' : ''}</small></summary>
+          <div class="xa__qs">${qs.map((x, i) => `<div class="xq"><div class="xq__h"><span class="xq__n">${i + 1}</span><span>${T[x.type] ? T[x.type].i + ' ' + esc(T[x.type].n) : ''}</span></div>
+            <p class="xq__q">${esc(x.q)}</p>${xaAnswer(x)}</div>`).join('')}</div></details>`;
+      }).join('') : '<p class="empty">مفيش امتحانات هنا.</p>';
+    }
+    document.getElementById('xaSearch').addEventListener('input', renderAdminExams);
+    document.getElementById('xaGrade').addEventListener('click', e => { const b = e.target.closest('[data-g]'); if (b) { xaGrade = b.dataset.g; renderAdminExams(); } });
+    document.getElementById('xaSubj').addEventListener('click', e => { const b = e.target.closest('[data-s]'); if (b) { xaSubj = b.dataset.s; renderAdminExams(); } });
 
     /* ---- الطلاب ---- */
     const gradeTag = s => Number.isInteger(s.grade) && GRADES[s.grade] ? ' • ' + GRADES[s.grade].name : '';
