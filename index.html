@@ -2240,7 +2240,7 @@ const deleteUser = u => previewing ? (pvBlock(), Promise.reject(new Error('previ
        owner   = المدير: يتحكم في كل حاجة (الطلاب + الأدمن + المحتوى)
        content = أدمن المحتوى: المحتوى بس (يضيفه المدير من اللوحة)
        ========================================================== */
-    const OWNER_EMAIL = 'dama@gmail.com';
+    const OWNER_EMAIL = 'markogorge18@gmail.com';
     const ROLE_LABELS = { owner: 'المالك', content: 'أدمن المحتوى', guest: 'ضيف أدمن', community: 'مشرف مجتمع' };
 
     let currentRole = null;   // دور المستخدم الحالي (أو null لو مش أدمن)
@@ -2263,7 +2263,7 @@ const deleteUser = u => previewing ? (pvBlock(), Promise.reject(new Error('previ
     async function getRole(user) {
       const email = (user.email || '').toLowerCase();
       myGrants = new Set(); myCommMod = false;
-      if (email === OWNER_EMAIL) return user.emailVerified ? 'owner' : null;
+      if (email === OWNER_EMAIL) return user.emailVerified ? 'owner' : null;   // القواعد بتشترط email_verified للمالك
       if (!user.emailVerified) return null;   // القواعد بتشترط إيميل متأكَّد لأي أدمن، فمفيش داعي نفتح له الواجهة
       try {
         const snap = await getDoc(doc(db, 'admins', email));
@@ -2679,6 +2679,8 @@ const deleteUser = u => previewing ? (pvBlock(), Promise.reject(new Error('previ
       studentNote.textContent = NOTE;
       try {
         const { user } = await signInWithPopup(auth, new GoogleAuthProvider());
+        const staffRole = await getRole(user);     // المالك/الأدمن بجوجل: يدخل على طول من غير شاشة الطالب
+        if (staffRole) { currentRole = staffRole; closeLogin(); if (!continueFlow()) openPanel(); return; }
         const snap = await getDoc(doc(db, 'users', user.uid));
 
         if (!snap.exists()) {                       // أول مرة: اطلب الصورة والاسم
