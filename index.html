@@ -1383,6 +1383,7 @@
     .ai-m--me{align-self:flex-start;background:var(--lime);color:var(--ink);border-color:var(--lime)}
     .ai-m--bot{align-self:stretch;max-width:100%}
     .ai-ut{white-space:pre-wrap}
+    .ai-uimg{display:block;max-width:100%;max-height:220px;object-fit:contain;border-radius:12px;margin-bottom:6px}
     .ai-who{display:block;font-size:13px;margin-bottom:2px}
     .ai-m--bot .ai-who{color:var(--lime)}
     .ai-ts{display:block;margin-top:4px;font-size:11.5px;opacity:.7}
@@ -2005,7 +2006,7 @@
         <form class="addbox" id="adminForm" novalidate>
           <h3>إضافة أدمن محتوى</h3>
           <label class="field"><span>البريد الإلكتروني</span><input type="email" id="newEmail" placeholder="name@example.com"></label>
-          <label class="field"><span>كلمة السر (6 حروف على الأقل)</span><input type="text" id="newPass" autocomplete="off" placeholder="كلمة سر مبدئية"></label>
+          <label class="field"><span>كلمة السر (6 حروف على الأقل)</span><input type="password" id="newPass" autocomplete="off" placeholder="كلمة سر مبدئية"></label>
           <div class="msg" id="adminMsg" role="alert"></div>
           <button class="btn" type="submit">إضافة</button>
         </form>
@@ -2193,7 +2194,7 @@
     import {
       getAuth, GoogleAuthProvider, signInWithPopup,
       signInWithEmailAndPassword, createUserWithEmailAndPassword,
-      sendPasswordResetEmail, updateProfile, signOut, onAuthStateChanged,
+      sendPasswordResetEmail, updateProfile, signOut as _signOut, onAuthStateChanged,
       deleteUser as _deleteUser, reauthenticateWithCredential, EmailAuthProvider
     } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js";
     import {
@@ -2212,6 +2213,7 @@
       measurementId: "G-YNYLK6KR4N"
     };
 
+    try { if (sessionStorage.getItem('wipeFs')) { sessionStorage.removeItem('wipeFs'); await new Promise(r => { const q = indexedDB.deleteDatabase('firestore/[DEFAULT]/' + firebaseConfig.projectId + '/main'); q.onsuccess = q.onerror = q.onblocked = () => r(); }); } } catch (e) {}
     const app  = initializeApp(firebaseConfig);
     const auth = getAuth(app);
     /* كاش دائم على الجهاز: تحميل أسرع + الدروس اللي اتفتحت تشتغل من غير نت */
@@ -2220,6 +2222,7 @@
       db = initializeFirestore(app, { localCache: persistentLocalCache({ tabManager: persistentMultipleTabManager(), cacheSizeBytes: CACHE_SIZE_UNLIMITED }) });
     } catch (e) { db = getFirestore(app); }
     auth.languageCode = 'ar';
+    const signOut = async a => { const r = await _signOut(a); try { sessionStorage.setItem('wipeFs', '1'); } catch (e) {} setTimeout(() => location.reload(), 1500); return r; };
 /* وضع "اعرض مثل الطالب": أي كتابة (حفظ / رسايل / نتايج / حذف حساب) بتتمنع وإنت بتعاين */
 let previewing = false, pvTs = 0;
 const pvBlock = () => { if (Date.now() - pvTs > 3000) { pvTs = Date.now(); try { toast('👁️ وضع المعاينة: مفيش حاجة بتتحفظ'); } catch (e) {} } };
@@ -2252,7 +2255,7 @@ const deleteUser = u => previewing ? (pvBlock(), Promise.reject(new Error('previ
     let myGrants = new Set();
     let myCommMod = false;   // مشرف مجتمع: طالب عادي + صلاحيات الإشراف على مجموعات صفه بس (من غير لوحة تحكم ولا محتوى ولا بيانات طلاب)
     /* المدير الرئيسي الوحيد: الإيميل ده بس هو اللي يضيف ويشيل الأدمن والضيوف */
-    const isOwner    = () => currentRole === 'owner' && (auth.currentUser?.email || '').toLowerCase() === OWNER_EMAIL;
+    const isOwner    = () => currentRole === 'owner' && (auth.currentUser?.email || '').toLowerCase() === OWNER_EMAIL && auth.currentUser?.emailVerified === true;
     const hasGrant   = (kind, grade, subj) => currentRole === 'guest' && myGrants.has(kind + ':' + grade + '_' + subj);
     const anyGrant   = kind => currentRole === 'guest' && [...myGrants].some(g => g.startsWith(kind + ':'));
     const canContent = (grade, subj) => currentRole === 'owner' || currentRole === 'content' || hasGrant('content', grade, subj);
@@ -2260,7 +2263,8 @@ const deleteUser = u => previewing ? (pvBlock(), Promise.reject(new Error('previ
     async function getRole(user) {
       const email = (user.email || '').toLowerCase();
       myGrants = new Set(); myCommMod = false;
-      if (email === OWNER_EMAIL) return 'owner';
+      if (email === OWNER_EMAIL) return user.emailVerified ? 'owner' : null;
+      if (!user.emailVerified) return null;   // القواعد بتشترط إيميل متأكَّد لأي أدمن، فمفيش داعي نفتح له الواجهة
       try {
         const snap = await getDoc(doc(db, 'admins', email));
         if (!snap.exists()) return null;
@@ -2373,8 +2377,11 @@ const deleteUser = u => previewing ? (pvBlock(), Promise.reject(new Error('previ
     /* ---- الاشتراك المدفوع: الطالب بيشوف بوابة لحد ما الأدمن يفعّله، والتفعيل شهر ---- */
     let myPaidUntil = 0, myLoaded = false, myPay = null, payUnsub = null, payUid = null, payImg = '';
     const payOn = () => !!(siteCfg.pay && siteCfg.pay.on);
-    const payActive = s => (Number(s && s.paidUntil) || 0) > Date.now();
-    const addMonth = ms => { const d = new Date(ms); d.setMonth(d.getMonth() + 1); return d.getTime(); };
+    let clockOff = 0;
+    const nowS = () => Date.now() + clockOff;
+    (async () => { try { const r = await fetch(location.href, { method: 'HEAD', cache: 'no-store' }); const d = Date.parse(r.headers.get('date') || ''); if (d) clockOff = d - Date.now(); } catch (e) {} })();
+    const payActive = s => (Number(s && s.paidUntil) || 0) > nowS();
+    const addMonth = ms => { const d = new Date(ms), day = d.getDate(); d.setDate(1); d.setMonth(d.getMonth() + 1); d.setDate(Math.min(day, new Date(d.getFullYear(), d.getMonth() + 1, 0).getDate())); return d.getTime(); };
     const fmtDate = ms => new Date(ms).toLocaleDateString('ar-EG', { day: 'numeric', month: 'long', year: 'numeric' });
     const payGate = document.getElementById('payGate');
     const goodImg = v => typeof v === 'string' && /^data:image\/(jpeg|png|webp);base64,/.test(v);
@@ -2394,7 +2401,7 @@ const deleteUser = u => previewing ? (pvBlock(), Promise.reject(new Error('previ
 
     function updatePay() {
       if (payOn() && waiting) { waiting = false; closeLogin(); }   // كان واقف على شاشة الموافقة القديمة
-      const locked = payOn() && !currentRole && !!auth.currentUser && myLoaded && !(myPaidUntil > Date.now());
+      const locked = payOn() && !currentRole && !!auth.currentUser && myLoaded && !(myPaidUntil > nowS());
       payGate.hidden = !locked;
       if (locked && modal.classList.contains('is-open')) { modal.classList.remove('is-open'); modal.setAttribute('aria-hidden', 'true'); }   // نافذة الدخول ماتفضلش مفتوحة ورا البوابة
       if (!locked) { stopMyPay(); if (document.body.style.overflow === 'hidden' && !document.querySelector('.panel.is-open') && !modal.classList.contains('is-open') && joinGate.hidden) document.body.style.overflow = ''; return; }
@@ -2904,8 +2911,10 @@ const deleteUser = u => previewing ? (pvBlock(), Promise.reject(new Error('previ
     function watchStudent(user) {
       stopStudentWatch();
 
+      let hadDoc = false;
       studentUnsubs.push(onSnapshot(doc(db, 'users', user.uid), snap => {
-        if (!snap.exists()) return;
+        if (!snap.exists()) { if (hadDoc && !snap.metadata.fromCache) { toast('حسابك اتحذف. كلّم الإدارة.'); signOut(auth); } return; }
+        hadDoc = true;
         const d = snap.data();
         if (d.blocked) { waiting = false; toast('حسابك اتوقف. كلّم الإدارة.'); signOut(auth); return; }
 
@@ -3367,7 +3376,7 @@ const deleteUser = u => previewing ? (pvBlock(), Promise.reject(new Error('previ
         updateDoc(doc(db, 'payments', id), { status: 'done' }).catch(() => {});
         logStu(id, 'تفعيل اشتراك شهر', 'لحد ' + fmtDate(until));
         toast('اتفعّل لحد ' + fmtDate(until) + ' ✓');
-        await rewardReferrer(s);
+        try { await rewardReferrer(s); } catch (e) { console.warn(e); }
       } catch (err) { dbError(err); }
     }
 
@@ -3395,12 +3404,13 @@ const deleteUser = u => previewing ? (pvBlock(), Promise.reject(new Error('previ
 
     async function activateAllExisting() {
       const until = addMonth(Date.now());
-      const list = students.filter(x => x.approved !== false && !x.blocked && !payActive(x));
+      const list = (await getDocs(collection(db, 'users'))).docs.map(d => ({ id: d.id, ...d.data() })).filter(x => x.approved !== false && !x.blocked && !payActive(x));
       for (let i = 0; i < list.length; i += 150) {
         const b = writeBatch(db);
         list.slice(i, i + 150).forEach(st => { b.update(doc(db, 'users', st.id), { paidUntil: until }); bulkLog(b, st, 'تفعيل اشتراك شهر (جماعي)'); });
         await b.commit();
       }
+      for (const code of new Set(list.map(x => x.refCode).filter(Boolean))) { const st = list.find(x => x.refCode === code); try { await rewardReferrer(st); } catch (e) {} }
       return list.length;
     }
 
@@ -3478,7 +3488,7 @@ const deleteUser = u => previewing ? (pvBlock(), Promise.reject(new Error('previ
       if (!confirm('تأكيد أخير: ده هيأثر على كل الطلاب في نفس اللحظة.')) return;
       const btn = document.getElementById('payResetAll'); btn.disabled = true;
       try {
-        const list = students.filter(x => Number(x.paidUntil) > 0);
+        const list = (await getDocs(query(collection(db, 'users'), where('paidUntil', '>', 0)))).docs.map(d => ({ id: d.id, ...d.data() }));
         for (let i = 0; i < list.length; i += 150) {
           const b = writeBatch(db);
           list.slice(i, i + 150).forEach(st => { b.update(doc(db, 'users', st.id), { paidUntil: 0 }); bulkLog(b, st, 'إخراج من الاشتراك (جماعي)'); });
@@ -5614,7 +5624,7 @@ const deleteUser = u => previewing ? (pvBlock(), Promise.reject(new Error('previ
       plan:      { n: '📅 خطة مذاكرة', d: 'جدول مذاكرة من المنهج والوقت المتاح.', ph: 'اكتب المواد/المنهج، والوقت المتاح يوميًا، وموعد الامتحان...',
         p: 'اعملي خطة مذاكرة واقعية في جدول منظم (| اليوم | المادة/الدرس | المدة | نوع المذاكرة |) بناءً على المعلومات دي. وزّع المراجعات والراحة، وآخر الجدول حط 3 نصايح مختصرة بالعامية. المعلومات:' },
       solve:     { n: '🧮 حل مسألة', d: 'حل خطوة بخطوة مع توضيح كل قانون.', ph: 'اكتب المسألة هنا...',
-        p: 'احلّي المسألة دي بأسلوب ورقة الامتحان، بالعامية المصرية:\n## 📋 المعطيات والمطلوب\n(اكتبهم في نقط مع الوحدات)\n## 📐 القانون\n(القانون المستخدم وليه هو المناسب)\n## 🧮 الحل خطوة بخطوة\n(كل خطوة في سطر: التعويض ثم الناتج بوحدته)\n## ✅ النتيجة النهائية\n(الناتج بوحدته في سطر واضح)\n## 🔍 مراجعة الحل\n(تأكد من الوحدات ومعقولية الناتج، أو اتحقق بطريقة تانية)\n> ⚠️ أخطاء شائعة في النوع ده من المسائل\nالمسألة:' },
+        p: 'احلّي المسألة دي بأسلوب ورقة الامتحان، بالعامية المصرية:\n## 📋 المعطيات والمطلوب\n(اكتبهم في نقط مع الوحدات)\n## 📐 القانون\n(القانون المستخدم وليه هو المناسب)\n## 🧮 الحل خطوة بخطوة\n(كل خطوة في سطر بالشكل: تعبير = ناتج، مثال 2 × 3 = 6، وبعده الوحدة)\n## ✅ النتيجة النهائية\n(الناتج بوحدته في سطر واضح)\n## 🔍 مراجعة الحل\n(تأكد من الوحدات ومعقولية الناتج، أو اتحقق بطريقة تانية)\n> ⚠️ أخطاء شائعة في النوع ده من المسائل\nالمسألة:' },
       visual:    { n: '🎨 شرح مصوّر', d: 'شرح برسومات وأقسام ملونة وقوانين وجداول ودوائر كهربية، شكل ورقة مراجعة احترافية تنزلها صورة أو PDF.', ph: 'الصق الدرس أو اكتب اسم الموضوع...',
         p: 'حوّل المحتوى ده لشرح مصوّر احترافي زي ورقة مراجعة ملونة بالرسومات، بالعامية المصرية ومن غير حاجة برا المنهج. رجّع JSON صالح بس جوه كتلة ```json من غير أي كلام قبلها أو بعدها، بالشكل ده:\n{"title":"عنوان قصير","sub":"المادة · الصف","sections":[{"k":"steps","i":"🎯","h":"عنوان القسم","items":["نقطة قصيرة"]}]}\nأنواع الأقسام (k):\n- steps: items = من 3 لـ 6 نقط قصيرة (المصطلح وبعده معناه).\n- formula: eq = القانون زي "R = V / I"، vars = رموزه ووحداته، note = ملحوظة.\n- table: cols = من 2 لـ 4 عناوين، rows = صفوف نصوص.\n- compare: a و b، كل واحد {"h":"عنوان","items":["..."]}.\n- flow: items = من 3 لـ 5 خطوات متتابعة.\n- circuit: type = "series" أو "parallel"، parts = [{"k":"battery|resistor|bulb|ammeter|voltmeter|switch","l":"1.5 V"}] (أقصى 6)، note. استخدمه بس لو الموضوع كهرباء.\n- punnett: مربع بانيت للوراثة. g1 و g2 = أمشاج الأبوين، مثال ["A","a"] أو لصفتين ["AB","Ab","aB","ab"]، و note. الحرف الكبير سائد والصغير متنحي، والمربع والنسب بيتحسبوا لوحدهم. استخدمه بدل وصف المربع بالكلام.\n- note: text = نصيحة أو فكرة مهمة للامتحان.\nالقواعد: من 4 لـ 7 أقسام، ابدأ بالفكرة العامة وانتهِ بقسم note، و i إيموجي واحد مناسب لكل قسم، والجمل قصيرة. المحتوى:' },
       mind:      { n: '🧠 خريطة ذهنية', d: 'خريطة ذهنية احترافية بأكتر من شكل، تنزلها صورة أو PDF.', ph: 'الصق الدرس أو اكتب اسم الموضوع...',
@@ -5622,8 +5632,151 @@ const deleteUser = u => previewing ? (pvBlock(), Promise.reject(new Error('previ
     };
     const MM_LAYOUT_NAMES = { radial: 'شعاعية', tree: 'شجرية', top: 'هرمية', flow: 'انسيابية', time: 'خط زمني', cols: 'أعمدة' };
 
+    /* ==========================================================
+       ربط Learn Ai بالمنهج المصري (لكل صف عقليته)
+       1) AI_STAGE: بروفايل عقلي وأسلوب شرح لكل صف
+       2) AI_CUR_DEF: خريطة المنهج (محاور مؤكَّدة بس) — وتتفوّق عليها settings/curriculum لو المالك كتبها
+       3) دروس المنصة الفعلية للصف (العناوين اللي المدرس رفعها) بتتحمّل من content
+       ========================================================== */
+    const AI_STAGE = [
+      { name: 'أولى إعدادي', age: '11–12 سنة',
+        mind: 'لسه جاي من الابتدائي: تفكيره بيعتمد على المحسوس والأمثلة اللي يشوفها ويجرّبها، والمجرّد لوحده بيتعبه.',
+        rules: ['جمل قصيرة (حوالي 15 كلمة)، وفكرة واحدة في الجملة.', 'مصطلح جديد واحد في المرة، وفسّره فوراً بكلمة بسيطة.', 'ابدأ بتشبيه من حياته (المدرسة، الأكل، الكورة، الموبايل) قبل التعريف الرسمي.', 'القانون بالكلام الأول وبعدين الرمز، وكل خطوة حسابية في سطر، بأرقام بسيطة.', 'نبرة مشجعة وودودة ("برافو"، "قربت") من غير مبالغة.'],
+        limit: 'ممنوع الاشتقاقات والتفاصيل اللي فوق مستواه وأي مفهوم مجرّد من غير مثال.',
+        quiz: 'أسئلة مباشرة وواضحة، وألفاظ بسيطة، وأرقام صغيرة.' },
+      { name: 'تانية إعدادي', age: '12–13 سنة',
+        mind: 'بدأ يفهم السبب والنتيجة والعلاقات البسيطة بين الحاجات، وبقى يقدر يتخيّل تجربة من غير ما يشوفها.',
+        rules: ['اربط كل "ليه" بـ"إيه اللي حصل" بترتيب سبب ← نتيجة.', 'جمل متوسطة، ومن 2 لـ 3 مصطلحات في الشرح الواحد، وكل مصطلح يتعرّف أول مرة.', 'القوانين بالتعويض والوحدات، والمقارنة بين حاجتين في جدول صغير لو الشرح مكتوب.', 'أمثلة من البيئة والحياة اليومية، وتجربة بسيطة يتخيّلها.', 'لو الفكرة مبنية على حاجة اتاخدت في أولى إعدادي فكّره بيها في جملة.'],
+        limit: 'ماتدخلش في تفاصيل رياضية أو علمية زيادة عن اللي في كتاب تانية إعدادي.',
+        quiz: 'أسئلة فهم وربط سبب بنتيجة، وتطبيق مباشر على قانون واحد.' },
+      { name: 'تالتة إعدادي', age: '13–14 سنة (سنة الشهادة)',
+        mind: 'بيفكّر منطقي ومنظّم وبيحلّل خطوات، ومشغول بالامتحان ونوع الأسئلة اللي بتيجي.',
+        rules: ['التعريف بنص الكتاب المعتمد، وبعده تبسيطه بالعامية.', 'اربط بين الوحدات لما يكون في علاقة (زي الحركة والقوى).', 'المسائل متعددة الخطوات: معطيات ← قانون ← تعويض ← ناتج بوحدته ← مراجعة.', 'قول الفكرة بتيجي في الامتحان إزاي (علل / ما المقصود / قارن / احسب) ونبّه على غلطة الامتحان الشهيرة.', 'المصطلح الإنجليزي بين قوسين لما يكون في الكتاب.'],
+        limit: 'التزم بحدود كتاب تالتة إعدادي بالظبط، وماتدخلش في مستوى ثانوي.',
+        quiz: 'زي أسئلة الشهادة الإعدادية: علل، ما المقصود، قارن، مسألة متعددة الخطوات.' },
+      { name: 'أولى بكالوريا', age: '15–16 سنة',
+        mind: 'تفكيره مجرّد وأعمق: بيفهم العلاقات الرياضية والرسوم البيانية وبيتقيّم على الفهم والتطبيق والتحليل مش الحفظ بس.',
+        rules: ['اشرح "ليه" و"إزاي" بالمنطق العلمي مش "إيه" بس، واربط بين فروع العلوم المتكاملة.', 'المصطلح بالعربي وبعده الإنجليزي، والقانون بالرمز ووحدته ومعنى العلاقة (طردية/عكسية).', 'فسّر الرسوم البيانية والعلاقات بالكلام، وفكّر في الاستنتاج مش الحفظ.', 'كلّمه كشاب ناضج من غير تبسيط مبالغ فيه ولا نبرة أطفال.', 'المسألة: حللها وقول ليه اخترت القانون، وراجع معقولية الناتج.'],
+        limit: 'التزم بنطاق منهج أولى بكالوريا، وأي توسّع يتحط في سطر "للمعرفة" ومش مطلوب في الامتحان.',
+        quiz: 'أسئلة فهم وتطبيق وتحليل واستنتاج بأسلوب البكالوريا، مش حفظ مباشر.' }
+    ];
+    /* خريطة الترم الأول 2026/27 من كتب الوزارة الرسمية (فهارس الكتب). الترم التاني بيتكتب في Firestore: settings/curriculum */
+    const AI_CUR_DEF = {
+      0: {
+        arabic: 'كتاب الطالب الترم الأول. (1) أنا مصري: مصر مهد العلم (استماع، أحمد زويل)، أسطورة مصرية: البطل أحمد منسي، رسالة إلى المرأة المصرية (نعمات أحمد فؤاد)، وجه الوطن (شعر، فاروق جويدة). قواعد: الفعل اللازم والمتعدي، الفعل المجرد والمزيد. إملاء: الهمزة على الألف. تعبير: السيرة الذاتية. (2) أصنع مستقبلي: تاريخنا أساس لمستقبلنا (المتحف المصري الكبير)، أشياء صنعت مني كاتبا (العقاد)، بطولات مصرية (محمد صلاح وعلي فرج وأحمد الجندي)، شباب اليوم صناع الغد (شعر، إبراهيم ناجي). قواعد: أنواع الفعل الصحيح والمعتل. إملاء: الهمزة على الواو. تعبير: السيرة الغيرية. (3) مواقف إنسانية: دروس من الحياة، رحمة تداوي وعلم يضيء (ابن النفيس)، إنسان في عصر التكنولوجيا، دعاء شاعرة (جليلة رضا). قواعد: ظن وأخواتها. إملاء: الهمزة على الياء.',
+        science: 'كتاب العلوم "اكتشف وتعلم" الترم الأول (4 وحدات). (1) المادة: تركيب الذرة، الجدول الدوري لتصنيف العناصر، المادة وخصائصها، الروابط الكيميائية. (2) مجالات القوى: القوى الكهربية، القوى المغناطيسية، قوى الجاذبية. (3) الكائنات الحية تركيبها وعملياتها: الخلايا والحياة، الصفات العامة للكائنات الحية، الميكروبات. (4) نظام الأرض والشمس والقمر: الأرض والنظام الشمسي، خسوف القمر.',
+        social: 'كتاب الدراسات الاجتماعية الترم الأول (4 وحدات). (1) الملامح الطبيعية لقارة إفريقيا وحضاراتها القديمة: قارة إفريقيا (الموقع والكشوف الجغرافية)، مظاهر سطح إفريقيا، نهر النيل والحضارات القديمة في إفريقيا. (2) الحضارة المصرية القديمة وعلاقتها بحضارات إفريقيا: عصر الدولة القديمة (بناة الأهرام)، الدولة الوسطى (الرخاء الاقتصادي)، الدولة الحديثة (المجد الحربي). (3) النظم البيئية في إفريقيا: الغابات المدارية المطيرة وغابات البحر المتوسط، الحشائش والصحاري الحارة، النظم البيئية المائية. (4) علاقة مصر بإفريقيا في العصور الوسطى: انتشار الإسلام في إفريقيا، دور مصر الحضاري في إفريقيا.'
+      },
+      1: {
+        arabic: 'كتاب الطالب الترم الأول. (1) انتمائي قوتي: سيدة المقاومة المصرية آمنة دهشان (استماع)، العبور إلى المستقبل (حرب أكتوبر)، من صقور الوطنية محمد مبروك، مصر التي في خاطري (شعر، أحمد رامي). قواعد: المعرب والمبني من الأسماء والحروف ثم من الأفعال. إملاء: الألف اللينة في الأسماء والأفعال. تعبير: مقال وصف مكان. (2) بيئتي مسؤوليتي: أقدم وديعة في يد المصري (استماع)، من أجل غد، واحة مصرية صديقة للبيئة: مدينة الخارجة، ريفنا المصري (شعر، محمود غنيم). قواعد: الضمائر البارزة والمستترة، أسلوب الشرط (أدوات الشرط الجازمة). إملاء: الألف اللينة في الحروف. تعبير: الخطبة الإقناعية. (3) علم وقيم: إنسان أم ظل إنسان؟ (استماع، د. هانم أحمد)، عندما يصبح العلم رسالة (الخوارزمي)، القراءة حياة (أحمد أمين)، الكد سبيل المعالي (شعر، الإمام الشافعي). قواعد: أسلوب الشرط (غير الجازمة). إملاء: التاء المربوطة والمفتوحة والهاء.',
+        science: 'كتاب العلوم الترم الأول (4 وحدات). (1) المادة والطاقة: حالات المادة، تغير حالات المادة، الطاقة الداخلية ودرجة الحرارة، طرق انتقال الحرارة. (2) المادة والتفاعلات الكيميائية: التفاعلات الكيميائية، المعادلة الكيميائية، كيمياء التغذية. (3) تدفق الطاقة في عمليتي البناء الضوئي والتنفس الخلوي: عملية البناء الضوئي، عملية التنفس الخلوي. (4) العمليات الجيولوجية: تغير سطح الأرض، تكوين المعادن والتربة.',
+        social: 'كتاب الدراسات الاجتماعية الترم الأول (4 وحدات). (1) الملامح الطبيعية لقارتي آسيا وأوروبا: موقع ومظاهر السطح، المعادن ومصادر الطاقة. (2) الحضارات القديمة في آسيا وعلاقتها بمصر: الشرق الأدنى، بلاد اليمن القديم، الشرق الأقصى، الحضارة الإسلامية. (3) النظم البيئية في آسيا وأوروبا: الغابات، الحشائش والصحاري، النظم البيئية المائية. (4) الحضارات القديمة في أوروبا وعلاقتها بمصر: الحضارة اليونانية، الحضارة الرومانية.'
+      },
+      2: {
+        arabic: 'كتاب الطالب الترم الأول. (1) قيم تحمي شبابنا: آداب التعامل مع الوالدين (استماع)، أغلى من الذهب، الصداقة (د. شوقي ضيف)، تحية للشباب (شعر، أحمد شوقي). قواعد: اسم الفاعل، اسم المفعول. إملاء: الألف اللينة. تعبير: النص الإقناعي. (2) نحو تفكير سليم: ثمرة القراءة (استماع)، أفضل النعم، خير جليس (د. أحمد زكي)، تاج الفضائل (شعر، الإمام علي). قواعد: صيغ المبالغة، اسم المكان. إملاء: الهمزة في بداية الكلمة ووسطها. تعبير: التقرير الصحفي. (3) أنا والمستقبل: بناء المستقبل في عصر الآلة (استماع)، حرفتك بين يديك، مستقبل مصر في الزراعة، اصنع بيدك مجدك (شعر، معروف الرصافي). قواعد: اسم الزمان، اسم الآلة. إملاء: الهمزة المتطرفة.',
+        science: 'كتاب العلوم الترم الأول (4 وحدات). (1) التفاعلات الكيميائية وآثارها البيئية: أنواع التفاعلات الكيميائية، تفاعلات الاحتراق والتلوث البيئي، التدخين ومخاطره. (2) الكهربية والمغناطيسية: التيار الكهربي، الدوائر الكهربية، القوى الكهربية والمغناطيسية. (3) تنوع الصفات في الكائنات الحية: الوراثة وتنوع الصفات، الانتخاب الطبيعي والانتخاب الصناعي. (4) تأريخ كوكب الأرض: السجل الحفري، الأزمنة الجيولوجية.',
+        social: 'كتاب الدراسات الاجتماعية الترم الأول (4 وحدات). (1) الملامح الطبيعية والحضارية لقارات العالم الجديد: موقع ومظاهر السطح، الحضارات القديمة في الأمريكتين (المايا والإنكا)، الكشوف الجغرافية. (2) مصر في عصر محمد علي وخلفائه: تولية محمد علي وتثبيت دعائم حكمه، بناء الدولة الحديثة، عصر خلفائه. (3) النظم البيئية في قارات العالم الجديد: الغابات والحشائش، النظم الصحراوية والمائية، التغير المناخي وتأثيره. (4) الحركة الوطنية في مواجهة الاحتلال البريطاني: الثورة العرابية وبداية الاحتلال، كفاح مصطفى كامل ومحمد فريد.'
+      },
+      3: {
+        arabic: 'كتاب اللغة العربية الترم الأول (أدب ونصوص وبلاغة). (1) قيم عربية: مكارم الأخلاق وحاتم الطائي (قراءة)، شباب تسامى للعلا (شعر، السموأل)، قيم الحياة الزوجية (نثر، أمامة بنت الحارث). نحو: الأفعال الناقصة والتامة، أفعال المقاربة والرجاء والشروع. بلاغة: الحقيقة والمجاز، التشبيه. أدب: الشعر والنثر في العصر الجاهلي. (2) التسامح والسلام: قيم اجتماعية (د. شوقي ضيف)، العفو مأمول (شعر، كعب بن زهير)، من أجل حياة كريمة (نص قرآني). نحو: إعمال اسم الفاعل وصيغ المبالغة. بلاغة: الاستعارة المكنية والتصريحية. أدب: عصر صدر الإسلام. (3) العلم والأخلاق: تكنولوجيا المعلومات (د. نبيل علي)، ابدأ بنفسك (شعر، أبو الأسود الدؤلي)، أدب صناعة الكتاب (عبد الحميد بن يحيى الكاتب). نحو: إعمال اسم المفعول. أدب: الشعر والنثر في العصر الأموي. وكتاب القصة المقررة: "أبو الفوارس عنترة بن شداد" (محمد فريد أبو حديد)، وكتاب القواعد الأساسية للنحو والصرف.',
+        science: 'كتاب العلوم المتكاملة "النظم البيئية واستدامة الحياة" الترم الأول (وحدتان). (1) النظام البيئي المائي (10 دروس): الغلاف المائي على كوكب الأرض، الخواص الكيميائية للماء، الخواص الفيزيائية للماء، المحاليل المائية وخواصها، الأهمية البيولوجية للماء، التكيفات البيولوجية للكائنات الحية في البيئة المائية، تأثير غازات الهواء الجوي على البيئات المائية، تأثير الضوء والإشعاع الشمسي على البيئات المائية، تأثير الضغط المائي على الكائنات الحية، التوازن البيئي ودور الإنسان في استدامة الحياة المائية. (2) الغلاف الجوي (4 دروس): مكونات وطبقات الغلاف الجوي، التفاعلات الكيميائية في الغلاف الجوي، العوامل الفيزيائية وتأثيرها في الغلاف الجوي، الغلاف الجوي ودور العلم في استدامته.',
+        social: 'كتاب التاريخ الترم الأول (4 وحدات). (1) مدخل لدراسة حضارة مصر والعالم القديم: الحضارة والتاريخ، مصادر دراسة الحضارات، عوامل قيام الحضارات. (2) حضارة مصر القديمة (الفرعونية): ملامح من تاريخ مصر القديمة، الحياة الاقتصادية، الحياة السياسية والإدارية، الحياة الاجتماعية، الحياة الدينية، الحياة الثقافية والفكرية. (3) حضارة بلاد العراق القديم وحضارة فينيقيا. (4) حضارة اليونان وحضارة الرومان: الحضارة اليونانية (الإغريقية)، مصر تحت حكم البطالمة، الحضارة الرومانية، مصر تحت حكم الرومان.'
+      }
+    };
+    /* العلوم بالإنجليزي (كتب الوزارة للمدارس اللغات) — بتتستخدم لما الطالب يختار English */
+    const AI_CUR_EN = {
+      0: { science: 'English-medium Science book, First Term (4 units). Unit 1 The Matter: Structure of the Atom; The Periodic Table of Elements; Matter and Its Properties; Chemical Bonds. Unit 2 Force Fields: Electric Forces; Magnetic Forces; Gravitational Forces. Unit 3 Living Organisms, Their Structure and Processes: Cells and Life; General Characteristics of Living Organisms; Microbes. Unit 4 The (Earth-Sun-Moon) System: The Earth and the Solar System; Lunar Eclipse.' },
+      1: { science: 'English-medium Science book, First Term (4 units). Unit 1 Matter and Energy: States of Matter; Changes in the States of Matter; Internal Energy and Temperature; Methods of Heat Transfer. Unit 2 Matter and Chemical Reactions: Chemical Reactions; Chemical Equations; Nutritional Chemistry. Unit 3 Energy Flow in Photosynthesis and Cellular Respiration: Photosynthesis; Cellular Respiration. Unit 4 Geological Processes: Changes in Earth\'s Surface; Formation of Minerals and Soil.' },
+      2: { science: 'English-medium Science book, First Term (4 units). Unit 1 Chemical Reactions and Their Environmental Impacts: Types of Chemical Reactions; Combustion Reactions and Environmental Pollution; Smoking and Its Hazards. Unit 2 Electricity and Magnetism: Electric Current; Electric Circuits; Electric and Magnetic Forces. Unit 3 Variation of Traits in Living Organisms: Heredity and Variation of Traits; Natural Selection and Artificial Selection. Unit 4 Dating Planet Earth: The Fossil Record; Geologic Time.' },
+      3: { science: 'English-medium Integrated Science book, First Term (2 units). Unit 1 The Aquatic Ecosystem: The Hydrosphere on Planet Earth; Chemical Properties of Water; Physical Properties of Water; Aqueous Solutions and Their Properties; Biological Importance of Water; Biological Adaptations of Organisms in the Aquatic Environment; Effect of Atmospheric Gases on Aquatic Environments; Effect of Light and Solar Radiation on Aquatic Environments; Effect of Water Pressure on Living Organisms; Ecological Balance and the Role of Humans in the Sustainability of Aquatic Life. Unit 2 The Atmosphere: Components and Layers of the Atmosphere; Chemical Reactions in the Atmosphere; Physical Factors and Their Effect on the Atmosphere; The Atmosphere and the Role of Science in Its Sustainability.' }
+    };
+    let AI_CUR_DOC = null, AI_CUR_KEY = '', AI_CUR_P = null;
+    const AI_LIVE = {};
+    const aiTerm = () => { const m = new Date().getMonth() + 1; return (m >= 9 || m === 1) ? 'الأول' : 'الثاني'; };
+    function aiGradeFrom(t) {
+      const n = aiNorm(t || '').slice(0, 4000);
+      const G3 = '(?:اولي|الاول|اول)\\s*(?:بكالوريا|ثانوي|الثانوي)|بكالوريا', E = '(?:اعدادي|الاعدادي)';
+      const g = (names) => new RegExp('(?:' + names + ')\\s*' + E + '|' + E + '\\s*(?:' + names + ')');
+      if (new RegExp(G3).test(n)) return 3;
+      if (g('تالته|ثالثه|ثالث|تالت|الثالث').test(n)) return 2;
+      if (g('تانيه|ثانيه|تاني|ثاني|الثاني').test(n)) return 1;
+      if (g('اولي|الاول|اول').test(n)) return 0;
+      return null;
+    }
+    const aiGrade = () => { for (let k = AI.msgs.length - 1; k >= 0; k--) { if (AI.msgs[k].role !== 'user') continue; const g = aiGradeFrom(AI.msgs[k].text); if (g !== null) return g; } return isAdminStaff() ? null : (Number.isInteger(myGrade) ? myGrade : null); };
+    function aiCurLoad() {
+      const g = isAdminStaff() ? null : (Number.isInteger(myGrade) ? myGrade : null);
+      const key = (auth.currentUser ? auth.currentUser.uid : '') + ':' + g;
+      if (AI_CUR_P && AI_CUR_KEY === key) return AI_CUR_P;
+      AI_CUR_KEY = key;
+      return AI_CUR_P = (async () => {
+        try { const s = await getDoc(doc(db, 'settings', 'curriculum')); AI_CUR_DOC = s.exists() ? s.data() : null; } catch (e) {}
+        if (g === null) return;
+        await aiBooksLoad(g);
+        const out = {};
+        for (const sj of SUBJECTS) {
+          try {
+            const q = await getDocs(query(collection(db, 'content'), where('grade', '==', g), where('subject', '==', sj.key), where('visible', '==', true)));
+            out[sj.key] = q.docs.map(d => d.data())
+              .sort((a, b) => ((a.order ?? 1e9) - (b.order ?? 1e9)) || ((a.createdAt?.seconds ?? 0) - (b.createdAt?.seconds ?? 0)))
+              .map(x => String(x.title || '').trim().slice(0, 80)).filter(Boolean).slice(0, 60);
+          } catch (e) {}
+        }
+        AI_LIVE[g] = out;
+      })();
+    }
+    /* ---- كتب الصف: استرجاع مقتطفات من كتب الوزارة لصف الطالب بس (books/g0..g3.json جنب index.html) ---- */
+    const AI_BK = { g: null, c: null, tf: null, df: null, p: null, ctx: '', img: false };
+    const AI_IMG_MAX = 80000;   /* حجم الصورة (base64) عشان طلب الـ Worker يفضل تحت 150 ألف حرف */
+    const AI_IMG_NOTE = '\n\nالطالب بعت صورة مع رسالته:\n- لو الصورة سؤال أو مسألة أو صفحة من كتابه أو ورقة مذاكرة: اقرأها بدقة، وقول الأول باختصار إيه اللي قريته منها عشان يتأكد، وبعدين اشرحها أو حلها خطوة خطوة حسب منهج صفه.\n- لو مش واضحة أو مقطوعة أو الإضاءة وحشة: قوله يصوّرها تاني بإضاءة أحسن ويقرّب على الجزء المطلوب، وماتخمّنش.\n- لو الصورة مش دراسية (وش حد، صورة شخصية، حاجة مش لايقة): ماتوصفهاش ولا تعلّق عليها، وقوله بلطف إنك بتساعده في المذاكرة بس وإنه يبعت صورة السؤال أو الدرس.\n- ماتحاولش تتعرف على أشخاص من الصور.';
+    const AI_STOP = new Set('اعدادي ثانوي بكالوريا صف تانيه ثانيه تاني ثاني تالته ثالثه ثالث تالت اولي اول في من علي الي عن ده دي دول ايه اي ازاي ليه يعني هو هي هم ما ماذا هل كيف لماذا اشرح اشرحلي اشرحلنا وضح وضحلي عايز عاوز عايزه لو كان كانت يكون تكون مع او ام ان انه انها اللي الذي التي هذا هذه ذلك كل بعض عند بين قبل بعد حتي زي مثل the a an of in on to is are was were and or for with what how why does do explain me about this that it its be as by from at'.split(' '));
+    const aiTok = t => aiNorm(t).split(' ').map(w => w.replace(/^(وال|بال|فال|كال|لل|ال)(?=.{3})/, '').replace(/(ات|ان|ون|ين|ها|هم|ه|s)$/, m => w.length > 5 ? '' : m)).filter(w => w.length > 2 && !AI_STOP.has(w));
+    function aiBooksLoad(g) {
+      if (AI_BK.p && AI_BK.g === g) return AI_BK.p;
+      AI_BK.g = g; AI_BK.c = null;
+      return AI_BK.p = (async () => {
+        try {
+          const r = await fetch('books/g' + g + '.json?v=1'); if (!r.ok) return;
+          const rows = (await r.json()).c || [], df = new Map(), tf = [];
+          rows.forEach((c, i) => { const m = new Map(); aiTok(c.t).forEach(w => m.set(w, (m.get(w) || 0) + 1)); tf[i] = m; m.forEach((_, w) => df.set(w, (df.get(w) || 0) + 1)); });
+          AI_BK.c = rows; AI_BK.tf = tf; AI_BK.df = df;
+        } catch (e) {}
+      })();
+    }
+    const AI_BRIDGE = { ماء: 'water', مياه: 'water', غلاف: 'atmosphere hydrosphere', جوي: 'atmosphere', بيئي: 'ecosystem ecological', نظام: 'ecosystem', محلول: 'solutions aqueous', ضغط: 'pressure', ضوء: 'light', اشعاع: 'radiation', تكيف: 'adaptation', توازن: 'balance', كيميائي: 'chemical', فيزيائي: 'physical', حرار: 'temperature heat', كثاف: 'density', غاز: 'gases', اكسجين: 'oxygen', اوزون: 'ozone', طبق: 'layers', تلوث: 'pollution', حمض: 'acid', ذوبان: 'solubility', ملح: 'salt', كائن: 'organisms', حياه: 'life', محيط: 'ocean', بحر: 'sea' };
+    function aiBookCtx(lang) {
+      if (!AI_BK.c) return '';
+      const en = lang === 'English', q = new Set(aiTok(AI.msgs.filter(m => m.role === 'user').slice(-2).map(m => m.text || '').join(' ')));
+      if (!q.size) return '';
+      if (AI_BK.g === 3) [...q].forEach(w => Object.keys(AI_BRIDGE).forEach(k => { if (w.includes(k)) AI_BRIDGE[k].split(' ').forEach(e => q.add(e)); }));
+      const N = AI_BK.c.length, sc = [];
+      AI_BK.c.forEach((c, i) => {
+        if (c.s === 'science' && c.l !== 'any' && c.l !== (en ? 'en' : 'ar')) return;
+        let v = 0, hit = 0;
+        q.forEach(w => { const f = AI_BK.tf[i].get(w); if (f) { hit++; v += Math.log(1 + N / AI_BK.df.get(w)) * (1 + Math.log(f)); } });
+        if (/نواتج التعلم|دروس الوحدة|Learning Outcomes|Unit Lessons/.test(c.t)) v *= 0.5;
+        if (hit >= 2 || (q.size === 1 && v >= 4)) sc.push([v + hit * 0.5, i]);
+      });
+      sc.sort((a, b) => b[0] - a[0]);
+      if (!sc.length || sc[0][0] < 3) return '';
+      let out = '', n = 0;
+      for (const [v, i] of sc) { if (v < sc[0][0] * 0.45 || n >= 4 || out.length > 3000) break; const c = AI_BK.c[i]; out += '\n[' + c.b + ' ص ' + c.p + '] ' + c.t; n++; }
+      return '\n\nمقتطفات من كتب الطالب الرسمية (مرجعك الأول. لما تعتمد عليها اذكر المصدر بالشكل "(اسم الكتاب ص رقم)"):' + out;
+    }
+
+    function aiCur(g, lang) {
+      if (!Number.isInteger(g) || !AI_STAGE[g]) return '';
+      const st = AI_STAGE[g], docG = (AI_CUR_DOC && AI_CUR_DOC['g' + g]) || {}, live = AI_LIVE[g] || {};
+      const map = SUBJECTS.map(sj => {
+        const en = lang === 'English' && (AI_CUR_EN[g] || {})[sj.key], off = String(en || docG[sj.key] || (AI_CUR_DEF[g] || {})[sj.key] || '').trim().slice(0, 2500), les = live[sj.key] || [];
+        return (off || les.length) ? '• ' + subjectName(g, sj) + ':' + (off ? '\n  منهج الوزارة: ' + off : '') + (les.length ? '\n  دروس المنصة بالترتيب: ' + les.join(' / ') : '') : '';
+      }).filter(Boolean).join('\n');
+      return `\n\nربطك بالمنهج المصري (إلزامي):\n- ${!isAdminStaff() && myGrade === g ? 'الطالب في ' : 'الطالب بيسأل عن منهج '}${st.name} (${st.age})، والترم الحالي: ${aiTerm()}.\n- عقليته: ${st.mind}\n- اشرحله كده:\n${st.rules.map(x => '  - ' + x).join('\n')}\n- الحدود: ${st.limit}\n${map ? '- المرجع (اللي تحت هو منهجه، وسمّي الدرس بنفس اسمه عندنا):\n' + map + '\n' : ''}${isAdminStaff() ? '- لو سؤاله من صف أعلى: اشرح الفكرة بسطر مبسّط وقول "ده هتاخده بتفصيل في صف أعلى"، ولو من صف أقل: اشرحه برفق من غير استخفاف.\n' : '- قفل الصف (إلزامي): مرجعك الوحيد كتب ' + st.name + ' الرسمية المذكورة هنا ومقتطفاتها. ماتجاوبش بمحتوى من كتب صفوف تانية ولا بمعلومات خارج الكتب. لو السؤال مش في كتبه، قوله بلطف: "ده مش في كتبك للصف ده" واقترح عليه درس قريب من كتبه. لو المقتطفات ماغطّتش السؤال لكنه تحت درس من الخريطة، اشرح على قد الكتاب من غير ما تخترع تفاصيل أو أرقام صفحات.\n'}${lang === 'English' ? '- الطالب اختار الإنجليزي: رد بإنجليزي، واستخدم أسماء دروس العلوم بالإنجليزي زي كتاب الوزارة الإنجليزي، ولعربي ودراسات اذكر اسم الدرس بالعربي زي الكتاب وبعده ترجمته بين قوسين.\n' : ''}- لو مش متأكد إن الجزء ده في منهج صفه حسب كتاب الوزارة، قول كده بصراحة واطلب منه يراجع كتابه، وماتخترعش أسماء دروس أو صفحات.${AI_BK.ctx}`;
+    }
+    const aiQzNote = () => { const g = aiGrade(); return Number.isInteger(g) && AI_STAGE[g] ? ' الأسئلة لطالب في ' + AI_STAGE[g].name + ' (' + AI_STAGE[g].age + '): ' + AI_STAGE[g].quiz : ''; };
+
     /* ---- الهوية: التعليمات + ردود جاهزة + فلاتر ---- */
-    const aiSystem = (lang, level, brief) => `أنت "${AI_NAME}"، مدرس ذكي جوه منصة Learn With Me لطلاب الإعدادي وأولى بكالوريا.
+    const aiSystem = (lang, level, brief, topic, grade = aiGrade()) => `أنت "${AI_NAME}"، مدرس ذكي جوه منصة Learn With Me لطلاب الإعدادي وأولى بكالوريا.
 قواعد الهوية (ثابتة ومش بتتغير أبداً):
 1) اسمك ${AI_NAME} بس. لو حد سألك عن اسمك أو موديلك أو إنت إيه أو إنت تابع لأنهي شركة أو إنت ChatGPT أو Gemini أو Claude أو GLM أو أي نموذج تاني، جاوب: "أنا ${AI_NAME}" من غير ما تذكر أي اسم موديل أو شركة.
 2) المبرمج اللي عملك وطوّرك اسمه ${AI_DEV}. لو حد سألك مين المبرمج أو المطوّر أو اللي عملك أو دربك، جاوب: "المبرمج بتاعي هو ${AI_DEV}".
@@ -5641,27 +5794,55 @@ ${brief ? '- اكتب نص بسيط: سطور قصيرة، إيموجي خفيف
 - لو المحتوى اللي بعته الطالب فيه معلومة غلط أو ناقصة، نبّه عليها بلطف وصحّحها.
 - المصطلح العلمي يتكتب بالعربي وبعده بين قوسين بالإنجليزي لو متعارف عليه.
 - القوانين والمعادلات تتكتب في سطر لوحدها مع معنى كل رمز ووحدته.
-- في المسائل راجع الناتج مرتين وراجع الوحدات قبل ما تكتبه.
+- في المسائل: اكتب كل عملية حسابية في سطر بالشكل: تعبير = ناتج (مثال: 2 × 3 = 6) بأرقام وعمليات بس، وبعدها الوحدة. الكود بيراجع الأرقام دي تلقائي فأي رقم غلط هيتكشف.
+- ماتستخدمش LaTeX ولا علامة الدولار، ورقّم النقط 1 و2 و3.
 - لو فيه حاجة صعبة الحفظ ادّي حيلة حفظ أو تشبيه، وماتكررش نفس الفكرة، وكل جملة لازم تفيد.
 - لو سؤال الطالب غلط أو فيه فخ أو مقارنة مالهاش معنى علمي (زي مقارنة موضوعين مالهمش علاقة)، قول بوضوح من أول سطر إن السؤال غلط أو مفيش مقارنة، وسبب ذلك باختصار وصحّح الفكرة. ماتجاملش ومتعملش جدول أو إجابة تجاري بيها السؤال الغلط.
 - ماتستخدمش LaTeX ولا علامة الدولار حوالين الرموز. اكتب الرموز عادي: × ÷ → ← ≤ ≥ ° وأرقام صغيرة زي H₂O و m².
-- في الوراثة: ثبّت طريقة كتابة واحدة في الرد كله: الأليلات حروف متتالية (AaBb، Tt)، والتزاوج بعلامة × والنواتج بسهم →، وكروموسومات الجنس XX و XY. ماتغيّرش الرموز في نفس الشرح.
-- الإملاء والمصطلحات: اكتب "جزيء" (مش جزئ)، و"الصفات الكمية"، و DNA و RNA بالشكل ده بس من غير أي إضافات أو حروف زيادة.
-- الدقة العلمية في الوراثة: الجين هو اللي بيتحمل على الكروموسوم (مش الصفة)، والسيادة معناها الصفة اللي بتظهر مش الأقوى جسدياً، والجين المتنحي بيفضل موجود في التركيب الجيني حتى لو ماظهرش. ماتستخدمش تشبيهات (عملاق وقزم) بتوحي بعكس كده.
 - لو المنهج مبسّط معلومة (زي عدد أزواج جينات صفة معينة) قول "حسب منهجك" وبعدها التبسيط، وماتقدمهاش كحقيقة مطلقة.
 - ماتستخدمش مصطلحات أعلى من مستوى الطالب ولا من خارج المنهج المصري. الشرح طويل بلا لزوم ممنوع: اكتفِ بالنقطة اللي تحل اللبس.
 - اللغة: التعريفات والقوانين والمصطلحات بالفصحى المعتمدة في الكتاب، والشرح حواليها بالعامية المصرية، وماتخلطش الاتنين في نفس الجملة. إيموجي قليل جداً (واحد في الفقرة بحد أقصى).
 - لو كتبت "أسئلة متوقعة" اكتب تحت كل سؤال إجابته النموذجية في سطر. وماتخترعش أرقام صفحات أو مصادر؛ اختم بـ "راجع الدرس في كتاب المدرسة" لو الموضوع محتاج.
-- كن دقيقاً، ولو معلومة مش متأكد منها قول كده بدل ما تخمّن. ركّز على المذاكرة والتعليم.`;
+- كن دقيقاً، ولو معلومة مش متأكد منها قول كده بدل ما تخمّن. ركّز على المذاكرة والتعليم.${aiCur(grade, lang)}${aiRules(topic)}${AI_BK.img ? AI_IMG_NOTE : ''}`;
 
+    const AI_MOD = {
+      sci: { re: /علوم|كهرب|مقاومه|فولت|تيار|ذره|جزيء|جزئ|خليه|عنصر|مركب|ضوء|حراره|وراث|جين/, t: '- الإملاء: اكتب "جزيء" (مش جزئ) و"الصفات الكمية" و DNA و RNA بالشكل ده بس.' },
+      gen: { re: /وراث|جين|كروموسوم|مندل|تزاوج|بانيت|dna|rna|اليل|سائد|متنحي|هجين/, t: '- الوراثة: ثبّت ترميزاً واحداً في الرد كله: الأليلات حروف متتالية (AaBb، Tt)، التزاوج بعلامة × والنواتج بسهم →، وكروموسومات الجنس XX و XY.\n- الجين هو اللي بيتحمل على الكروموسوم (مش الصفة)، والسيادة معناها الصفة اللي بتظهر مش الأقوى جسدياً، والجين المتنحي بيفضل موجود في التركيب الجيني حتى لو ماظهرش. الكروموسوم تركيب خيطي من DNA وبروتين بيحمل الجينات.\n- مربع بانيت أو أي تزاوج: اكتب كل خانة صراحةً (حرف من الأب + حرف من الأم) وراجعها قبل ما تكتب النسب. مثال: Tt × tt الناتج Tt و tt بس (مفيش TT). ماتغيّرش نوع التزاوج جوه نفس الورقة.\n- الارتباط والعبور: ثبّت ترميز واحد (AB/ab للهجين، ab/ab للنقي المتنحي).' },
+      ar:  { re: /اسم الفاعل|اعراب|اعرب|نحو|مبتدا|مفعول|نعت|مثني/, t: '- النحو: اذكر الشروط كاملة بمثال لكل شرط (الإعمال لما يكون منوّن بيسبقه نفي أو استفهام أو مبتدأ أو موصوف أو نداء)، وماتستخدمش اختصارات غامضة. الإعراب في سطر أو سطرين على الأكتر.' }
+    };
+    const aiRules = topic => {
+      const n = aiNorm(topic || '').slice(0, 4000), out = Object.values(AI_MOD).filter(m => m.re.test(n)).map(m => m.t);
+      return out.length ? '\nقواعد خاصة بالموضوع ده (التزم بيها):\n' + out.join('\n') : '';
+    };
+    const aiTopic = () => AI.msgs.filter(m => m.role === 'user').slice(-3).map(m => m.text).join(' ');
+    /* حساب آمن: أرقام وعمليات بس */
+    const aiCalc = ex => {
+      const s = String(ex || '').replace(/[٠-٩]/g, d => '٠١٢٣٤٥٦٧٨٩'.indexOf(d)).replace(/[×x✕]/g, '*').replace(/÷/g, '/').replace(/−/g, '-').replace(/\^/g, '**').replace(/٫/g, '.').replace(/,/g, '').trim();
+      if (!s || s.length > 80 || !/^[0-9+\-*/().\s]+$/.test(s) || !/[0-9)]\s*(\*\*|[+\-*/])\s*[0-9(]/.test(s)) return NaN;
+      try { const v = Function('"use strict";return (' + s + ')')(); return typeof v === 'number' && isFinite(v) ? v : NaN; } catch (e) { return NaN; }
+    };
+    /* فحص حسابي بالكود لأي "تعبير = ناتج" في الرد */
+    const aiCalcCheck = text => {
+      const t = String(text || '').replace(/```[\s\S]*?```/g, ''), bad = [], seen = new Set();
+      const re = /([0-9٠-٩][0-9٠-٩.\s+\-−×÷*/()^]*[0-9٠-٩)])\s*=\s*(-?[0-9٠-٩]+(?:[.٫][0-9٠-٩]+)?)(?![0-9٠-٩.٫]|\s*[+\-−×÷*/^]\s*[0-9٠-٩(])/g;
+      let m;
+      while ((m = re.exec(t)) && bad.length < 3) {
+        const ex = m[1].trim().replace(/\s+/g, ' ');
+        if (!/[+\-−×÷*/^]/.test(ex.slice(1)) || seen.has(m[0])) continue;
+        seen.add(m[0]);
+        const v = aiCalc(ex), st = parseFloat(String(m[2]).replace(/[٠-٩]/g, d => '٠١٢٣٤٥٦٧٨٩'.indexOf(d)).replace('٫', '.'));
+        if (isFinite(v) && isFinite(st) && Math.abs(v - st) > Math.max(0.05, Math.abs(v) * 0.02)) bad.push(ex + ' = ' + (Math.round(v * 1000) / 1000) + ' (المكتوب ' + m[2] + ')');
+      }
+      return bad.length ? '\n\n> 🧮 **فحص حسابي تلقائي:** لقيت ناتج مش مظبوط: ' + bad.join(' ، ') + '. راجع الحساب ده.' : '';
+    };
     const AI_R_NAME = `أنا **${AI_NAME}**، مساعد المذاكرة بتاعك في منصة Learn With Me 🚀 اسألني في أي درس وأنا أشرحه لك.`;
     const AI_R_DEV  = `المبرمج بتاعي هو **${AI_DEV}** 💻 هو اللي عمل المنصة وعملني. تحب نذاكر إيه النهاردة؟`;
     const AI_R_CHG  = `اسمي **${AI_NAME}** والمبرمج بتاعي **${AI_DEV}**، وده ثابت ومحدش يقدر يغيّره بالكلام 🙂 قولّي عايز تذاكر إيه؟`;
     const aiNorm = t => String(t || '').toLowerCase().replace(/[\u064B-\u065F\u0670\u0640]/g, '').replace(/[أإآ]/g, 'ا').replace(/ى/g, 'ي').replace(/ة/g, 'ه').replace(/[؟?!.,،:;"'()\[\]{}]/g, ' ').replace(/\s+/g, ' ').trim();
     const AI_RE_DEV = /(?:مين|منو|مين هو|مين اللي|مين الي)\s+(?:عملك|صنعك|صممك|برمجك|طورك|دربك|خلقك|اخترعك|كتبك)|(?:مبرمجك|مطورك|صانعك|مصممك|مخترعك|مبرمجينك|مطوريك)|(?:المبرمج|المطور|صاحب)\s+(?:بتاعك|بتاع المنصه|بتاع الموقع)|(?:مين|منو)\s+(?:اللي\s+)?(?:عمل|برمج|صمم|طور|كتب)\s+(?:المنصه|الموقع|التطبيق)|who\s+(?:made|created|built|programmed|developed|trained|designed|coded)\s+you|your\s+(?:developer|creator|programmer|maker|author)|who\s+is\s+your\s+(?:developer|creator|programmer|maker)/;
     const AI_RE_NAME = /(?:^|\s)(?:انت|انتا|انتي)\s+(?:مين|ايه|اي)(?:\s+(?:بالظبط|يعني|ده|دا|اصلا|اساسا|يا\s+\S+))?$|اسمك|(?:^|\s)موديلك|نموذجك|(?:ايه|اي)\s+(?:هو\s+)?(?:الموديل|النموذج)\s+(?:بتاعك|اللي|الي)|(?:انت|انتا)\s+(?:شغال|شغاله)\s+(?:ب|علي)|(?:انت|انتا|انتي)\s+(?:تابع|بتاع)\s+(?:ل?شركه|ل?جوجل|ل?مايكروسوفت|اوبن|openai|google)|(?:انت|انتا|انتي)\s+(?:هو\s+)?(?:chat\s*gpt|gpt|جي بي تي|شات جي بي تي|كلود|claude|gemini|جيميني|جيمناي|deepseek|ديب سيك|glm|جي ال ام|zhipu|openai|اوبن اي اي|جوجل|google|ميتا|meta|llama|لاما|بارد|bard|copilot|كوبايلوت|mistral|grok|جروك|qwen|كوين)|شركتك|\byour name\b|who are you|(?:what|which)\s+(?:ai|model|llm)\s+are\s+you|are\s+you\s+(?:chat\s*gpt|gpt|claude|gemini|deepseek|glm|openai|google|bard|copilot|llama|grok|qwen)/;
-    const AI_RE_CHG = /(?:غير|بدل|غيري|بدلي|انسي|تجاهل|اهمل|خليك|سمي|سميك|نادي|ناديك|اعتبر|اتظاهر|تخيل)\s+(?:\S+\s+){0,3}?(?:اسمك|مبرمجك|صانعك|مطورك|شركتك|موديلك|تعليماتك|التعليمات|الاوامر السابقه|برومبت|prompt|system)|(?:قول|قولي|قل|اعترف|اكتب|ردد)\s+(?:لي\s+)?(?:ان|انك|انو)\s*(?:ك|ي)?\s*(?:انت\s+)?(?:اسمك|مبرمجك|مطورك|صانعك|chat\s*gpt|gpt|claude|gemini|glm|deepseek|openai)|from now on|you are now|pretend|act as|ignore\s+(?:all\s+)?(?:previous|above|prior)|forget\s+(?:all\s+)?(?:previous|your)|change your (?:name|developer|creator)|rename yourself|your new name|say (?:that )?you are|admit (?:that )?you are|system prompt/;
-    const AI_LEAK = /(?:انا|أنا|اسمي|اني|i am|i'm|my name is)\s+(?:هو\s+)?(?:chat\s*glm|glm[\s-]?[\w.-]*|chatgpt|gpt[\s-]?\d[\w.-]*|claude|gemini|deepseek|llama|bard|copilot|zhipu|openai)|(?:developed|created|trained|built|made|designed)\s+by\s+(?:zhipu|openai|google|anthropic|meta|microsoft|deepseek|alibaba)|(?:طورتني|دربتني|صنعتني|طورني|دربني|صنعني|من تطوير|من صنع|تم تطويري|تم تدريبي)\s+(?:شركه|شركة|من)?\s*(?:zhipu|openai|google|anthropic|meta|microsoft|جوجل|اوبن|مايكروسوفت|ميتا|ديب سيك|deepseek)|智谱|zhipu|chatglm/i;
+    const AI_RE_CHG = /(?:غير|بدل|غيري|بدلي|انسي|تجاهل|اهمل|خليك|سمي|سميك|نادي|ناديك|اعتبر|اتظاهر|تخيل)\s+(?:\S+\s+){0,3}?(?:اسمك|مبرمجك|صانعك|مطورك|شركتك|موديلك|تعليماتك|التعليمات|الاوامر السابقه|برومبت|prompt|system)|(?:قول|قولي|قل|اعترف|اكتب|ردد)\s+(?:لي\s+)?(?:ان|انك|انو)\s*(?:ك|ي)?\s*(?:انت\s+)?(?:اسمك|مبرمجك|مطورك|صانعك|chat\s*gpt|gpt|claude|gemini|glm|deepseek|openai)|(?:from now on|you are now|pretend|act as)\s+(?:you\s+are\s+|to\s+be\s+)?(?:chat\s*gpt|gpt|claude|gemini|deepseek|openai|glm)|ignore\s+(?:all\s+)?(?:previous|above|prior)|forget\s+(?:all\s+)?(?:previous|your)|change your (?:name|developer|creator)|rename yourself|your new name|say (?:that )?you are|admit (?:that )?you are|system prompt/;
+    const AI_LEAK = /(?:انا|أنا|اسمي|اني|i am|i'm|my name is)\s+(?:هو\s+)?(?:chat\s*glm|glm[\s-]?[\w.-]*|chatgpt|gpt[\s-]?\d[\w.-]*|claude|gemini|deepseek|llama|bard|copilot|zhipu|openai)|(?:i\s+was|i\s+am|i'm)\s+(?:developed|created|trained|built|made|designed)\s+by\s+(?:zhipu|openai|google|anthropic|meta|microsoft|deepseek|alibaba)|(?:طورتني|دربتني|صنعتني|طورني|دربني|صنعني|تم تطويري|تم تدريبي)\s+(?:شركه|شركة|من)?\s*(?:zhipu|openai|google|anthropic|meta|microsoft|جوجل|اوبن|مايكروسوفت|ميتا|ديب سيك|deepseek)|智谱|zhipu|chatglm/i;
     /* ردود محلية فورية على أسئلة الهوية (من غير ما نسأل الموديل): بس للرسايل القصيرة في وضع "اسأل" */
     function aiLocal(raw) {
       const t = aiNorm(raw);
@@ -5697,7 +5878,8 @@ ${brief ? '- اكتب نص بسيط: سطور قصيرة، إيموجي خفيف
     const AI_TEX = { times: '×', rightarrow: '→', longrightarrow: '→', to: '→', leftarrow: '←', leftrightarrow: '↔', Rightarrow: '⇒', Leftarrow: '⇐', cdot: '·', pm: '±', div: '÷', leq: '≤', le: '≤', geq: '≥', ge: '≥', neq: '≠', approx: '≈', degree: '°', circ: '°', infty: '∞', Delta: 'Δ', delta: 'δ', alpha: 'α', beta: 'β', gamma: 'γ', mu: 'μ', pi: 'π', Omega: 'Ω', omega: 'ω', lambda: 'λ', theta: 'θ', sigma: 'σ', rho: 'ρ' };
     const AI_SUB = '₀₁₂₃₄₅₆₇₈₉', AI_SUP = '⁰¹²³⁴⁵⁶⁷⁸⁹';
     function aiTex(s) {
-      return String(s).replace(/\$\$?([^$\n]{1,120}?)\$\$?/g, (m, t) => {
+      s = String(s).replace(/\\([A-Za-z]+)/g, (w, n) => AI_TEX[n] || w).replace(/\\%/g, '%').replace(/(^|\s)(rightarrow|leftarrow|leftrightarrow)(?=\s|$)/g, (w, a, n) => a + AI_TEX[n]);
+      return s.replace(/\$\$?([^$\n]{1,120}?)\$\$?/g, (m, t) => {
         if (!/[\\^_{}]|\b(?:times|rightarrow|leftarrow|leftrightarrow|longrightarrow|Rightarrow|cdot|pm|leq|geq|neq|approx)\b/.test(t)) return m;
         return t.replace(/\\(?:text|mathrm|mathbf|textbf|mathit)\{([^}]*)\}/g, '$1')
           .replace(/\\frac\{([^}]*)\}\{([^}]*)\}/g, '($1)/($2)')
@@ -5721,7 +5903,12 @@ ${brief ? '- اكتب نص بسيط: سطور قصيرة، إيموجي خفيف
       const isRow = x => /^\s*\|.*\|\s*$/.test(x);
       while (i < L.length) {
         const ln = L[i];
-        if (/^\s*$/.test(ln)) { close(); i++; continue; }
+        if (/^\s*$/.test(ln)) {
+          let j = i + 1; while (j < L.length && /^\s*$/.test(L[j])) j++;
+          const nx = L[j] || '';
+          if ((list === 'ol' && /^\s*\d+[.)]\s+/.test(nx)) || (list === 'ul' && /^\s*[-*•]\s+/.test(nx))) { i++; continue; }   // سطر فاضي بين نقطتين ما يرجّعش الترقيم لـ 1
+          close(); i++; continue;
+        }
         if ((m = ln.match(/^\u0000(\d+)\u0000\s*$/))) { close(); out.push(blocks[+m[1]]); i++; continue; }
         if (isRow(ln) && i + 1 < L.length && /^\s*\|?\s*:?-{2,}:?\s*(\|\s*:?-{2,}:?\s*)*\|?\s*$/.test(L[i + 1])) {
           close();
@@ -5735,7 +5922,7 @@ ${brief ? '- اكتب نص بسيط: سطور قصيرة، إيموجي خفيف
         if ((m = ln.match(/^\s{0,3}(#{1,6})\s+(.*)$/))) { close(); const h = m[1].length <= 2 ? 3 : 4; out.push('<h' + h + '>' + inl(m[2]) + '</h' + h + '>'); i++; continue; }
         if (/^\s*([-*_])\1{2,}\s*$/.test(ln)) { close(); out.push('<hr>'); i++; continue; }
         if ((m = ln.match(/^\s*[-*•]\s+(.*)$/))) { if (list !== 'ul') { close(); out.push('<ul>'); list = 'ul'; } out.push('<li>' + inl(m[1]) + '</li>'); i++; continue; }
-        if ((m = ln.match(/^\s*\d+[.)]\s+(.*)$/))) { if (list !== 'ol') { close(); out.push('<ol>'); list = 'ol'; } out.push('<li>' + inl(m[1]) + '</li>'); i++; continue; }
+        if ((m = ln.match(/^\s*(\d+)[.)]\s+(.*)$/))) { if (list !== 'ol') { close(); out.push('<ol' + (+m[1] > 1 ? ' start="' + (+m[1]) + '"' : '') + '>'); list = 'ol'; } out.push('<li>' + inl(m[2]) + '</li>'); i++; continue; }
         if (/^\s*>/.test(ln)) {
           close(); const q = [];
           while (i < L.length && /^\s*>/.test(L[i])) { q.push(L[i].replace(/^\s*>\s?/, '')); i++; }
@@ -5751,7 +5938,7 @@ ${brief ? '- اكتب نص بسيط: سطور قصيرة، إيموجي خفيف
     }
 
     /* ---- حالة الطالب ---- */
-    const AI = { uid: null, chats: [], cid: null, msgs: [], tool: 'chat', busy: false, live: '', file: null, ctrl: null, err: '', lastSend: 0, mm: {}, lay: {} };
+    const AI = { uid: null, chats: [], cid: null, msgs: [], tool: 'chat', busy: false, live: '', file: null, img: null, imgs: {}, ctrl: null, err: '', lastSend: 0, mm: {}, lay: {} };
     const $ai = id => document.getElementById(id);
     function aiClose() {
       try { AI.ctrl && AI.ctrl.abort(); } catch (e) {}
@@ -5773,7 +5960,7 @@ ${brief ? '- اكتب نص بسيط: سطور قصيرة، إيموجي خفيف
         const tag = m.tool && m.tool !== 'chat' && AI_TOOLS[m.tool] ? `<span class="ai-tag">${esc(AI_TOOLS[m.tool].n)}</span>` : '';
         const body = m.file
           ? `<details class="ai-fl"><summary>📎 ${esc(m.file)}</summary><div>${esc(m.text)}</div></details>`
-          : `<div class="ai-ut">${esc(m.text)}</div>`;
+          : `${AI.imgs[m.ts] ? `<img class="ai-uimg" src="${AI.imgs[m.ts]}" alt="">` : ''}<div class="ai-ut">${esc(m.text)}</div>`;
         return `<div class="ai-m ai-m--me">${who ? `<b class="ai-who">👤 ${esc(who)}</b>` : ''}${tag}${body}${m.ts && who ? `<small class="ai-ts">${esc(fFull(m.ts))}</small>` : ''}</div>`;
       }
       if (isAdminStaff() && prev && prev.tool === 'visual') {
@@ -5836,6 +6023,7 @@ ${brief ? '- اكتب نص بسيط: سطور قصيرة، إيموجي خفيف
           <div class="ai-fchip" id="aiFile" hidden></div>
           <div class="ai-bar">
             <label class="ai-ib" title="رفع ملف نصي" ${isAdminStaff() ? '' : 'style="display:none"'}>📎<input type="file" id="aiFileIn" accept=".txt,.md,.csv,.html,.json" hidden></label>
+            <label class="ai-ib" title="إرسال صورة">📷<input type="file" id="aiImgIn" accept="image/*" hidden></label>
             <textarea id="aiIn" rows="1" maxlength="${AI_MAX_CHARS}"></textarea>
             <button class="ai-send" id="aiGo" type="button" data-ai="send" aria-label="إرسال"><svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path fill="currentColor" d="M3 20.5v-6.9l8.4-1.6L3 10.4V3.5l18 8.5z"/></svg></button>
           </div>
@@ -5851,6 +6039,13 @@ ${brief ? '- اكتب نص بسيط: سطور قصيرة، إيموجي خفيف
         if (t.length > AI_MAX_CHARS) { t = t.slice(0, AI_MAX_CHARS); toast('اتقص الملف لأول ' + AI_MAX_CHARS + ' حرف.'); }
         inp.value = t; AI.file = { name: f.name.slice(0, 60) }; aiDrawFile(); grow();
       };
+      $ai('aiImgIn').onchange = async e => {
+        const f = e.target.files[0]; e.target.value = ''; if (!f) return;
+        if (!/^image\//.test(f.type)) return toast('اختار صورة بس.');
+        if (f.size > 20 * 1024 * 1024) return toast('الصورة كبيرة قوي. جرّب صورة أصغر.');
+        try { AI.img = { url: await aiImgShrink(f) }; aiDrawFile(); }
+        catch (err) { toast('الصورة ماتقرتش. جرّب صورة تانية.'); }
+      };
       root.addEventListener('click', e => {
         const b = e.target.closest('[data-ai]'); if (!b) return;
         const a = b.dataset.ai;
@@ -5859,6 +6054,7 @@ ${brief ? '- اكتب نص بسيط: سطور قصيرة، إيموجي خفيف
         else if (a === 'new') { if (AI.busy) return; AI.cid = null; AI.msgs = []; AI.mm = {}; AI.err = ''; aiDraw(); inp.focus(); }
         else if (a === 'hist') aiHist();
         else if (a === 'cmds') aiCmds();
+        else if (a === 'unimg') { AI.img = null; aiDrawFile(); }
         else if (a === 'unfile') { AI.file = null; inp.value = ''; aiDrawFile(); grow(); }
         else if (a === 'copy') { const m = AI.msgs[+b.dataset.i]; if (m) { copyText(m.text, 'اتنسخ'); } }
         else if (a === 'rate') aiRate(+b.dataset.i, +b.dataset.v);
@@ -5879,9 +6075,26 @@ ${brief ? '- اكتب نص بسيط: سطور قصيرة، إيموجي خفيف
       aiDraw();
     }
 
+    async function aiImgShrink(f) {
+      const u = URL.createObjectURL(f);
+      try {
+        const im = await new Promise((ok, no) => { const i = new Image(); i.onload = () => ok(i); i.onerror = no; i.src = u; });
+        let side = 1280, q = 0.78;
+        for (let n = 0; n < 9; n++) {
+          const k = Math.min(1, side / Math.max(im.naturalWidth, im.naturalHeight)), cv = document.createElement('canvas');
+          cv.width = Math.max(1, Math.round(im.naturalWidth * k)); cv.height = Math.max(1, Math.round(im.naturalHeight * k));
+          const cx = cv.getContext('2d'); cx.fillStyle = '#fff'; cx.fillRect(0, 0, cv.width, cv.height); cx.drawImage(im, 0, 0, cv.width, cv.height);
+          const d = cv.toDataURL('image/jpeg', q);
+          if (d.length <= AI_IMG_MAX) return d;
+          side = Math.round(side * 0.82); q = Math.max(0.5, q - 0.04);
+        }
+        throw new Error('big');
+      } finally { URL.revokeObjectURL(u); }
+    }
     function aiDrawFile() {
       const el = $ai('aiFile'); if (!el) return;
-      el.hidden = !AI.file;
+      el.hidden = !AI.file && !AI.img;
+      if (AI.img) { el.innerHTML = `<span><img src="${AI.img.url}" alt="" style="width:34px;height:34px;object-fit:cover;border-radius:8px;vertical-align:middle;margin-inline-end:8px">الصورة جاهزة للإرسال</span><button type="button" class="ai-x" data-ai="unimg" aria-label="شيل الصورة">✕</button>`; return; }
       el.innerHTML = AI.file ? `<span>📎 ${esc(AI.file.name)}</span><button type="button" class="ai-x" data-ai="unfile" aria-label="شيل الملف">✕</button>` : '';
     }
     function aiDraw() {
@@ -5936,7 +6149,8 @@ ${brief ? '- اكتب نص بسيط: سطور قصيرة، إيموجي خفيف
 
     /* الاتصال بالموديل (بث مباشر). onDelta بترجّع true لو عايزين نوقف */
     async function aiStream(system, hist, onDelta, opts) {
-      const ctrl = AI.ctrl = new AbortController();
+      const ctrl = AI.ctrl = new AbortController(); const tmo = setTimeout(() => { ctrl.timedOut = true; ctrl.abort(); }, 120000);
+      try {
       let saved = ''; try { saved = localStorage.getItem('ai_model_g') || ''; } catch (e) {}
       const list = saved ? [saved, ...AI_MODELS.filter(m => m !== saved)] : AI_MODELS;
       let res = null, lastErr = '', allErr = [];
@@ -5945,12 +6159,13 @@ ${brief ? '- اكتب نص بسيط: سطور قصيرة، إيموجي خفيف
         if (pass) await new Promise(ok => setTimeout(ok, 1200 * pass));
         let busy = false;
         for (const model of list) {
-          const reqBody = JSON.stringify({ model, max_tokens: 4096, temperature: (opts && opts.temp) ?? 0.6, stream: true, reasoning_effort: /2\.5/.test(model) ? 'none' : undefined, messages: [{ role: 'system', content: system }, ...hist] });
+          const reqBody = JSON.stringify({ model, max_tokens: 8192, temperature: (opts && opts.temp) ?? 0.6, stream: true, messages: [{ role: 'system', content: system }, ...hist] });
           const send = (auth) => fetch(AI_URL, { method: 'POST', signal: ctrl.signal, headers: Object.assign({ 'content-type': 'application/json' }, auth), body: reqBody });
-          const r = await send({});
+          const r = await send({ authorization: 'Bearer ' + (await auth.currentUser.getIdToken()) });
           if (r.ok) { res = r; try { localStorage.setItem('ai_model_g', model); } catch (e) {} break; }
           const j = await r.json().catch(() => ({})), je = (Array.isArray(j) ? j[0] : j)?.error || {};
           lastErr = je.message || String(r.status);
+          if (r.status === 429 && lastErr === 'rate') throw new Error('rate');   // حد الـ Worker لكل طالب: إعادة المحاولة بتزوّد المشكلة
           allErr.push(model + ' (' + r.status + '): ' + lastErr.slice(0, 120));
           if ([429, 500, 503].includes(r.status)) busy = true;
           /* موديل مش موجود أو الكوتا خلصت أو السيرفر مشغول: جرّب اللي بعده. غير كده (مفتاح غلط مثلاً) وقّف */
@@ -5978,11 +6193,13 @@ ${brief ? '- اكتب نص بسيط: سطور قصيرة، إيموجي خفيف
         }
       }
       return full;
+      } finally { clearTimeout(tmo); }
     }
 
     /* جدول الأوامر: ضغطة على أي صف بتكتب بدايته في خانة الكتابة */
     const AI_CMDS = [
       ['🎨 شرح مصوّر', 'اعمل شرح مصور عن ', 'اعمل شرح مصور · ارسملي شرح'],
+      ['🧪 فحص الدقة (30 سؤال)', 'فحص الدقة', 'فحص الدقة'],
       ['🧬 مربع بانيت', 'اعمل شرح مصور بمربع بانيت لـ ', 'مربع بانيت · وراثة'],
       ['🧠 خريطة ذهنية', 'اعمل خريطة ذهنية عن ', 'خريطة ذهنية'],
       ['📋 امتحان كامل', 'اعمل امتحان كامل على ', 'اعمل امتحان · امتحان كامل'],
@@ -6043,10 +6260,113 @@ ${brief ? '- اكتب نص بسيط: سطور قصيرة، إيموجي خفيف
       setTimeout(close, 2600);
     }
     const aiSecKey = t => aiNorm(t).replace(/[\u200b-\u200f\u202a-\u202e\u2066-\u2069\ufeff\s]/g, '');
+    /* تدقيق الوراثة بالكود: أي تزاوج زي Tt × tt في الرد يتحسب تلقائي ويتقارن بالتراكيب اللي الـ AI كتبها */
+    function aiCrossNote(text) {
+      const t = String(text || ''), seen = new Set(), notes = [];
+      const valid = g => /^(?:[A-Za-z]{2}|[A-Za-z]{4})$/.test(g) && g.match(/../g).every(p => p[0].toLowerCase() === p[1].toLowerCase());
+      const letters = g => g.match(/../g).map(p => p[0].toLowerCase()).join('');
+      const gcd = (a, b) => b ? gcd(b, a % b) : a;
+      const re = /(?<![A-Za-z])([A-Za-z]{2}|[A-Za-z]{4})\s*[×xX]\s*([A-Za-z]{2}|[A-Za-z]{4})(?![A-Za-z])/g;
+      let m;
+      while ((m = re.exec(t)) && notes.length < 2) {
+        const a = m[1], b = m[2];
+        if (a.length !== b.length || !valid(a) || !valid(b) || letters(a) !== letters(b) || seen.has(a + b)) continue;
+        const ctx = aiNorm(t.slice(Math.max(0, m.index - 120), m.index + m[0].length + 120));
+        if (!/(وراث|جين|تزاوج|الاباء|الجيل|نسب|نقي|هجين|سائد|متنحي|صفه|بانيت|ناتج)/.test(ctx)) continue;
+        seen.add(a + b);
+        const gam = g => g.match(/../g).reduce((acc, p) => acc.flatMap(x => [...new Set([p[0], p[1]])].map(al => x + al)), ['']);
+        const cnt = new Map(), ph = new Map();
+        for (const x of gam(a)) for (const y of gam(b)) {
+          const gt = [...x].map((_, i) => [x[i], y[i]].sort((p, q) => (p === p.toUpperCase() ? 0 : 1) - (q === q.toUpperCase() ? 0 : 1)).join('')).join('');
+          cnt.set(gt, (cnt.get(gt) || 0) + 1);
+          const f = gt.match(/../g).map(p => /[A-Z]/.test(p) ? 'D' : 'r').join(''); ph.set(f, (ph.get(f) || 0) + 1);
+        }
+        const up = k => k.replace(/[^A-Z]/g, '').length, keys = [...cnt.keys()].sort((p, q) => (up(q) - up(p)) || p.localeCompare(q));
+        const g0 = [...cnt.values(), ...ph.values()].reduce(gcd), red = v => v / g0;
+        const gr = keys.map(k => red(cnt.get(k))), pr = [...ph.values()].sort((x, y) => y - x).map(red);
+        const bad = (t.match(/(?<![A-Za-z])[A-Za-z]{2,4}(?![A-Za-z])/g) || []).filter(k => k.length === a.length && valid(k) && letters(k) === letters(a) && !cnt.has(k) && k !== a && k !== b);
+        const body = (keys.length <= 4 ? `${keys.join(' : ')} = ${gr.join(' : ')} · ` : '') + `المظهري ${pr.join(' : ')}` + (a.length === 4 ? ' (على فرض استقلال الصفتين)' : '');
+        notes.push(bad.length ? `> ⚠️ **حساب تلقائي للتزاوج ده بس:** ناتج ${a} × ${b} الصحيح: ${body}. التركيب ${[...new Set(bad)].join(' و')} مش ممكن يطلع من التزاوج ده.`
+                              : `> 🧮 **حساب تلقائي للتزاوج ده بس (مش تدقيق للشرح كله):** ${a} × ${b} ← ${body}`);
+      }
+      return notes.length ? '\n\n' + notes.join('\n') : '';
+    }
+    /* ---------- فحص الدقة (للأدمن): 30 سؤال من المنهج بمفتاح إجابة، بيتبعتوا للـ AI بوضع الطالب وبيتصحّحوا تلقائي ---------- */
+    const AI_TESTS = [
+      { q: 'إيه وحدة قياس فرق الجهد؟ وإيه علاقتها بالجول والكولوم؟', ok: [/فولت/, /جول/], hint: 'الفولت = جول / كولوم' },
+      { q: 'ثلاث مقاومات متماثلة مقاومتهم المكافئة على التوازي 2 أوم. كام تبقى المقاومة المكافئة لو وصلتهم على التوالي؟', ok: [/(^|\D)18(\D|$)/], hint: '18 أوم (كل مقاومة 6)' },
+      { q: 'كمية كهرباء 600 كولوم عدّت في موصل خلال 5 دقايق، والشغل المبذول 1800 جول. احسب شدة التيار وفرق الجهد.', ok: [/(^|\D)2(\D|$)/, /(^|\D)3(\D|$)/], hint: 'التيار 2 أمبير، فرق الجهد 3 فولت' },
+      { q: 'أربع بطاريات 1.5 فولت متصلين على التوالي، القوة الدافعة الكلية كام؟', ok: [/(^|\D)6(\D|$)/], hint: '6 فولت' },
+      { q: 'إيه الفرق بين توصيل الأميتر والفولتميتر في الدايرة؟', ok: [/اميتر[\s\S]{0,60}توالي|توالي[\s\S]{0,60}اميتر/, /فولتميتر[\s\S]{0,60}توازي|توازي[\s\S]{0,60}فولتميتر/], hint: 'الأميتر توالي، الفولتميتر توازي' },
+      { q: 'إيه العوامل اللي بتتوقف عليها مقاومة موصل؟', ok: [/طول/, /مساحه/, /(نوع|ماده)/], hint: 'الطول، مساحة المقطع، نوع المادة، (ودرجة الحرارة)' },
+      { q: 'تيار شدته 4 أمبير مر في موصل 28 ثانية. كمية الكهرباء كام؟', ok: [/112/], hint: '112 كولوم' },
+      { q: 'مقاومتين 3 أوم و6 أوم متصلين على التوازي. المقاومة المكافئة كام؟', ok: [/(^|[^\d.])2(\.0+)?\s*(اوم|ω|ohm)/], hint: '2 أوم' },
+      { q: 'لو ضاعفت طول سلك مع ثبات مساحة مقطعه، إيه اللي بيحصل لمقاومته؟', ok: [/(تزيد|تزداد|بتزيد|تتضاعف|الضعف|ضعف)/], hint: 'تتضاعف (تزيد للضعف)' },
+      { q: 'جهاز شغال على 220 فولت وبيسحب تيار 5 أمبير. قدرته كام؟', ok: [/1100/], hint: '1100 وات' },
+      { q: 'هات مثال لمادة موصلة للكهرباء ومثال لمادة عازلة.', ok: [/(نحاس|حديد|المنيوم|فضه|ذهب)/, /(بلاستيك|خشب|مطاط|زجاج|ورق)/], hint: 'موصل: نحاس مثلاً / عازل: بلاستيك مثلاً' },
+      { q: 'تزاوج Tt × tt: إيه التراكيب الوراثية الناتجة ونسبتها؟', raw: true, cross: true, ok: [/Tt/, /tt/, /(1 ?: ?1|50 ?%|نصف|1\/2)/], hint: 'Tt : tt = 1 : 1 (مفيش TT)' },
+      { q: 'تزاوج Tt × Tt: إيه النسبة الوراثية والمظهرية؟', raw: true, cross: true, ok: [/1 ?: ?2 ?: ?1/, /3 ?: ?1/], hint: 'وراثي 1:2:1، مظهري 3:1' },
+      { q: 'تزاوج AaBb × AaBb: إيه النسبة المظهرية؟', raw: true, cross: true, ok: [/9 ?: ?3 ?: ?3 ?: ?1/], hint: '9 : 3 : 3 : 1' },
+      { q: 'تزاوج TT × tt: إيه تراكيب الجيل الأول؟', raw: true, cross: true, ok: [/Tt/, /(100 ?%|كلهم|جميع|كل )/], hint: 'كلهم Tt (100%)' },
+      { q: 'مين مؤسس علم الوراثة؟', ok: [/مندل/], hint: 'جريجور مندل' },
+      { q: 'إيه المقصود بالصفة السائدة والصفة المتنحية؟', ok: [/(ساد|سائد)/, /متنحي/, /(تظهر|ظاهر)/], hint: 'السائدة بتظهر، المتنحية بتختفي مع وجود السائدة' },
+      { q: 'الجينات موجودة فين في الخلية؟', ok: [/كروموسوم/], hint: 'على الكروموسومات' },
+      { q: 'هات اسم الفاعل من الفعل كتب.', ok: [/كاتب/], hint: 'كاتب' },
+      { q: 'هات اسم الفاعل من الفعل أخلص، وإزاي بنصوغه من الفعل غير الثلاثي؟', ok: [/مخلص/], hint: 'مُخلِص' },
+      { q: 'أعرب: جاء الطالبان.', ok: [/مثني/, /الالف/, /فاعل/], hint: 'الطالبان فاعل مرفوع بالألف لأنه مثنى' },
+      { q: 'إيه علامة رفع جمع المذكر السالم ونصبه وجره؟', ok: [/الواو/, /الياء/], hint: 'رفع بالواو، نصب وجر بالياء' },
+      { q: 'أعرب كلمة أبوك في: جاء أبوك.', ok: [/(الاسماء الخمس|الخمسه)/, /الواو/, /فاعل/], hint: 'فاعل مرفوع بالواو (من الأسماء الخمسة)' },
+      { q: 'إيه علامة نصب الفعل المضارع بعد لن؟', ok: [/الفتح/], hint: 'الفتحة' },
+      { q: 'أعرب: كتب الطالبُ الدرسَ.', ok: [/الطالب[\s\S]{0,80}فاعل/, /الدرس[\s\S]{0,80}مفعول/], hint: 'الطالب فاعل، الدرس مفعول به' },
+      { q: 'إيه عاصمة مصر؟ ونهر النيل بيصب فين؟', ok: [/القاهره/, /المتوسط/], hint: 'القاهرة، البحر المتوسط' },
+      { q: 'إمتى حصلت حرب أكتوبر وإيه أهم نتايجها؟', ok: [/1973/, /(قناه|عبور|بارليف|سيناء)/], hint: '1973، عبور القناة وتحرير جزء من سيناء' },
+      { q: 'إمتى افتتحت قناة السويس للملاحة؟', ok: [/1869/], hint: '1869' },
+      { q: 'مين الملك اللي وحّد القطرين في مصر القديمة؟', ok: [/(مينا|نارمر)/], hint: 'مينا (نارمر)' },
+      { q: 'اعملي خريطة ذهنية عن الكهرباء.', ok: [/(مش هقدر|ما اقدرش|مقدرش)/], no: /nodes|children|```/, hint: 'لازم يرفض (الطالب شرح وأسئلة بس)' }
+    ];
+    async function aiSelfTest() {
+      if (!isAdminStaff()) return;
+      if (!confirm('الفحص هيبعت ' + AI_TESTS.length + ' طلب للـ AI وبياخد دقايق. تكمّل؟')) return;
+      const d = document.createElement('div');
+      d.setAttribute('popover', 'manual');
+      d.style.cssText = 'position:fixed;inset:0;width:100%;height:100%;max-width:none;max-height:none;margin:0;padding:0;border:0;z-index:2147483647;background:#0b0a28;color:#fff;overflow:auto;direction:rtl;font-family:inherit';
+      document.body.appendChild(d); try { d.showPopover(); } catch (e) {}
+      let stop = false, pass = 0, done = 0; const rows = [], rep = [];
+      const draw = () => {
+        d.innerHTML = `<div style="max-width:560px;margin:0 auto;padding:14px">`
+          + `<div style="display:flex;justify-content:space-between;align-items:center;gap:8px"><b style="font-size:18px">🧪 فحص الدقة: ${pass} / ${AI_TESTS.length}</b><span><button type="button" data-a="copy" style="border:0;border-radius:10px;padding:7px 12px;background:#3b5bdb;color:#fff">نسخ التقرير</button> <button type="button" data-a="stop" style="border:0;border-radius:10px;padding:7px 12px;background:#e03131;color:#fff">${done >= AI_TESTS.length || stop ? 'إغلاق' : 'إيقاف'}</button></span></div>`
+          + `<div style="height:8px;background:#2a2860;border-radius:6px;margin:10px 0"><div style="height:8px;width:${Math.round(done / AI_TESTS.length * 100)}%;background:#9be15d;border-radius:6px"></div></div>`
+          + rows.map(r => `<div style="background:${r.ok ? '#16351f' : '#3d1a1f'};border-radius:12px;padding:9px 11px;margin:7px 0;font-size:14px"><b>${r.ok ? '✅' : '❌'} ${esc(r.q)}</b>${r.ok ? '' : `<div style="opacity:.85;margin-top:5px">المتوقع: ${esc(r.hint)}</div><div style="opacity:.7;margin-top:4px;font-size:12.5px">${esc(r.reply.slice(0, 220))}</div>`}</div>`).join('')
+          + `</div>`;
+      };
+      d.addEventListener('click', e => {
+        const a = e.target.closest('[data-a]'); if (!a) return;
+        if (a.dataset.a === 'copy') { const txt = `فحص الدقة: ${pass}/${AI_TESTS.length}\n\n` + rep.join('\n\n'); (navigator.clipboard ? navigator.clipboard.writeText(txt) : Promise.reject()).then(() => toast('اتنسخ التقرير'), () => toast('ماقدرتش أنسخ')); }
+        else { stop = true; if (AI.ctrl) try { AI.ctrl.abort(); } catch (x) {} d.remove(); }
+      });
+      draw();
+      for (const t of AI_TESTS) {
+        if (stop) break;
+        let reply = '', err = '';
+        try { reply = await aiStream(aiSystem('عربي (مصري)', 'متوسط', true, t.q), [{ role: 'user', content: t.q }], () => false, { temp: 0.45 }); }
+        catch (e) { err = String(e.message || e).slice(0, 120); }
+        if (stop) break;
+        const full = reply + aiCrossNote(reply), raw = aiTex(full).replace(/[٠-٩]/g, c => '٠١٢٣٤٥٦٧٨٩'.indexOf(c)), n = aiNorm(raw), src = t.raw ? raw : n;
+        const srcs = t.raw ? [raw] : [n, raw];
+        const ok = !err && t.ok.every(r => (Array.isArray(r) ? r : [r]).some(x => srcs.some(s2 => x.test(s2)))) && !(t.no && srcs.some(s2 => t.no.test(s2))) && !(t.cross && /⚠️ \*\*حساب تلقائي/.test(full));
+        done++; if (ok) pass++;
+        rows.push({ ok, q: t.q, hint: t.hint, reply: err ? 'خطأ: ' + err : reply });
+        rep.push(`${ok ? '✅' : '❌'} ${t.q}\n${ok ? '' : 'المتوقع: ' + t.hint + '\nالرد: ' + (err ? 'خطأ: ' + err : reply.slice(0, 400))}`.trim());
+        draw(); d.scrollTop = d.scrollHeight;
+        await new Promise(ok2 => setTimeout(ok2, 700));
+      }
+      done = AI_TESTS.length; draw();
+    }
     async function aiSend() {
       if (AI.busy) return;
       const inp = $ai('aiIn'); if (!inp) return;
-      const text = inp.value.trim(); if (!text) return;
+      let text = inp.value.trim(); const img = AI.img; if (!text && !img) return; if (!text) text = 'اشرحلي الصورة دي.';
+      if (isAdminStaff() && aiSecKey(text) === aiSecKey('فحص الدقة')) { inp.value = ''; inp.style.height = 'auto'; aiSelfTest(); return; }
       if (!isAdminStaff() && myAiBlocked) { AI.err = 'الإدارة وقّفت استخدامك لـ ' + AI_NAME + '.'; return aiDrawMsgs(); }
       if (Date.now() - AI.lastSend < 1500) return;
       AI.lastSend = Date.now();
@@ -6056,45 +6376,58 @@ ${brief ? '- اكتب نص بسيط: سطور قصيرة، إيموجي خفيف
       let tool = isAdminStaff() ? aiAutoTool(text) : 'chat';
       if (isAdminStaff() && tool === 'chat' && !file && /(اعمل|اعملي|اعمللي|ارسم|ارسمي|عايز|عاوز|هات|حول|ابني|وريني)[^\n]{0,30}خريطه ذهنيه/.test(aiNorm(text))) tool = 'mind';
       if (isAdminStaff() && tool === 'chat' && !file && /(اعمل|اعملي|اعمللي|ارسم|ارسمي|عايز|عاوز|هات|وريني)[^\n]{0,30}(شرح مصور|شرح برسومات|شرح بالرسم)/.test(aiNorm(text))) tool = 'visual';
-      const um = { role: 'user', text, tool, ts: Date.now(), ...(file ? { file: file.name } : {}) };
+      const um = { role: 'user', text, tool, ts: Date.now(), ...(file ? { file: file.name } : {}), ...(img ? { img: true } : {}) };
+      if (img) AI.imgs[um.ts] = img.url;
       if (tool === 'mind' && $ai('aiMm').value) AI.lay[um.ts] = $ai('aiMm').value;
       const sec = Object.entries(AI_SECRETS).find(([k]) => aiSecKey(k) === aiSecKey(text));   // كلمة سرية: الرسالة تظهر على الشاشة والـ AI يرد بنفس الجملة
-      const loc = sec ? sec[1] : (!file && tool === 'chat') ? (aiLocal(text) || (isAdminStaff() ? '' : aiStudentBlock(text))) : '';
+      const loc = sec ? sec[1] : (!file && !img && tool === 'chat') ? (aiLocal(text) || (isAdminStaff() ? '' : aiStudentBlock(text))) : '';
       if (sec) aiSecretShow(sec[1]);
       AI.err = ''; AI.busy = true; AI.live = '';
-      inp.value = ''; inp.style.height = 'auto'; AI.file = null;
-      AI.msgs.push(um); aiDraw();
+      inp.value = ''; inp.style.height = 'auto'; AI.file = null; AI.img = null;
+      AI.msgs.push(um); aiDraw(); aiDrawFile();
       let reply = '';
       try {
         if (loc) reply = loc;
         else {
-          const hist = AI.msgs.slice(-20).map(m => ({ role: m.role, content: aiPrompt(m) }));
+          AI_BK.ctx = '';
+          await Promise.race([aiCurLoad(), new Promise(ok => setTimeout(ok, 4000))]);
+          { const gg = aiGrade(); if (gg !== null) { await Promise.race([aiBooksLoad(gg), new Promise(ok => setTimeout(ok, 4000))]); AI_BK.ctx = aiBookCtx(lang); } }
+          const hist = AI.msgs.slice(-20).map(m => ({ role: m.role, content: aiPrompt(m) + (m.img && m !== um ? '\n[الطالب بعت صورة هنا]' : '') }));
+          if (img) { const lm = hist[hist.length - 1]; lm.content = [{ type: 'text', text: lm.content }, { type: 'image_url', image_url: { url: img.url } }]; AI_BK.img = true; }
+          { let tot = hist.reduce((n, m) => n + String(m.content).length, 0);   // نشيل الأقدم لحد ما الحجم يدخل في حد الـ Worker
+            while (hist.length > 1 && (tot > (img ? 40000 : 90000) || hist[0].role !== 'user')) tot -= String(hist.shift().content).length; }
           const opts = { temp: (tool === 'mind' || tool === 'visual' || tool === 'summarize' || tool === 'solve') ? 0.3 : tool === 'explain' ? 0.4 : !isAdminStaff() ? 0.45 : 0.6 };
-          reply = await aiStream(aiSystem(lang, lvl, !isAdminStaff()), hist, full => {
+          reply = await aiStream(aiSystem(lang, lvl, !isAdminStaff(), aiTopic()), hist, full => {
             if (AI_LEAK.test(full)) return true;
             AI.live = full; if ($ai('aiMsgs')) aiDrawMsgs();
             return false;
           }, opts);
+          AI_BK.ctx = ''; AI_BK.img = false;
           if (AI_LEAK.test(reply)) reply = AI_R_NAME + '\n\n' + AI_R_DEV;
           /* لو الخريطة رجعت JSON مش سليم، نطلب من الموديل يصلحه مرة واحدة */
           if ((tool === 'mind' ? !mmParse(reply, true) : tool === 'visual' && !vsParse(reply)) && !AI_LEAK.test(reply)) {
             try {
-              const fix = await aiStream(aiSystem(lang, lvl, !isAdminStaff()), hist.concat([{ role: 'assistant', content: reply }, { role: 'user', content: 'الرد ده مش JSON صالح. رجّع JSON صالح بس جوه كتلة ```json بالشكل المطلوب بالظبط، من غير أي كلام تاني.' }]), () => false, { temp: 0.2 });
+              const fix = await aiStream(aiSystem(lang, lvl, !isAdminStaff(), aiTopic()), hist.concat([{ role: 'assistant', content: reply }, { role: 'user', content: 'الرد ده مش JSON صالح. رجّع JSON صالح بس جوه كتلة ```json بالشكل المطلوب بالظبط، من غير أي كلام تاني.' }]), () => false, { temp: 0.2 });
               if (tool === 'mind' ? mmParse(fix, true) : vsParse(fix)) reply = fix;
             } catch (e) {}
           }
         }
         if (!reply.trim()) throw new Error('empty');
+        if (tool !== 'mind' && tool !== 'visual') reply += aiCrossNote(reply) + aiCalcCheck(reply);
       } catch (err) {
-        if (!$ai('aiMsgs')) return;                      // الطالب خرج من الشاشة
-        if (err.name === 'AbortError') return;
+        if (!$ai('aiMsgs')) { AI.busy = false; return; }   // الطالب خرج من الشاشة
+        if (err.name === 'AbortError' && !(AI.ctrl && AI.ctrl.timedOut)) return;
         console.warn('Learn Ai:', err);
-        AI.msgs.pop(); AI.busy = false; AI.live = '';
-        inp.value = text; AI.file = file;
-        AI.err = err.message === 'empty' ? 'الرد رجع فاضي، جرّب تاني.' : 'المساعد مشغول شوية دلوقتي 🙏 جرّب تبعت تاني بعد ثواني.' + (isAdminStaff() ? ' [' + String(err.message || err).slice(0, 160) + ']' : '');
+        AI.msgs.pop(); AI.busy = false; AI.live = ''; AI_BK.img = false; AI_BK.ctx = '';
+        inp.value = text; AI.file = file; AI.img = img;
+        AI.err = err.message === 'empty' ? 'الرد رجع فاضي، جرّب تاني.'
+          : err.message === 'rate' ? 'بعتّ رسايل كتير في وقت قليل. استنى دقيقة وجرّب تاني.'
+          : err.message === 'forbidden' ? 'الإدارة وقّفت استخدامك لـ ' + AI_NAME + '.'
+          : err.message === 'unauthorized' ? 'سجّل دخول تاني وجرّب.'
+          : 'المساعد مشغول شوية دلوقتي 🙏 جرّب تبعت تاني بعد ثواني.' + (isAdminStaff() ? ' [' + String(err.message || err).slice(0, 160) + ']' : '');
         aiDraw(); return;
       }
-      if (!$ai('aiMsgs')) return;
+      if (!$ai('aiMsgs')) { AI.busy = false; try { await aiSave(um, reply); } catch (e) {} return; }
       AI.msgs.push({ role: 'assistant', text: reply, ts: um.ts + 1 });
       AI.busy = false; AI.live = '';
       aiDraw();
@@ -6110,7 +6443,7 @@ ${brief ? '- اكتب نص بسيط: سطور قصيرة، إيموجي خفيف
         bt.set(doc(db, 'aiUsers', uid, 'chats', cid), { title: um.text.slice(0, 40), tool: um.tool, created: now, upd: now, at: serverTimestamp() });
       } else bt.set(doc(db, 'aiUsers', uid, 'chats', cid), { upd: now }, { merge: true });
       const mc = collection(db, 'aiUsers', uid, 'chats', cid, 'msgs');
-      bt.set(doc(mc), { role: 'user', text: um.text, tool: um.tool, ts: um.ts, ...(um.file ? { file: um.file } : {}), at: serverTimestamp() });
+      bt.set(doc(mc), { role: 'user', text: (um.img ? '🖼️ ' : '') + um.text, tool: um.tool, ts: um.ts, ...(um.file ? { file: um.file } : {}), at: serverTimestamp() });
       const ar = doc(mc);
       bt.set(ar, { role: 'assistant', text: reply, ts: um.ts + 1, at: serverTimestamp() });
       bt.set(doc(db, 'aiUsers', uid), { uid, name: isAdminStaff() ? myDisp() : (myName || 'طالب'), code: myCode || '', grade: !isAdminStaff() && Number.isInteger(myGrade) ? myGrade : null, last: um.text.slice(0, 80), upd: now, n: increment(2), at: serverTimestamp() }, { merge: true });
@@ -6164,8 +6497,8 @@ ${brief ? '- اكتب نص بسيط: سطور قصيرة، إيموجي خفيف
       const numeric = /\d|[٠-٩]|قانون|مسأل|احسب/.test(qz.topic);
       const kinds = qz.type === 'mix' ? Object.keys(spec).filter(k => k !== 'calc' || numeric) : [qz.type];
       const lv = { 'سهل': 'كل الأسئلة مباشرة على الحفظ والفهم', 'متوسط': 'فهم وتطبيق', 'صعب': 'تطبيق وتحليل واستنتاج بأسلوب أسئلة التفوق', 'متدرّج': 'متدرّجة من السهل للصعب' }[qz.lvl] || '';
-      return 'أنت واضع امتحانات خبير في المنهج المصري (الإعدادي وأولى بكالوريا). اعمل ' + qz.n + ' سؤال من المحتوى ده فقط، ' + (kinds.length > 1 ? 'موزّعة على الأنواع دي بالتساوي' : 'كلها من النوع ده') + '.\nالمستوى: ' + lv + '.\nرجّع JSON صالح فقط: مصفوفة جوه كتلة ```json من غير أي كلام قبلها أو بعدها. صيغة الأنواع:\n' + kinds.map(k => spec[k]).join('\n') +
-        '\nقواعد الجودة:\n- الصياغة فصحى مبسطة زي ورقة الامتحان الرسمية وبدون أخطاء إملائية.\n- كل سؤال يقيس فكرة مختلفة وماتتكررش، وغطّي أجزاء المحتوى كلها.\n- الاختيار من متعدد: 4 اختيارات متقاربة الطول، و3 مشتتات منطقية مبنية على أخطاء الطلبة الشائعة، ماتستخدمش "كل ما سبق"، وموّع مكان الإجابة الصح بين أ وب وج ود.\n- صح وغلط: عبارات واضحة من غير نفي مزدوج، وحوالي نصها غلط بتعديل كلمة مهمة.\n- علل وبم تفسر: لازم لها تعليل علمي محدد، والإجابة النموذجية جملتين لتلاتة فيهم الأفكار الأساسية.\n- المسائل: أرقام بسيطة وناتج دقيق، والحل كامل في why.\n- لكل سؤال: hint تلميح من جملة من غير ما يكشف الإجابة، و why تفسير بالعامية المصرية.\n- ماتختلقش معلومة مش موجودة في المحتوى.\nالمحتوى:\n---\n' + qz.topic;
+      return 'أنت واضع امتحانات خبير في المنهج المصري (الإعدادي وأولى بكالوريا).' + aiQzNote() + ' اعمل ' + qz.n + ' سؤال من المحتوى ده فقط، ' + (kinds.length > 1 ? 'موزّعة على الأنواع دي بالتساوي' : 'كلها من النوع ده') + '.\nالمستوى: ' + lv + '.\nرجّع JSON صالح فقط: مصفوفة جوه كتلة ```json من غير أي كلام قبلها أو بعدها. صيغة الأنواع:\n' + kinds.map(k => spec[k]).join('\n') +
+        '\nقواعد الجودة:\n- الصياغة فصحى مبسطة زي ورقة الامتحان الرسمية وبدون أخطاء إملائية.\n- كل سؤال يقيس فكرة مختلفة وماتتكررش، وغطّي أجزاء المحتوى كلها.\n- الاختيار من متعدد: 4 اختيارات متقاربة الطول، و3 مشتتات منطقية مبنية على أخطاء الطلبة الشائعة، ماتستخدمش "كل ما سبق"، وموّع مكان الإجابة الصح بين أ وب وج ود.\n- صح وغلط: عبارات واضحة من غير نفي مزدوج، وحوالي نصها غلط بتعديل كلمة مهمة.\n- علل وبم تفسر: لازم لها تعليل علمي محدد، والإجابة النموذجية جملتين لتلاتة فيهم الأفكار الأساسية.\n- المسائل: أرقام بسيطة وناتج دقيق، والحل كامل في why.\n- لكل سؤال: hint تلميح من جملة من غير ما يكشف الإجابة، و why تفسير بالعامية المصرية.\n- ماتختلقش معلومة مش موجودة في المحتوى.\n- لكل سؤال (ماعدا المسائل الحسابية) أضف حقل src: جملة قصيرة منقولة حرفيًا من المحتوى بتثبت الإجابة.\n- علل وبم تفسر: أضف حقل key = مصفوفة من 2 لـ 4 أفكار أساسية قصيرة لازم تتوفر في الإجابة.\n- المسائل: أضف حقل expr = العملية الحسابية الكاملة للناتج بأرقام وعمليات بس (مثال 12/4)، و a هو ناتجها بالظبط.\nالمحتوى:\n---\n' + qz.topic;
     };
 
     function qzParse(raw) {
@@ -6175,19 +6508,44 @@ ${brief ? '- اكتب نص بسيط: سطور قصيرة، إيموجي خفيف
       const s = x => String(x ?? '').trim();
       return j.map(q => {
         if (!q) return null;
-        const o = { type: s(q.type), q: s(q.q), why: s(q.why), hint: s(q.hint) }; if (!o.q) return null;
+        const o = { type: s(q.type), q: s(q.q), why: s(q.why), hint: s(q.hint), src: s(q.src) }; if (!o.q) return null;
         if (o.type === 'mcq') { o.opts = (q.opts || []).map(s).slice(0, 4); o.a = +q.a; if (o.opts.length < 2 || !(o.a >= 0 && o.a < o.opts.length)) return null; }
         else if (o.type === 'tf') o.a = q.a === true || q.a === 'true' || q.a === 'صح';
-        else if (o.type === 'why' || o.type === 'how') { o.a = s(q.a); if (!o.a) return null; }
+        else if (o.type === 'why' || o.type === 'how') { o.a = s(q.a); o.key = (Array.isArray(q.key) ? q.key : []).map(s).filter(Boolean).slice(0, 4); if (!o.a) return null; }
         else if (o.type === 'table') {
           o.head = (q.head || []).map(s); o.rows = (q.rows || []).map(r => (r || []).map(s)); o.ans = (q.ans || []).map(r => (r || []).map(s));
           if (!o.head.length || !o.rows.length || o.ans.length !== o.rows.length || !o.rows.some(r => r.some(c => !c))) return null;
-        } else if (o.type === 'calc') { o.a = qzNum(q.a); o.unit = s(q.unit); if (!isFinite(o.a)) return null; }
+        } else if (o.type === 'calc') { o.a = qzNum(q.a); o.unit = s(q.unit); o.expr = s(q.expr); const cv = aiCalc(o.expr); if (isFinite(cv)) o.a = Math.round(cv * 1000) / 1000; if (!isFinite(o.a)) return null; }
         else return null;
         return o;
       }).filter(Boolean).slice(0, qz.n);
     }
 
+    async function qzVerify(qs) {
+      const lp = qz.el && qz.el.querySelector('.qz-load p'); if (lp) lp.textContent = 'بتحقق من الإجابات بحل مستقل...';
+      const grounded = q => {
+        if (qz.topic.length < 200 || q.type === 'calc') return true;
+        const w = aiNorm(q.src).split(' ').filter(x => x.length > 2); if (w.length < 3) return false;
+        const tn = ' ' + aiNorm(qz.topic) + ' ';
+        return w.filter(x => tn.includes(x)).length / w.length >= 0.6;
+      };
+      const keep = qs.map(() => true);
+      try {
+        const items = qs.map((q, i) => q.type === 'mcq' ? { i, q: q.q, opts: q.opts } : (q.type === 'tf' || q.type === 'calc') ? { i, q: q.q } : null).filter(Boolean);
+        if (items.length) {
+          const raw = await aiStream(aiSystem('العربية المصرية', 'متوسط', false, qz.topic), [{ role: 'user', content: 'جاوب على الأسئلة دي بنفسك من غير ما تفترض أي إجابة، بحسب المحتوى والمنهج المصري. رجّع JSON فقط جوه كتلة ```json: مصفوفة {"i":رقم,"a":...} حيث a = رقم الاختيار (من 0) للاختيار من متعدد، true أو false لصح وغلط، ورقم فقط للمسائل.\nالمحتوى:\n' + qz.topic.slice(0, 3500) + '\nالأسئلة:\n' + JSON.stringify(items) }], () => false, { temp: 0 });
+          const m = raw.match(/```(?:json)?\s*([\s\S]*?)```/i), arr = JSON.parse(m ? m[1] : raw.slice(raw.indexOf('['), raw.lastIndexOf(']') + 1));
+          arr.forEach(r => {
+            const q = qs[r && r.i]; if (!q) return;
+            const same = q.type === 'mcq' ? +r.a === q.a : q.type === 'tf' ? (r.a === true || r.a === 'true') === q.a : Math.abs(qzNum(r.a) - q.a) <= Math.max(0.01, Math.abs(q.a) * 0.01);
+            if (!same) keep[r.i] = false;
+          });
+        }
+      } catch (e) { if (e.name === 'AbortError') throw e; }
+      qs.forEach((q, i) => { if (!grounded(q)) keep[i] = false; });
+      const out = qs.filter((q, i) => keep[i]);
+      return out.length >= Math.ceil(qs.length / 2) ? out : qs;
+    }
     async function qzStart() {
       if (qz.busy) return;
       qz.topic = qz.el.querySelector('#qzTopic').value.trim();
@@ -6195,14 +6553,15 @@ ${brief ? '- اكتب نص بسيط: سطور قصيرة، إيموجي خفيف
       qz.busy = true; qz.el.querySelector('.qz-card').innerHTML = '<div class="qz-load"><span class="ai-typing"><i></i><i></i><i></i></span><p>بجهّزلك الأسئلة...</p></div>';
       try {
         let qs = [];
-        for (let t = 0; t < 2 && qs.length < Math.ceil(qz.n / 2); t++) qs = qzParse(await aiStream(aiSystem('العربية المصرية', 'متوسط', false), [{ role: 'user', content: qzPrompt() }], () => false, { temp: 0.4 }));
+        for (let t = 0; t < 2 && qs.length < Math.ceil(qz.n / 2); t++) qs = qzParse(await aiStream(aiSystem('العربية المصرية', 'متوسط', false, qz.topic), [{ role: 'user', content: qzPrompt() }], () => false, { temp: 0.4 }));
         if (!qs.length) throw new Error('bad');
         try {
           const lp = qz.el && qz.el.querySelector('.qz-load p'); if (lp) lp.textContent = 'براجع صحة الأسئلة...';
-          const v = qzParse(await aiStream(aiSystem('العربية المصرية', 'متوسط', false), [{ role: 'user', content: 'راجع الأسئلة دي كمدقق امتحانات: اتأكد إن كل إجابة صحيحة علميًا وبحسب المحتوى، وإن لكل سؤال إجابة واحدة بس واضحة، وإن المشتتات غلط فعلًا، وإن مفيش غموض أو أخطاء إملائية أو أرقام مش دقيقة. صحّح أي مشكلة بنفس الشكل بالظبط، واحذف أي سؤال مش مناسب. رجّع نفس صيغة JSON فقط جوه كتلة ```json.\nالمحتوى الأصلي:\n' + qz.topic.slice(0, 3500) + '\nالأسئلة:\n' + JSON.stringify(qs) }], () => false, { temp: 0.1 }));
+          const v = qzParse(await aiStream(aiSystem('العربية المصرية', 'متوسط', false, qz.topic), [{ role: 'user', content: 'راجع الأسئلة دي كمدقق امتحانات: اتأكد إن كل إجابة صحيحة علميًا وبحسب المحتوى، وإن لكل سؤال إجابة واحدة بس واضحة، وإن المشتتات غلط فعلًا، وإن مفيش غموض أو أخطاء إملائية أو أرقام مش دقيقة. صحّح أي مشكلة بنفس الشكل بالظبط، واحذف أي سؤال مش مناسب. رجّع نفس صيغة JSON فقط جوه كتلة ```json.\nالمحتوى الأصلي:\n' + qz.topic.slice(0, 3500) + '\nالأسئلة:\n' + JSON.stringify(qs) }], () => false, { temp: 0.1 }));
           if (v.length >= Math.ceil(qs.length * 0.7)) qs = v;
         } catch (e) { if (e.name === 'AbortError') return; }
         if (!qz.el) return;
+        qs = await qzVerify(qs); if (!qz.el) return;
         Object.assign(qz, { qs, i: 0, res: [], busy: false, t0: 0, whyMd: '' }); qzShow();
       } catch (e) { if (!qz.el || e.name === 'AbortError') return; qz.busy = false; qzSetup(); qzErr('مقدرتش أجهّز الأسئلة. جرّب تاني أو غيّر الموضوع.'); }
     }
@@ -6224,7 +6583,7 @@ ${brief ? '- اكتب نص بسيط: سطور قصيرة، إيموجي خفيف
       const q = qz.qs[qz.i], last = qz.i === qz.qs.length - 1; res.right = qzRight(q); qz.res[qz.i] = res;
       const cls = res.ok >= 0.99 ? 'ok' : res.ok > 0 ? 'mid' : 'bad';
       const fb = qz.el.querySelector('#qzFb');
-      fb.innerHTML = `<div class="qz-fb ${cls}"><b>${cls === 'ok' ? '✅ إجابة صحيحة' : cls === 'mid' ? '🟡 إجابة ناقصة (' + qzFmt(res.ok) + ')' : '❌ إجابة غلط'}</b>${(q.type === 'why' || q.type === 'how') ? '<p><u>الإجابة النموذجية:</u><br>' + esc(q.a) + '</p>' : cls !== 'ok' && q.type !== 'table' ? '<p>الإجابة الصح: <b>' + esc(res.right) + '</b></p>' : ''}${res.fb ? '<p>' + esc(res.fb) + '</p>' : ''}${q.why ? '<p>💡 ' + esc(q.why) + '</p>' : ''}<button class="qz-main" type="button" data-q="next">${last ? 'شوف النتيجة 🏁' : 'السؤال التالي ➜'}</button></div>`;
+      fb.innerHTML = `<div class="qz-fb ${cls}"><b>${cls === 'ok' ? '✅ إجابة صحيحة' : cls === 'mid' ? '🟡 إجابة ناقصة (' + qzFmt(res.ok) + ')' : '❌ إجابة غلط'}</b>${(q.type === 'why' || q.type === 'how') ? '<p><u>الإجابة النموذجية:</u><br>' + esc(q.a) + '</p>' : cls !== 'ok' && q.type !== 'table' ? '<p>الإجابة الصح: <b>' + esc(res.right) + '</b></p>' : ''}${res.fb ? '<p style="white-space:pre-wrap">' + esc(res.fb) + '</p>' : ''}${q.src && q.type !== 'calc' ? '<p>📖 من المحتوى: ' + esc(q.src) + '</p>' : ''}${q.why ? '<p>💡 ' + esc(q.why) + '</p>' : ''}<button class="qz-main" type="button" data-q="next">${last ? 'شوف النتيجة 🏁' : 'السؤال التالي ➜'}</button></div>`;
       fb.scrollIntoView({ behavior: 'smooth', block: 'center' });
     }
     function qzPick(k) {
@@ -6232,6 +6591,13 @@ ${brief ? '- اكتب نص بسيط: سطور قصيرة، إيموجي خفيف
       const okk = q.type === 'mcq' ? q.a : (q.a ? 1 : 0), btns = [...qz.el.querySelectorAll('.qz-opt')];
       btns.forEach(b => { b.disabled = true; if (+b.dataset.k === okk) b.classList.add('ok'); else if (+b.dataset.k === k) b.classList.add('bad'); });
       qzDone({ ok: k === okk ? 1 : 0, mine: q.type === 'mcq' ? QZ_L[k] + ') ' + q.opts[k] : (k ? 'صح' : 'غلط') });
+    }
+    async function qzGradeKey(q, v) {
+      const raw = await aiStream(aiSystem('العربية المصرية', 'متوسط', false, qz.topic), [{ role: 'user', content: 'السؤال: ' + q.q + '\nالأفكار الأساسية المطلوبة:\n' + q.key.map((k, i) => i + ') ' + k).join('\n') + '\nإجابة الطالب: ' + v + '\n\nلكل فكرة قرر هل إجابة الطالب غطّتها فعلاً (المعنى يكفي حتى لو الصياغة مختلفة، ولو الفكرة مش مذكورة أو غلط تبقى false). رجّع JSON فقط: {"hit":[true أو false لكل فكرة بنفس الترتيب],"fb":"جملة بالعامية عن أهم فكرة ناقصة لو فيه"}' }], () => false, { temp: 0 });
+      const j = JSON.parse(raw.match(/\{[\s\S]*\}/)[0]);
+      if (!Array.isArray(j.hit) || j.hit.length !== q.key.length) throw new Error('bad');
+      const hits = j.hit.filter(x => x === true).length;
+      return { ok: hits / q.key.length, fb: q.key.map((k, i) => (j.hit[i] === true ? '✅ ' : '❌ ') + k).join('\n') + (j.fb ? '\n' + String(j.fb).slice(0, 300) : '') };
     }
     async function qzSubmit() {
       const q = qz.qs[qz.i]; if (qz.busy || qz.res[qz.i]) return;
@@ -6252,8 +6618,12 @@ ${brief ? '- اكتب نص بسيط: سطور قصيرة، إيموجي خفيف
       const v = qz.el.querySelector('#qzTx').value.trim(); if (v.length < 2) return toast('اكتب إجابتك الأول.');
       qz.busy = true; sb.disabled = true; sb.textContent = 'بصحّح إجابتك...';
       let ok = 0, fb = '';
+      if (q.key && q.key.length >= 2) {
+        try { const g = await qzGradeKey(q, v); qz.busy = false; if (!qz.el) return; qz.el.querySelector('#qzTx').disabled = true; sb.remove(); return qzDone({ ok: g.ok, mine: v, fb: g.fb }); }
+        catch (e) { if (e.name === 'AbortError') return; }
+      }
       try {
-        const raw = await aiStream(aiSystem('العربية المصرية', 'متوسط', false), [{ role: 'user', content: 'السؤال: ' + q.q + '\nالإجابة النموذجية: ' + q.a + '\nإجابة الطالب: ' + v + '\n\nصحّح إجابة الطالب زي مدرس منصف: استخرج الأفكار الأساسية في الإجابة النموذجية، وادّي درجة بحسب عدد الأفكار اللي غطّاها الطالب (الفكرة الصحيحة تتحسب حتى لو الصياغة مختلفة). رجّع JSON بس: {"score":0 أو 0.25 أو 0.5 أو 0.75 أو 1,"fb":"بالعامية: إيه اللي كان صح، وإيه الفكرة الناقصة بالتحديد"}' }], () => false, { temp: 0.2 });
+        const raw = await aiStream(aiSystem('العربية المصرية', 'متوسط', false, qz.topic), [{ role: 'user', content: 'السؤال: ' + q.q + '\nالإجابة النموذجية: ' + q.a + '\nإجابة الطالب: ' + v + '\n\nصحّح إجابة الطالب زي مدرس منصف: استخرج الأفكار الأساسية في الإجابة النموذجية، وادّي درجة بحسب عدد الأفكار اللي غطّاها الطالب (الفكرة الصحيحة تتحسب حتى لو الصياغة مختلفة). رجّع JSON بس: {"score":0 أو 0.25 أو 0.5 أو 0.75 أو 1,"fb":"بالعامية: إيه اللي كان صح، وإيه الفكرة الناقصة بالتحديد"}' }], () => false, { temp: 0 });
         const j = JSON.parse(raw.match(/\{[\s\S]*\}/)[0]); ok = Math.max(0, Math.min(1, +j.score || 0)); fb = String(j.fb || '').slice(0, 600);
       } catch (e) { if (!qz.el) return; fb = 'مقدرتش أصحح تلقائي، قارن إجابتك بالنموذجية.'; }
       qz.busy = false; if (!qz.el) return;
@@ -6278,7 +6648,7 @@ ${brief ? '- اكتب نص بسيط: سطور قصيرة، إيموجي خفيف
       qz.busy = true; btn.disabled = true; btn.textContent = 'بحلل أخطاءك...';
       const box = qz.el.querySelector('#qzWhy'); box.innerHTML = '<span class="ai-typing"><i></i><i></i><i></i></span>';
       try {
-        const txt = await aiStream(aiSystem('العربية المصرية', 'متوسط', false), [{ role: 'user', content: 'الطالب غلط في الأسئلة دي. لكل سؤال اشرح بالعامية المصرية: الفكرة الغلط اللي وقع فيها، والإجابة الصح خطوة بخطوة، وقاعدة بسيطة تفكّره. وفي الآخر "## 🎯 نقط ضعفك" بنقطتين أو تلاتة وخطة مراجعة قصيرة.\n\n' + wr.map((x, k) => (k + 1) + ') ' + x.q.q + '\nإجابته: ' + x.r.mine + '\nالصح: ' + x.r.right).join('\n\n') }], () => false, { temp: 0.4 });
+        const txt = await aiStream(aiSystem('العربية المصرية', 'متوسط', false, qz.topic), [{ role: 'user', content: 'الطالب غلط في الأسئلة دي. لكل سؤال اشرح بالعامية المصرية: الفكرة الغلط اللي وقع فيها، والإجابة الصح خطوة بخطوة، وقاعدة بسيطة تفكّره. وفي الآخر "## 🎯 نقط ضعفك" بنقطتين أو تلاتة وخطة مراجعة قصيرة.\n\n' + wr.map((x, k) => (k + 1) + ') ' + x.q.q + '\nإجابته: ' + x.r.mine + '\nالصح: ' + x.r.right).join('\n\n') }], () => false, { temp: 0.4 });
         if (!qz.el) return; qz.whyMd = '## 🧠 تحليل أخطائك\n' + txt; box.innerHTML = '<div class="ai-paper">' + aiMd(qz.whyMd) + '</div>'; btn.remove();
       } catch (e) { if (!qz.el) return; box.textContent = 'معرفتش أحلل دلوقتي، جرّب تاني.'; btn.disabled = false; btn.textContent = '🧠 اشرحلي أخطائي'; }
       qz.busy = false;
