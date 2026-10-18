@@ -6204,18 +6204,16 @@ ${brief ? '- اكتب نص بسيط: سطور قصيرة، إيموجي خفيف
 
     /* جدول الأوامر: ضغطة على أي صف بتكتب بدايته في خانة الكتابة */
     const AI_CMDS = [
-      ['🎨 شرح مصوّر', 'اعمل شرح مصور عن ', 'اعمل شرح مصور · ارسملي شرح'],
-      ['🧪 فحص الدقة (30 سؤال)', 'فحص الدقة', 'فحص الدقة'],
-      ['🧬 مربع بانيت', 'اعمل شرح مصور بمربع بانيت لـ ', 'مربع بانيت · وراثة'],
+      ['🎨 شرح مصوّر', 'اعمل شرح مصور عن ', 'اعمل شرح مصور · مربع بانيت'],
       ['🧠 خريطة ذهنية', 'اعمل خريطة ذهنية عن ', 'خريطة ذهنية'],
-      ['📋 امتحان كامل', 'اعمل امتحان كامل على ', 'اعمل امتحان · امتحان كامل'],
+      ['🖨️ عمل امتحان (PDF / صورة)', '', 'اعمل امتحان · امتحان كامل', 'exam'],
       ['❓ اختبار تفاعلي', 'اعمل اختبار على ', 'اعمل اختبار · اختبرني'],
       ['📝 تلخيص', 'لخصلي ', 'لخّص · ملخص'],
       ['🧮 حل مسألة', 'احلي المسألة دي: ', 'حل المسألة · احسب'],
       ['🗂️ فلاش كاردز', 'اعملي فلاش كاردز عن ', 'فلاش كاردز · بطاقات مراجعة'],
       ['📅 خطة مذاكرة', 'اعمل خطة مذاكرة لـ ', 'خطة مذاكرة · جدول مذاكرة'],
-      ['📚 شرح كامل', 'اشرحلي درس ', 'شرح كامل · اشرح الدرس'],
-      ['💡 شرح مبسّط', 'اشرحلي ', 'اشرح · وضّح · فهمني']
+      ['📚 شرح الدرس', 'اشرحلي ', 'اشرح · وضّح · فهمني'],
+      ['🧪 فحص الدقة (30 سؤال)', 'فحص الدقة', 'فحص الدقة']
     ];
     function aiCmds() {
       const d = document.createElement('div');
@@ -6228,8 +6226,10 @@ ${brief ? '- اكتب نص بسيط: سطور قصيرة، إيموجي خفيف
       d.addEventListener('click', e => {
         if (e.target === d || e.target.closest('[data-x]')) return d.remove();
         const tr = e.target.closest('tr[data-i]'); if (!tr) return;
-        const inp = $ai('aiIn'); if (inp) { inp.value = AI_CMDS[+tr.dataset.i][1]; inp.focus(); }
+        const row = AI_CMDS[+tr.dataset.i];
         d.remove();
+        if (row[3] === 'exam') return exOpen('');
+        const inp = $ai('aiIn'); if (inp) { inp.value = row[1]; inp.focus(); }
       });
       document.body.appendChild(d);
     }
@@ -6376,6 +6376,7 @@ ${brief ? '- اكتب نص بسيط: سطور قصيرة، إيموجي خفيف
       if (!isAdminStaff() && myAiBlocked) { AI.err = 'الإدارة وقّفت استخدامك لـ ' + AI_NAME + '.'; return aiDrawMsgs(); }
       if (Date.now() - AI.lastSend < 1500) return;
       AI.lastSend = Date.now();
+      if (isAdminStaff() && !AI.file && AI_RE_EXAM.test(aiNorm(text).slice(0, 3000)) && !/اختبرني|امتحني/.test(aiNorm(text).slice(0, 3000))) { inp.value = ''; inp.style.height = 'auto'; exOpen(aiNorm(text).length < 25 ? '' : text); return; }
       { const nt = aiNorm(text).slice(0, 3000); if (!AI.file && (AI_RE_QZ.test(nt) || (isAdminStaff() && AI.tool === 'quiz'))) { inp.value = ''; inp.style.height = 'auto'; qzOpen(nt.length < 25 ? '' : text); return; } }
       const file = isAdminStaff() ? AI.file : null, lvl = $ai('aiLvl').value, lang = $ai('aiLang').value;
       /* لو الطالب كتب في "اسأل" إنه عايز خريطة ذهنية، نحوّلها لأداة الخريطة لوحدنا */
@@ -6464,6 +6465,7 @@ ${brief ? '- اكتب نص بسيط: سطور قصيرة، إيموجي خفيف
     const QZ_TYPES = { mcq: ['🔘', 'اختار الإجابة الصح'], tf: ['✅', 'صح وغلط'], why: ['❓', 'علل'], how: ['💭', 'بم تفسر'], table: ['🗂️', 'جدول'], calc: ['🧮', 'مسألة حسابية'], mix: ['🎲', 'كل الأنواع'] };
     const QZ_TL = { mcq: 'اختر الإجابة الصحيحة', tf: 'ضع (✓) أو (✗)', why: 'علل', how: 'بم تفسر', table: 'أكمل الجدول', calc: 'حل المسألة' };
     const QZ_L = ['أ', 'ب', 'ج', 'د'];
+    const AI_RE_EXAM = /امتحان كامل|ورقه امتحان|نموذج امتحان|(?:اعمل|اعملي|اعمللي|هات|هاتلي|عايز|عاوز)\s+(?:\S+\s+){0,2}?امتحان/;
     const AI_RE_QZ = /اختبرني|امتحني|quiz me|(?:اعمل|اعملي|اعمللي|هات|هاتلي|عايز|عاوز|اديني|ادني)\s+(?:\S+\s+){0,3}?(?:اختبار|امتحان|كويز|quiz|اسئله)/;
     const qz = { el: null, type: 'mix', n: 10, topic: '', lvl: 'متدرّج', qs: [], i: 0, res: [], busy: false, t0: 0, whyMd: '' };
     const qzNum = v => parseFloat(String(v).replace(/[٠-٩]/g, d => '٠١٢٣٤٥٦٧٨٩'.indexOf(d)).replace(/٫/g, '.').replace(/[^\d.\-]/g, ''));
@@ -7307,6 +7309,298 @@ ${brief ? '- اكتب نص بسيط: سطور قصيرة، إيموجي خفيف
         const cv = document.createElement('canvas'); cv.width = Math.round(W * sc); cv.height = Math.round(H * sc);
         const cx = cv.getContext('2d'); cx.fillStyle = '#fff'; cx.fillRect(0, 0, cv.width, cv.height); cx.drawImage(im, 0, 0, cv.width, cv.height);
         aiDownload(await aiBlob(cv, 'image/png'), aiFileName(aiTagOf(AI.msgs[i - 1]) + ' - Learn Ai', 'png'));
+      } catch (e) { console.warn(e); toast('الصورة ماظبطتش على جهازك، جرّب زر PDF.'); }
+      finally { host.remove(); }
+    }
+
+    /* ==========================================================
+       عمل امتحان (للأدمن): يختار الصف والمادة والدروس وعدد الأسئلة وأنواعها
+       ← ورقة امتحان (مع نموذج إجابة اختياري) تتطبع PDF أو تتنزل صورة
+       ========================================================== */
+    const EX_TYPES = {
+      mcq:  { i: '🔘', n: 'اختيار من متعدد',    t: 'اختر الإجابة الصحيحة', w: 1 },
+      tf:   { i: '✅', n: 'صح وخطأ',            t: 'ضع علامة (✓) أمام العبارة الصحيحة وعلامة (✗) أمام العبارة الخاطئة', w: 1 },
+      fill: { i: '✏️', n: 'أكمل',               t: 'أكمل ما يأتي', w: 1 },
+      def:  { i: '📖', n: 'ما المقصود / عرّف',  t: 'ما المقصود بكل مما يأتي؟', w: 1 },
+      why:  { i: '❓', n: 'علل',                t: 'علل لما يأتي', w: 2 },
+      calc: { i: '🧮', n: 'مسائل حسابية',       t: 'حل المسائل الآتية', w: 2 }
+    };
+    const EX_ORD = ['الأول', 'الثاني', 'الثالث', 'الرابع', 'الخامس', 'السادس'];
+    const EX_L = ['أ', 'ب', 'ج', 'د'];
+    const EXM = { el: null, g: 0, sub: 'science', les: [], sel: new Set(), types: new Set(['mcq', 'tf', 'fill']), n: 10, lvl: 'متدرّج', ans: true, topic: '', qs: [], busy: false, meta: null, lid: 0, loading: false };
+    const EX_CSS = `.exam{direction:rtl;font-family:"IBM Plex Sans Arabic",Tahoma,Arial,sans-serif;color:#111;background:#fff;box-sizing:border-box;width:100%;max-width:794px;margin:0 auto;padding:22px 26px;line-height:1.9;font-size:16px;border:1px solid #dfe3f5;border-radius:14px;text-align:right}
+.exam *{box-sizing:border-box}
+.exam .exh{border:2px solid #222;border-radius:12px;padding:10px 14px;margin-bottom:14px}
+.exam .exh1{display:flex;justify-content:space-between;font-size:13px;color:#555}
+.exam .exh h2{margin:4px 0 6px;text-align:center;font-size:22px;color:#111}
+.exam .exh2,.exam .exh3{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;font-size:14.5px}
+.exam .exh3{margin-top:6px;border-top:1px dashed #999;padding-top:6px}
+.exam .exs{margin:14px 0}
+.exam .exs h3{margin:0 0 8px;font-size:17px;background:#eef0ff;border-right:5px solid #3b4ea8;padding:4px 12px;border-radius:8px;break-after:avoid;color:#111;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+.exam .exs h3 i{font-style:normal;font-size:13px;color:#555;margin-inline-start:8px}
+.exam .exq{position:relative;margin:8px 0;white-space:pre-line;break-inside:avoid;page-break-inside:avoid}
+.exam .exq>b{margin-inline-end:6px}
+.exam .exo{display:grid;grid-template-columns:1fr 1fr;gap:2px 18px;margin:2px 22px 0;white-space:normal}
+.exam .exbl{display:inline-block;min-width:110px;border-bottom:1.5px dotted #333;height:1em;vertical-align:baseline}
+.exam .exbox{display:inline-block;min-width:54px;border:1.5px solid #333;border-radius:6px;text-align:center;margin-inline-start:8px;line-height:1.5}
+.exam .exln{border-bottom:1.5px dotted #888;height:30px}
+.exam .exgap{height:84px;border:1.5px dashed #bbb;border-radius:8px;margin-top:6px;color:#999;font-size:13px;padding:2px 8px}
+.exam .exend{text-align:center;margin:16px 0 4px;color:#444;font-weight:700}
+.exam .exa{margin-top:22px;border-top:3px double #333;padding-top:10px;break-before:page;page-break-before:always}
+.exam .exa h3{margin:0 0 8px;font-size:18px;color:#111}
+.exam .exai{display:flex;gap:8px;margin:5px 0;break-inside:avoid;page-break-inside:avoid;white-space:pre-line}
+.exam .exai>b{min-width:26px;height:26px;border-radius:50%;background:#3b4ea8;color:#fff;text-align:center;line-height:26px;font-size:13px;flex:none;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+.exam .exdel{position:absolute;left:0;top:0;border:0;background:#ffe3e3;border-radius:8px;cursor:pointer;padding:0 8px;font-size:14px}
+@media print{.exam .exa{border-top:0;margin-top:0;padding-top:0}}
+.ex-note{margin:6px 2px;font-size:13.5px;color:#5a6098}
+.ex-ls{display:flex;flex-wrap:wrap;gap:8px;max-height:230px;overflow:auto}
+.ex-lh{width:100%;display:flex;gap:8px}
+.ex-l{text-align:right}`;
+    const exDeg = n => n === 1 ? 'درجة واحدة' : n === 2 ? 'درجتان' : n <= 10 ? n + ' درجات' : n + ' درجة';
+    const exSplit = (n, kinds) => { const o = {}, b = Math.floor(n / kinds.length), r = n % kinds.length; kinds.forEach((k, i) => { o[k] = b + (i < r ? 1 : 0); }); return o; };
+    const exSum = c => Object.values(c).reduce((a, b) => a + b, 0);
+
+    function exOpen(topic) {
+      if (!isAdminStaff()) return;
+      exClose();
+      const d = document.createElement('div'); d.className = 'qzov'; d.id = 'exov'; EXM.el = d; document.body.appendChild(d);
+      d.addEventListener('click', exClick);
+      EXM.topic = String(topic || '').slice(0, 6000); EXM.qs = []; EXM.sel = new Set(); EXM.busy = false;
+      exSetup(); exLoad();
+    }
+    function exClose() { if (EXM.busy) { try { AI.ctrl && AI.ctrl.abort(); } catch (e) {} } if (EXM.el) EXM.el.remove(); EXM.el = null; EXM.busy = false; EXM.lid++; }
+    const exErr = m => { const e = EXM.el && EXM.el.querySelector('#exErr'); if (e) { e.textContent = m; e.hidden = false; } };
+
+    function exSetup() {
+      const chip = (act, k, t, on) => `<button type="button" class="qz-chip" data-e="${act}" data-k="${esc(k)}" aria-pressed="${on}">${t}</button>`;
+      EXM.el.innerHTML = `<style>${EX_CSS}</style><div class="qz-w"><div class="qz-top"><button class="qz-x" type="button" data-e="close" aria-label="إغلاق">✕</button><b>📝 عمل امتحان</b></div>
+        <div class="qz-card"><h3>الصف</h3><div class="qz-chips">${GRADES.map((x, i) => chip('g', i, esc(x.name), i === EXM.g)).join('')}</div>
+        <h3>المادة</h3><div class="qz-chips">${SUBJECTS.map(s => chip('sub', s.key, esc(subjectName(EXM.g, s)), s.key === EXM.sub)).join('')}</div>
+        <h3>الدروس <small id="exLc"></small></h3><div id="exLs" class="ex-ls"></div>
+        <h3>أو اكتب / الصق الموضوع أو نص الدرس</h3><textarea id="exTopic" class="qz-tx" rows="4" maxlength="6000" placeholder="اختياري لو اخترت دروس من فوق...">${esc(EXM.topic)}</textarea>
+        <h3>عدد الأسئلة</h3><div class="qz-chips">${[5, 10, 15, 20, 30].map(n => chip('n', n, n + ' سؤال', n === EXM.n)).join('')}</div>
+        <h3>أنواع الأسئلة (اختار نوع أو أكتر)</h3><div class="qz-chips">${Object.entries(EX_TYPES).map(([k, v]) => chip('type', k, v.i + ' ' + v.n, EXM.types.has(k))).join('')}</div>
+        <h3>مستوى الصعوبة</h3><div class="qz-chips">${['سهل', 'متوسط', 'صعب', 'متدرّج'].map(l => chip('lvl', l, l, l === EXM.lvl)).join('')}</div>
+        <h3>نموذج الإجابة</h3><div class="qz-chips">${chip('ans', 1, '✅ أضيف نموذج الإجابة في آخر الورقة', EXM.ans)}</div>
+        <div class="qz-err" id="exErr" hidden></div><button class="qz-main" type="button" data-e="go">جهّز الامتحان 🚀</button></div></div>`;
+      exLessons();
+    }
+    function exLessons() {
+      const box = EXM.el && EXM.el.querySelector('#exLs'); if (!box) return;
+      if (EXM.loading) box.innerHTML = '<p class="ex-note">بحمّل الدروس...</p>';
+      else if (!EXM.les.length) box.innerHTML = '<p class="ex-note">مفيش دروس مرفوعة للمادة دي. اكتب الموضوع في الخانة اللي تحت.</p>';
+      else box.innerHTML = '<div class="ex-lh"><button type="button" class="qz-chip" data-e="all">اختيار الكل</button><button type="button" class="qz-chip" data-e="none">مسح الاختيار</button></div>'
+        + EXM.les.map(l => `<button type="button" class="qz-chip ex-l" data-e="les" data-id="${esc(l.id)}" aria-pressed="${EXM.sel.has(l.id)}">${esc(l.title)}${l.visible === false ? ' 🙈' : ''}</button>`).join('');
+      exCount();
+    }
+    function exCount() { const c = EXM.el && EXM.el.querySelector('#exLc'); if (c) c.textContent = EXM.sel.size ? '(' + EXM.sel.size + ' مختار)' : ''; }
+    async function exLoad() {
+      const id = ++EXM.lid; EXM.loading = true; EXM.les = []; EXM.sel = new Set(); exLessons();
+      let rows = [];
+      try {
+        const s = await getDocs(query(collection(db, 'content'), where('grade', '==', EXM.g), where('subject', '==', EXM.sub)));
+        rows = s.docs.map(d => ({ id: d.id, ...d.data() }))
+          .sort((a, b) => ((a.order ?? 1e9) - (b.order ?? 1e9)) || ((a.createdAt?.seconds ?? 0) - (b.createdAt?.seconds ?? 0)))
+          .map(x => ({ id: x.id, title: String(x.title || '').trim().slice(0, 90), body: String(x.body || '').trim(), visible: x.visible !== false }))
+          .filter(x => x.title).slice(0, 120);
+      } catch (e) { rows = []; }
+      if (id !== EXM.lid || !EXM.el) return;
+      EXM.les = rows; EXM.loading = false; exLessons();
+    }
+
+    function exClick(e) {
+      const b = e.target.closest('[data-e]'); if (!b || !EXM.el) return;
+      const a = b.dataset.e, k = b.dataset.k;
+      const keep = () => { const t = EXM.el.querySelector('#exTopic'); if (t) EXM.topic = t.value; };
+      const only = () => b.parentNode.querySelectorAll('.qz-chip').forEach(x => x.setAttribute('aria-pressed', String(x === b)));
+      if (a === 'close') exClose();
+      else if (a === 'g') { keep(); EXM.g = +k; exSetup(); exLoad(); }
+      else if (a === 'sub') { keep(); EXM.sub = k; exSetup(); exLoad(); }
+      else if (a === 'les') { const id = b.dataset.id; if (EXM.sel.has(id)) EXM.sel.delete(id); else EXM.sel.add(id); b.setAttribute('aria-pressed', String(EXM.sel.has(id))); exCount(); }
+      else if (a === 'all') { EXM.les.forEach(l => EXM.sel.add(l.id)); exLessons(); }
+      else if (a === 'none') { EXM.sel.clear(); exLessons(); }
+      else if (a === 'n') { EXM.n = +k; only(); }
+      else if (a === 'lvl') { EXM.lvl = k; only(); }
+      else if (a === 'type') {
+        if (EXM.types.has(k)) { if (EXM.types.size === 1) return toast('لازم تختار نوع واحد على الأقل.'); EXM.types.delete(k); } else EXM.types.add(k);
+        b.setAttribute('aria-pressed', String(EXM.types.has(k)));
+      }
+      else if (a === 'ans' && EXM.qs.length) { EXM.ans = !EXM.ans; b.setAttribute('aria-pressed', String(EXM.ans)); exPaper(); }
+      else if (a === 'ans') { EXM.ans = !EXM.ans; b.setAttribute('aria-pressed', String(EXM.ans)); }
+      else if (a === 'go' || a === 'again') exGo();
+      else if (a === 'back') { exSetup(); }
+      else if (a === 'pdf') exPrint();
+      else if (a === 'png') exPng();
+      else if (a === 'del') {
+        EXM.qs.splice(+b.dataset.i, 1);
+        if (!EXM.qs.length) { toast('مسحت كل الأسئلة.'); return exSetup(); }
+        const t = EXM.el.querySelector('.qz-top b'); if (t) t.textContent = '📝 الامتحان جاهز (' + EXM.qs.length + ' سؤال)';
+        exPaper();
+      }
+    }
+
+    /* ---------- توليد الأسئلة ---------- */
+    function exPrompt(counts, hasBody, avoid) {
+      const spec = {
+        mcq: '{"type":"mcq","q":"نص السؤال","opts":["..","..","..",".."],"a":0,"why":"تفسير في جملة"}   (a = رقم الإجابة الصح من 0 لـ 3)',
+        tf: '{"type":"tf","q":"عبارة","a":true,"why":"تفسير في جملة"}',
+        fill: '{"type":"fill","q":"جملة فيها ____ مكان الجزء المطلوب","a":"الإجابة"}',
+        def: '{"type":"def","q":"ما المقصود بـ ...؟","a":"الإجابة النموذجية"}',
+        why: '{"type":"why","q":"علل: ...","a":"الإجابة النموذجية في جملتين"}',
+        calc: '{"type":"calc","q":"مسألة فيها أرقام","expr":"عملية حسابية بالأرقام فقط زي 4*28","a":112,"unit":"الوحدة","sol":"المعطيات ثم القانون ثم التعويض ثم الناتج"}'
+      };
+      const kinds = Object.keys(EX_TYPES).filter(k => counts[k] > 0);
+      const lv = { 'سهل': 'كل الأسئلة مباشرة على الحفظ والفهم', 'متوسط': 'فهم وتطبيق', 'صعب': 'تطبيق وتحليل واستنتاج بأسلوب أسئلة التفوق', 'متدرّج': 'متدرّجة من السهل للصعب' }[EXM.lvl] || '';
+      const st = AI_STAGE[EXM.g] || {};
+      return 'أنت واضع امتحانات خبير في المنهج المصري. اعمل ورقة امتحان لطالب في ' + GRADES[EXM.g].name + ' (' + (st.age || '') + ') في مادة ' + EXM.meta.subject + '. ' + (st.quiz || '') +
+        '\nعدد الأسئلة المطلوب بالظبط لكل نوع: ' + kinds.map(k => EX_TYPES[k].n + ' = ' + counts[k]).join(' ، ') + '.\nالمستوى: ' + lv + '.\n' +
+        (hasBody ? 'اعتمد على المحتوى المرفق فقط.' : 'المحتوى المرفق هو أسماء الدروس فقط: اعتمد على كتاب الوزارة المصري لنفس الدروس، وماتكتبش أي معلومة مش متأكد منها.') +
+        '\nرجّع JSON صالح فقط: مصفوفة جوه كتلة ```json من غير أي كلام قبلها أو بعدها. صيغة الأنواع:\n' + kinds.map(k => spec[k]).join('\n') +
+        '\nقواعد الجودة:\n- الصياغة فصحى مبسطة زي ورقة الامتحان الرسمية وبدون أخطاء إملائية، وماتكتبش رقم السؤال جوه النص.\n- كل سؤال يقيس فكرة مختلفة وماتتكررش، وغطّي أجزاء المحتوى كلها.\n- الاختيار من متعدد: 4 اختيارات متقاربة الطول، و3 مشتتات منطقية، ماتستخدمش \"كل ما سبق\"، وموّع مكان الإجابة الصح بين أ وب وج ود.\n- صح وخطأ: عبارات واضحة من غير نفي مزدوج، وحوالي نصها خطأ بتعديل كلمة مهمة.\n- أكمل: الجزء الناقص كلمة أو عبارة قصيرة واحدة.\n- علل وما المقصود: لازم لها إجابة علمية محددة من المحتوى.\n- المسائل: الأرقام بسيطة والناتج مظبوط، وexpr لازم يديك نفس قيمة a.\n- ممنوع أي سؤال إجابته مش في المحتوى أو في كتاب الوزارة.' +
+        (avoid.length ? '\nأسئلة اتعملت قبل كده وماتكررهاش: ' + avoid.slice(-30).map(q => q.q.slice(0, 50)).join(' | ') : '');
+    }
+    function exParse(raw) {
+      raw = String(raw || ''); let j = null; const fm = raw.match(/```(?:json)?\s*([\s\S]*?)```/i);
+      for (const c of [fm && fm[1], raw.slice(raw.indexOf('['), raw.lastIndexOf(']') + 1)]) { if (!c) continue; try { j = JSON.parse(c); if (Array.isArray(j)) break; } catch (e) { j = null; } }
+      if (!Array.isArray(j)) return [];
+      const s = x => String(x ?? '').trim();
+      return j.map(q => {
+        if (!q || !EX_TYPES[q.type]) return null;
+        const o = { type: q.type, q: s(q.q).replace(/^\s*\d+\s*[\-\).:،]\s*/, ''), why: s(q.why) }; if (!o.q) return null;
+        if (o.type === 'mcq') { o.opts = (q.opts || []).map(x => s(x).replace(/^\s*[أبجد]\s*[\)\-\.]\s*/, '')).slice(0, 4); o.a = +q.a; if (o.opts.length < 2 || !Number.isInteger(o.a) || o.a < 0 || o.a >= o.opts.length) return null; }
+        else if (o.type === 'tf') o.a = q.a === true || q.a === 'true' || q.a === 'صح';
+        else if (o.type === 'calc') { o.unit = s(q.unit); o.sol = s(q.sol || q.why); o.a = qzNum(q.a); const cv = aiCalc(s(q.expr)); if (isFinite(cv)) o.a = Math.round(cv * 1000) / 1000; if (!isFinite(o.a)) return null; }
+        else { o.a = Array.isArray(q.a) ? q.a.map(s).filter(Boolean).join(' ، ') : s(q.a); if (!o.a) return null; }
+        return o;
+      }).filter(Boolean);
+    }
+    const exKey = q => aiNorm(q.q).slice(0, 60);
+    function exDedup(list, old) { const seen = new Set(old.map(exKey)); return list.filter(q => { const k = exKey(q); if (seen.has(k)) return false; seen.add(k); return true; }); }
+    function exPick(list, counts) { const out = []; Object.keys(EX_TYPES).forEach(k => { if (counts[k]) out.push(...list.filter(q => q.type === k).slice(0, counts[k])); }); return out; }
+    async function exReview(qs, counts, sys, content) {
+      try {
+        const v = exPick(exParse(await aiStream(sys, [{ role: 'user', content: 'راجع الأسئلة دي كمدقق امتحانات: اتأكد إن كل إجابة صحيحة علميًا وبحسب المحتوى والمنهج المصري، وإن لكل سؤال إجابة واحدة بس واضحة، وإن المشتتات غلط فعلًا، وإن مفيش غموض أو أخطاء إملائية أو أرقام مش دقيقة. صحّح أي مشكلة بنفس الشكل بالظبط، واحذف أي سؤال مش مناسب. رجّع نفس صيغة JSON فقط جوه كتلة ```json.\nالمحتوى:\n' + content.slice(0, 4000) + '\nالأسئلة:\n' + JSON.stringify(qs) }], () => false, { temp: 0.2 })), counts);
+        if (v.length >= Math.ceil(qs.length * 0.7)) return v;
+      } catch (e) { if (e.name === 'AbortError') throw e; }
+      return qs;
+    }
+    async function exGo() {
+      if (EXM.busy || !EXM.el) return;
+      const tv = EXM.el.querySelector('#exTopic'); if (tv) EXM.topic = tv.value.trim();
+      const chosen = EXM.les.filter(l => EXM.sel.has(l.id));
+      if (!chosen.length && EXM.topic.length < 6) return exErr('اختار درس واحد على الأقل أو اكتب الموضوع.');
+      let content = '', hasBody = false;
+      chosen.forEach(l => { const b = l.body.slice(0, Math.floor(5000 / chosen.length)); if (b.length > 40) hasBody = true; content += '## ' + l.title + '\n' + b + '\n\n'; });
+      if (EXM.topic) { content += EXM.topic + '\n'; if (EXM.topic.length > 200) hasBody = true; }
+      content = content.trim().slice(0, 7000);
+      const sj = SUBJECTS.find(s => s.key === EXM.sub);
+      EXM.meta = { grade: GRADES[EXM.g].name, subject: subjectName(EXM.g, sj), lessons: chosen.length ? chosen.map(l => l.title).join(' ، ') : EXM.topic.replace(/\s+/g, ' ').slice(0, 60), date: new Date().toLocaleDateString('ar-EG') };
+      EXM.busy = true;
+      EXM.el.innerHTML = `<style>${EX_CSS}</style><div class="qz-w"><div class="qz-top"><button class="qz-x" type="button" data-e="close" aria-label="إغلاق">✕</button><b>📝 عمل امتحان</b></div><div class="qz-card"><div class="qz-load"><span class="ai-typing"><i></i><i></i><i></i></span><p id="exSay">بجهّز الأسئلة...</p></div></div></div>`;
+      const say = t => { const p = EXM.el && EXM.el.querySelector('#exSay'); if (p) p.textContent = t; };
+      try {
+        await Promise.race([aiCurLoad(), new Promise(ok => setTimeout(ok, 4000))]);
+        const sys = aiSystem('العربية المصرية', 'متوسط', false, content, EXM.g);
+        const kinds = Object.keys(EX_TYPES).filter(k => EXM.types.has(k)), total = exSplit(EXM.n, kinds);
+        let batches = [total];
+        if (EXM.n > 15) { const c1 = {}, c2 = {}; kinds.forEach(k => { c1[k] = Math.ceil(total[k] / 2); c2[k] = total[k] - c1[k]; }); batches = [c1, c2]; }
+        let all = [];
+        for (let bi = 0; bi < batches.length; bi++) {
+          const cnt = batches[bi], want = exSum(cnt); if (!want) continue;
+          say(batches.length > 1 ? 'بجهّز الأسئلة (جزء ' + (bi + 1) + ' من ' + batches.length + ')...' : 'بجهّز الأسئلة...');
+          let got = [];
+          for (let t = 0; t < 2 && got.length < Math.ceil(want / 2); t++) {
+            const raw = await aiStream(sys, [{ role: 'user', content: exPrompt(cnt, hasBody, all) + '\nالمحتوى:\n' + content }], () => false, { temp: 0.4 });
+            if (!EXM.el) return;
+            got = exPick(exDedup(exParse(raw), all), cnt);
+          }
+          if (!got.length) throw new Error('bad');
+          say('براجع صحة الأسئلة...');
+          got = await exReview(got, cnt, sys, content); if (!EXM.el) return;
+          all = all.concat(got);
+        }
+        if (!all.length) throw new Error('bad');
+        EXM.qs = all; EXM.busy = false; exShow();
+      } catch (e) {
+        if (!EXM.el || (e && e.name === 'AbortError')) return;
+        EXM.busy = false; exSetup(); exErr('مقدرتش أجهّز الامتحان. جرّب تاني أو قلّل عدد الأسئلة أو غيّر الموضوع.');
+      }
+    }
+
+    /* ---------- ورقة الامتحان ---------- */
+    const exFill = t => { let hit = false; const h = esc(t).replace(/(?:_{2,}|\.{4,}|…+|\(\s*\)|\[\s*\])/g, () => { hit = true; return '<span class="exbl"></span>'; }); return hit ? h : h + ' <span class="exbl"></span>'; };
+    function exQ(q, n, ei) {
+      const del = ei >= 0 ? `<button type="button" class="exdel" data-e="del" data-i="${ei}" title="احذف السؤال">🗑</button>` : '';
+      let h = '';
+      if (q.type === 'mcq') h = `<b>${n}.</b>${esc(q.q)}<div class="exo">${q.opts.map((o, i) => `<span>${EX_L[i]}) ${esc(o)}</span>`).join('')}</div>`;
+      else if (q.type === 'tf') h = `<b>${n}.</b>${esc(q.q)} <span class="exbox">( &nbsp;&nbsp;&nbsp; )</span>`;
+      else if (q.type === 'fill') h = `<b>${n}.</b>${exFill(q.q)}`;
+      else if (q.type === 'calc') h = `<b>${n}.</b>${esc(q.q)}<div class="exgap">الحل:</div>`;
+      else h = `<b>${n}.</b>${esc(q.q)}<div class="exln"></div><div class="exln"></div>${q.type === 'why' ? '<div class="exln"></div>' : ''}`;
+      return `<div class="exq">${del}${h}</div>`;
+    }
+    const exAns = q => q.type === 'mcq' ? EX_L[q.a] + ') ' + q.opts[q.a]
+      : q.type === 'tf' ? (q.a ? '✓ صح' : '✗ خطأ') + (q.why ? ' — ' + q.why : '')
+      : q.type === 'calc' ? q.a + (q.unit ? ' ' + q.unit : '') + (q.sol ? ' — ' + q.sol : '')
+      : q.a;
+    function exPaperHtml(edit) {
+      const m = EXM.meta, qs = EXM.qs;
+      const order = [], groups = Object.keys(EX_TYPES).filter(k => qs.some(q => q.type === k)).map(k => { const ids = qs.map((_, i) => i).filter(i => qs[i].type === k); order.push(...ids); return [k, ids]; });
+      const numOf = new Map(order.map((qi, p) => [qi, p + 1]));
+      const marks = qs.reduce((s, q) => s + EX_TYPES[q.type].w, 0);
+      const secs = groups.map(([k, ids], si) => `<section class="exs"><h3>السؤال ${EX_ORD[si] || (si + 1)}: ${esc(EX_TYPES[k].t)} <i>(${exDeg(ids.length * EX_TYPES[k].w)})</i></h3>${ids.map(i => exQ(qs[i], numOf.get(i), edit ? i : -1)).join('')}</section>`).join('');
+      const ans = EXM.ans ? `<section class="exa"><h3>✅ نموذج الإجابة</h3>${order.map(qi => `<div class="exai"><b>${numOf.get(qi)}</b><span>${esc(exAns(qs[qi]))}</span></div>`).join('')}</section>` : '';
+      return `<div class="exam"><div class="exh"><div class="exh1"><b>🚀 Learn With Me</b><span>${esc(m.date)}</span></div><h2>امتحان في مادة ${esc(m.subject)}</h2>
+        <div class="exh2"><span>الصف: ${esc(m.grade)}</span><span>الدروس: ${esc(m.lessons)}</span></div>
+        <div class="exh3"><span>اسم الطالب: ................................</span><span>الدرجة: ........ / ${marks}</span></div></div>${secs}<div class="exend">انتهت الأسئلة — مع أطيب التمنيات بالتوفيق ✨</div>${ans}</div>`;
+    }
+    function exShow() {
+      EXM.el.innerHTML = `<style>${EX_CSS}</style><div class="qz-w"><div class="qz-top"><button class="qz-x" type="button" data-e="close" aria-label="إغلاق">✕</button><b>📝 الامتحان جاهز (${EXM.qs.length} سؤال)</b></div>
+        <div class="qz-card"><div class="qz-chips"><button type="button" class="qz-chip" data-e="pdf">📄 PDF / طباعة</button><button type="button" class="qz-chip" data-e="png">🖼️ تنزيل صورة</button><button type="button" class="qz-chip" data-e="ans" aria-pressed="${EXM.ans}">✅ نموذج الإجابة</button></div>
+        <div class="qz-chips" style="margin-top:8px"><button type="button" class="qz-chip" data-e="again">🔁 امتحان جديد بنفس الإعدادات</button><button type="button" class="qz-chip" data-e="back">⚙️ تعديل الإعدادات</button></div>
+        <p class="ex-note">تقدر تمسح أي سؤال مش عاجبك بزرار 🗑 جنبه قبل الطباعة.</p></div><div id="exPaper"></div></div>`;
+      exPaper(); EXM.el.scrollTop = 0;
+    }
+    function exPaper() { const p = EXM.el && EXM.el.querySelector('#exPaper'); if (p) p.innerHTML = exPaperHtml(true); }
+
+    /* ---------- PDF (طباعة) وصورة ---------- */
+    function exDoc() {
+      const links = [...document.querySelectorAll('link[rel="stylesheet"]')].map(l => `<link rel="stylesheet" href="${esc(l.href)}">`).join('');
+      return `<!doctype html><html lang="ar" dir="rtl"><head><meta charset="utf-8"><title>${esc('امتحان ' + EXM.meta.subject + ' - ' + EXM.meta.grade)}</title>${links}<style>${EX_CSS}@page{size:A4;margin:12mm}html,body{margin:0;background:#fff}.exam{max-width:none;border:0;border-radius:0;padding:0}</style></head><body>${exPaperHtml(false)}</body></html>`;
+    }
+    function exPrint() {
+      if (!EXM.qs.length) return;
+      const html = exDoc();
+      let w = null; try { w = window.open('', '_blank'); } catch (e) {}
+      if (w && w.document) {
+        w.document.open(); w.document.write(html); w.document.close();
+        setTimeout(() => { try { w.focus(); w.print(); } catch (e) {} }, 900);
+        return;
+      }
+      /* لو المتصفح منع النافذة: نطبع من iframe مخفي */
+      const f = document.createElement('iframe'); f.style.cssText = 'position:fixed;right:0;bottom:0;width:0;height:0;border:0'; document.body.appendChild(f);
+      try {
+        f.contentDocument.open(); f.contentDocument.write(html); f.contentDocument.close();
+        setTimeout(() => { try { f.contentWindow.focus(); f.contentWindow.print(); } catch (e) { toast('الطباعة ماظبطتش، جرّب زر الصورة.'); } setTimeout(() => f.remove(), 60000); }, 900);
+      } catch (e) { f.remove(); toast('الطباعة ماظبطتش، جرّب زر الصورة.'); }
+    }
+    async function exPng() {
+      if (!EXM.qs.length) return;
+      toast('بجهّز الصورة...');
+      const host = document.createElement('div'); host.style.cssText = 'position:fixed;left:-99999px;top:0;width:794px';
+      host.innerHTML = `<style>${EX_CSS}</style>` + exPaperHtml(false);
+      document.body.appendChild(host);
+      try {
+        if (document.fonts && document.fonts.ready) await document.fonts.ready;
+        const el = host.querySelector('.exam'); el.style.maxWidth = 'none'; el.style.border = '0'; el.style.borderRadius = '0';
+        const W = 794, H = Math.ceil(el.scrollHeight);
+        const xhtml = new XMLSerializer().serializeToString(el);
+        const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${W}" height="${H}"><foreignObject x="0" y="0" width="${W}" height="${H}"><div xmlns="http://www.w3.org/1999/xhtml"><style>${EX_CSS}</style>${xhtml}</div></foreignObject></svg>`;
+        const im = await aiImgLoad('data:image/svg+xml;charset=utf-8,' + encodeURIComponent(svg));
+        const sc = Math.min(2, Math.sqrt(16e6 / (W * H)), 16000 / H);
+        const cv = document.createElement('canvas'); cv.width = Math.round(W * sc); cv.height = Math.round(H * sc);
+        const cx = cv.getContext('2d'); cx.fillStyle = '#fff'; cx.fillRect(0, 0, cv.width, cv.height); cx.drawImage(im, 0, 0, cv.width, cv.height);
+        aiDownload(await aiBlob(cv, 'image/png'), aiFileName('امتحان ' + EXM.meta.subject + ' - ' + EXM.meta.grade, 'png'));
       } catch (e) { console.warn(e); toast('الصورة ماظبطتش على جهازك، جرّب زر PDF.'); }
       finally { host.remove(); }
     }
